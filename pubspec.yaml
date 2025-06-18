@@ -1,0 +1,94 @@
+name: aroundu
+description: "AroundU Web FE"
+publish_to: 'none' 
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.7.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_web_plugins:
+    sdk: flutter
+
+  cupertino_icons: ^1.0.8
+  paw: ^0.0.4
+  flutter_easyloading: ^3.0.5
+  flutter_riverpod: ^2.5.1
+  riverpod_annotation: ^2.3.5
+  flutter_svg: ^2.0.10+1
+  # flutter_screenutil: ^5.9.3
+  get: ^4.6.6
+  geocoding: ^3.0.0
+  geolocator: ^13.0.1
+  firebase_core: ^3.4.1
+  firebase_messaging: ^15.1.1
+  intl: 0.19.0
+  dio: ^5.6.0
+  pretty_dio_logger: ^1.4.0
+  get_storage: ^2.1.1
+  permission_handler: ^11.3.1
+  flutter_localizations:
+    sdk: flutter
+  flutter_quill: ^11.4.0
+  url_launcher: ^6.3.1
+  animated_bottom_navigation_bar: ^1.4.0
+  pinput: ^5.0.1
+  freezed_annotation: 2.4.1
+  freezed: 2.4.5
+  file_picker: ^9.0.0
+  shimmer: ^3.0.0
+  http: ^1.4.0
+  html: ^0.15.6
+  image_picker: ^1.1.2
+  share_plus: ^10.0.3
+  font_awesome_flutter: ^10.7.0
+  photo_view: ^0.15.0
+  lucide_icons: ^0.257.0
+  fluttertoast: ^8.2.12
+  lottie: ^3.3.1
+  path_provider: ^2.1.5
+  dotted_border: ^2.1.0
+  mobile_scanner: ^6.0.6
+  flutter_bloc: ^9.1.1
+  equatable: ^2.0.7
+  video_thumbnail: ^0.5.6
+  video_player: ^2.10.0
+  screenshot: ^3.0.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  flutter_lints: ^5.0.0
+  build_runner: ^2.4.12
+  riverpod_generator: ^2.4.3
+  custom_lint: ^0.7.00
+  riverpod_lint: ^2.3.13
+  json_serializable: ^6.8.0
+
+flutter:
+
+  uses-material-design: true
+
+  assets:
+    - assets/
+    - assets/images/
+    - assets/icons/
+    - assets/animations/
+    - assets/icons.aroundu/
+
+  fonts:
+    - family: Poppins
+      fonts:
+        - asset: fonts/poppins/Poppins_Light.ttf
+          weight: 300
+        - asset: fonts/poppins/Poppins_Regular.ttf
+          weight: 400
+        - asset: fonts/poppins/Poppins_Medium.ttf
+          weight: 500
+        - asset: fonts/poppins/Poppins_SemiBold.ttf
+          weight: 600
+        - asset: fonts/poppins/Poppins_Bold.ttf
+          weight: 700
