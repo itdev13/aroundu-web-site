@@ -1,8 +1,10 @@
+import 'package:aroundu/constants/urls.dart';
 import 'package:aroundu/designs/widgets/text.widget.designs.dart';
 import 'package:aroundu/models/detailed.lobby.model.dart';
 import 'package:aroundu/models/lobby.dart';
 import 'package:aroundu/utils/api_service/api.service.dart';
 import 'package:aroundu/utils/custome_snackbar.dart';
+import 'package:aroundu/utils/google_search.dart';
 import 'package:dio/src/response.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -180,7 +182,7 @@ class _AddTierPricingPageState extends ConsumerState<AddTierPricingPage> {
   }) async {
     try {
       final postRequestUrl =
-          'https://api.aroundu.in/match/lobby/tiered-pricing';
+          '${ApiConstants.arounduBaseUrl}match/lobby/tiered-pricing';
 
       final response = await ApiService().put(
         postRequestUrl,

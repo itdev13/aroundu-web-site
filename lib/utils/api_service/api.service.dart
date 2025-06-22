@@ -1,12 +1,12 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:aroundu/constants/urls.dart';
 import 'package:aroundu/views/auth/auth.service.dart';
 import 'package:aroundu/views/auth/auth_api.service.dart';
 import 'package:dio/dio.dart';
 import 'package:dio/io.dart';
 import 'package:pretty_dio_logger/pretty_dio_logger.dart';
-
 
 ///
 /// A singleton service class to handle communications w/ API's
@@ -21,7 +21,7 @@ class ApiService {
   ApiService._internal() {
     dio = Dio(
       BaseOptions(
-        baseUrl: kBaseUrl,
+        baseUrl: ApiConstants.arounduBaseUrl,
         connectTimeout: const Duration(seconds: 30),
         receiveTimeout: const Duration(seconds: 30),
       ),
@@ -35,7 +35,7 @@ class ApiService {
     //   ),
     // );
 
-     dio.interceptors.add(
+    dio.interceptors.add(
       InterceptorsWrapper(
         onRequest: (options, handler) {
           print('🔵 REQUEST: ${options.method} ${options.uri}');
@@ -74,7 +74,7 @@ class ApiService {
     // Add token refresh interceptor
     dio.interceptors.add(
       InterceptorsWrapper(
-         onResponse: (response, handler) {
+        onResponse: (response, handler) {
           // Handle UTF-8 encoding issues in response
           if (response.data is String) {
             try {
@@ -109,13 +109,14 @@ class ApiService {
             // Try to refresh the token
             final authApiService = AuthApiService();
             final refreshed = await authApiService.refreshToken();
-            
+
             if (refreshed) {
               // If token refresh was successful, retry the original request
               final options = error.requestOptions;
               // Update the Authorization header with the new token
-              options.headers["Authorization"] = "Bearer ${authService.getToken()}";
-              
+              options.headers["Authorization"] =
+                  "Bearer ${authService.getToken()}";
+
               // Create a new request with the updated headers
               final response = await dio.fetch(options);
               return handler.resolve(response);
@@ -126,8 +127,6 @@ class ApiService {
         },
       ),
     );
-
-    
 
     // //TODO: Warning : remove this code
     // // WARNING: TESTING CONFIGURATION ONLY
@@ -158,11 +157,11 @@ class ApiService {
     // dio.httpClientAdapter = adapter;
   }
 
-  static const String kBaseUrl = "https://api.aroundu.in/";
+  // static const String kBaseUrl = "https://api.aroundu.in/";
   late final Dio dio;
   final AuthService authService = AuthService();
 
-   // Helper method to clean response data recursively
+  // Helper method to clean response data recursively
   dynamic _cleanResponseData(dynamic data) {
     if (data is String) {
       return data.replaceAll('\uFFFD', '').replaceAll('�', '');
@@ -189,9 +188,7 @@ class ApiService {
     final response = await dio.get(
       path,
       queryParameters: queryParameters,
-      options: Options(
-        headers: headers,
-      ),
+      options: Options(headers: headers),
     );
 
     return response;
@@ -218,13 +215,9 @@ class ApiService {
     );
 
     // Clean response data to remove replacement characters
-    if (response.data != null) {
-      response.data = _cleanResponseData(response.data);
-    }
-
-    // If status is 200 or 201 then good otherwise return error object, with
-    // either type
-
+    // if (response.data != null) {
+    //   response.data = _cleanResponseData(response.data);
+    // }
     return response;
   }
 
@@ -237,14 +230,13 @@ class ApiService {
       path,
       data: jsonEncode(body),
       queryParameters: queryParameters,
-      options: Options(
-        headers: await authService.getAuthHeaders(),
-      ),
+      options: Options(headers: await authService.getAuthHeaders()),
     );
 
     return response;
   }
-Future<Response> put(
+
+  Future<Response> put(
     String path, {
     required Map<String, dynamic> body,
     Map<String, dynamic>? queryParameters,
@@ -253,13 +245,12 @@ Future<Response> put(
       path,
       data: jsonEncode(body),
       queryParameters: queryParameters,
-      options: Options(
-        headers: await authService.getAuthHeaders(),
-      ),
+      options: Options(headers: await authService.getAuthHeaders()),
     );
 
     return response;
   }
+
   // TODO: Need to handle error's here
   Future<Map<String, dynamic>> getUserProfileData() async {
     final res = await get("user/api/v1/getProfile");
@@ -268,8 +259,3 @@ Future<Response> put(
     return res.data as Map<String, dynamic>;
   }
 }
-
-
-
-
-

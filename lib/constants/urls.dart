@@ -1,5 +1,6 @@
 class ApiConstants {
-  static const String baseUrl = 'https://api.aroundu.in/';
+  // static const String arounduBaseUrl = 'https://api.aroundu.in/';
+  static const String arounduBaseUrl = 'https://staging.aroundu.in/';
   static const String profile = 'user/api/v1/getProfile/';
   static const String updateBasicProfile = 'user/api/v1/updateBasicProfile/';
   static const String updateProfileInterest =

@@ -2,7 +2,7 @@ import 'package:aroundu/designs/widgets/rounded.rectangle.tab.indicator.dart';
 import 'package:aroundu/designs/widgets/textfield.widget.designs.dart';
 import 'package:aroundu/utils/custome_snackbar.dart';
 import 'package:aroundu/utils/logger.utils.dart';
-import 'package:aroundu/views/lobby/checkout.view.lobby%20copy.dart';
+import 'package:aroundu/views/lobby/checkout.view.lobby.dart';
 import 'package:aroundu/views/lobby/form_page.dart';
 import 'package:aroundu/views/lobby/provider/get_price_provider.dart';
 import 'package:aroundu/views/lobby/provider/lobby_access_provider.dart';
@@ -195,7 +195,9 @@ class _UserLobbyAccessRequestState
                 () => UserLobbyAccessRequestShare(
                   friends: profileController.friendsList,
                   squads: groupController.groups,
-                  lobby: widget.lobby,
+                  lobbyId: widget.lobby.id,
+                  lobbyHasForm: widget.lobby.hasForm,
+                  lobbyIsPrivate: widget.lobby.isPrivate,
                   requestText: requestText,
                   formModel: formModel,
                 ),
@@ -256,7 +258,9 @@ class _UserLobbyAccessRequestState
               () => UserLobbyAccessRequestShare(
                 friends: profileController.friendsList,
                 squads: groupController.groups,
-                lobby: widget.lobby,
+                lobbyId: widget.lobby.id,
+                lobbyHasForm: widget.lobby.hasForm,
+                lobbyIsPrivate: widget.lobby.isPrivate,
                 requestText: requestText,
               ),
             );
@@ -545,7 +549,7 @@ class _UserLobbyAccessRequestState
               borderRadius: BorderRadius.all(Radius.circular(24)),
               child: Container(
                 width: sw(0.1),
-                height: sw(0.12),
+                height: 50,
                 color: Colors.red,
                 child: Center(
                   child: DesignText(
@@ -718,7 +722,7 @@ class _UserLobbyAccessRequestState
         // Form questions
         Padding(
           // constraints: BoxConstraints(maxHeight: 0.6.sh),
-          padding: EdgeInsets.only(bottom: (Get.height*0.1)),
+          padding: EdgeInsets.only(bottom: (Get.height * 0.1)),
           child:
               formState.questions.isEmpty
                   ? FutureBuilder(
@@ -920,14 +924,19 @@ class UserLobbyAccessRequestShare extends ConsumerStatefulWidget {
     super.key,
     required this.friends,
     required this.squads,
-    required this.lobby,
+    required this.lobbyId,
+    required this.lobbyHasForm,
+    required this.lobbyIsPrivate,
     required this.requestText,
     this.formModel,
   });
 
   final List<GroupModel> squads;
   final List<UserFriendsModel> friends;
-  final Lobby lobby;
+  // final Lobby lobby;
+  final String lobbyId;
+  final bool lobbyHasForm;
+  final bool lobbyIsPrivate;
   final String requestText;
   final FormModel? formModel;
 
@@ -950,19 +959,15 @@ class _UserLobbyAccessRequestShare
     ref.read(requestedText.notifier).state = '';
 
     ref.read(requestTextProvider.notifier).state = '';
-    ref.invalidate(lobbyFormAutofillProvider(widget.lobby.id));
-    ref.read(formStateProvider(widget.lobby.id).notifier).resetForm();
-    ref.invalidate(formStateProvider(widget.lobby.id));
+    ref.invalidate(lobbyFormAutofillProvider(widget.lobbyId));
+    ref.read(formStateProvider(widget.lobbyId).notifier).resetForm();
+    ref.invalidate(formStateProvider(widget.lobbyId));
   }
 
   @override
   Widget build(BuildContext context) {
-    double screenWidth = MediaQuery.of(context).size.width;
-    double screenHeight = MediaQuery.of(context).size.height;
-
-    double sw(double size) => screenWidth * size;
-
-    double sh(double size) => screenHeight * size;
+    double sw = MediaQuery.of(context).size.width;
+    double sh = MediaQuery.of(context).size.height;
     return DefaultTabController(
       length: 2,
       child: GestureDetector(
@@ -971,6 +976,24 @@ class _UserLobbyAccessRequestShare
         child: Scaffold(
           bottomNavigationBar: GestureDetector(
             onTap: () async {
+              // Show loading dialog
+              showDialog(
+                context: context,
+                barrierDismissible: false,
+                builder: (BuildContext context) {
+                  return AlertDialog(
+                    backgroundColor: Colors.transparent,
+                    content: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        CircularProgressIndicator(color: DesignColors.accent),
+                      ],
+                    ),
+                  );
+                },
+              );
+
               print(
                 "Request text value: ${widget.requestText}",
               ); // Log requestText value
@@ -979,75 +1002,89 @@ class _UserLobbyAccessRequestShare
                 "friendsIds: ${ref.read(selectedFriendIds)} squadsIds: ${ref.read(selectedSquadIds)}",
               );
 
-              if (widget.lobby.hasForm) {
-                final response = await ref.read(
-                  handleLobbyAccessProvider(
-                    widget.lobby.id,
-                    widget.lobby.isPrivate,
-                    friends: ref.read(selectedFriendIds),
-                    groupId: ref.read(selectedSquadIds),
-                    text: widget.requestText,
-                    form: widget.formModel?.toJson() ?? {},
-                    hasForm: true,
-                  ).future,
-                );
-                // if (ref.read(selectedConversationIds).isNotEmpty) {
-                //   await chatController.sendBulkMessages(
-                //     message: "",
-                //     id: response['id'],
-                //     from: chatController.currentUserId.value,
-                //     attachments: [],
-                //     conversationIds: ref.read(selectedConversationIds),
-                //     type: "ACCESS_REQUEST",
-                //   );
-                // }
-              } else {
-                final response = await ref.read(
-                  handleLobbyAccessProvider(
-                    widget.lobby.id,
-                    widget.lobby.isPrivate,
-                    friends: ref.read(selectedFriendIds),
-                    groupId: ref.read(selectedSquadIds),
-                    text: widget.requestText,
-                    hasForm: false,
-                    // form: widget.lobby.hasForm ? widget.lobby.form!.toJson() : {},
-                  ) // Pass the requestText here
-                  .future,
-                );
-                // if (ref.read(selectedConversationIds).isNotEmpty) {
-                //   await chatController.sendBulkMessages(
-                //     message: "",
-                //     id: response['id'],
-                //     from: chatController.currentUserId.value,
-                //     attachments: [],
-                //     conversationIds: ref.read(selectedConversationIds),
-                //     type: "ACCESS_REQUEST",
-                //   );
-                // }
-              }
+              try {
+                if (widget.lobbyHasForm) {
+                  final response = await ref.read(
+                    handleLobbyAccessProvider(
+                      widget.lobbyId,
+                      widget.lobbyIsPrivate,
+                      friends: ref.read(selectedFriendIds),
+                      groupId: ref.read(selectedSquadIds),
+                      text: widget.requestText,
+                      form: widget.formModel?.toJson() ?? {},
+                      hasForm: true,
+                    ).future,
+                  );
+                  // if (ref.read(selectedConversationIds).isNotEmpty) {
+                  //   await chatController.sendBulkMessages(
+                  //     message: "",
+                  //     id: response['id'],
+                  //     from: chatController.currentUserId.value,
+                  //     attachments: [],
+                  //     conversationIds: ref.read(selectedConversationIds),
+                  //     type: "ACCESS_REQUEST",
+                  //   );
+                  // }
+                } else {
+                  final response = await ref.read(
+                    handleLobbyAccessProvider(
+                      widget.lobbyId,
+                      widget.lobbyIsPrivate,
+                      friends: ref.read(selectedFriendIds),
+                      groupId: ref.read(selectedSquadIds),
+                      text: widget.requestText,
+                      hasForm: false,
+                    ).future,
+                  );
+                  // if (ref.read(selectedConversationIds).isNotEmpty) {
+                  //   await chatController.sendBulkMessages(
+                  //     message: "",
+                  //     id: response['id'],
+                  //     from: chatController.currentUserId.value,
+                  //     attachments: [],
+                  //     conversationIds: ref.read(selectedConversationIds),
+                  //     type: "ACCESS_REQUEST",
+                  //   );
+                  // }
+                }
 
-              // Close the bottom sheet after action
-              ref.read(selectedFriendIds.notifier).state = [];
-              ref.read(selectedSquadIds.notifier).state = [];
-              ref.read(selectedConversationIds.notifier).state = [];
-              ref.read(requestedText.notifier).state = '';
-              // requestedTextEditingController.clear();
-              Get.back();
-              Get.back();
-              dashboardController.updateTabIndex(2);
+                await Future.delayed(const Duration(seconds: 1));
+                // Close loading dialog
+                Navigator.pop(context);
+
+                Fluttertoast.showToast(
+                  msg:
+                      "Your request has been sent successfully, Please check the chats",
+                );
+
+                // Reset states and navigate back
+                ref.read(selectedFriendIds.notifier).state = [];
+                ref.read(selectedSquadIds.notifier).state = [];
+                ref.read(selectedConversationIds.notifier).state = [];
+                ref.read(requestedText.notifier).state = '';
+                Get.back();
+                Get.back();
+                Get.back();
+
+                dashboardController.updateTabIndex(2);
+              } catch (e) {
+                // Close loading dialog on error
+                Navigator.pop(context);
+                Fluttertoast.showToast(msg: "Error: ${e.toString()}");
+              }
             },
             child: Padding(
               padding: EdgeInsets.symmetric(vertical: 16, horizontal: 16),
               child: ClipRRect(
                 borderRadius: BorderRadius.all(Radius.circular(24)),
                 child: Container(
-                  width: sw(0.1),
-                  height: sw(0.12),
+                  width: 0.1*sw,
+                  height: 0.12*sw,
                   color: Colors.red,
                   child: Center(
                     child: DesignText(
                       text:
-                          widget.lobby.isPrivate
+                          widget.lobbyIsPrivate
                               ? 'Request Access'
                               : 'Join Lobby',
                       fontSize: 14,
@@ -1170,7 +1207,7 @@ class _UserLobbyAccessRequestShare
                         // });
                         // },
                         //   leading: CircleAvatar(
-                        //     radius: 24,
+                        //     radius: 24.r,
                         //     child: (member.profilePictureUrl != "")
                         //         ? Image.network(
                         //       fit: BoxFit.cover,
@@ -1178,17 +1215,17 @@ class _UserLobbyAccessRequestShare
                         //     )
                         //         : Icon(
                         //       Icons.person,
-                        //       size: 20,
+                        //       size: 20.sp,
                         //     ),
                         //   ),
                         //   title: DesignText(
                         //     text: member.name,
-                        //     fontSize: 14,
+                        //     fontSize: 14.sp,
                         //     fontWeight: FontWeight.w500,
                         //   ),
                         //   subtitle: DesignText(
                         //     text: member.userName,
-                        //     fontSize: 12,
+                        //     fontSize: 12.sp,
                         //     fontWeight: FontWeight.w500,
                         //     color: DesignColors.secondary,
                         //   ),

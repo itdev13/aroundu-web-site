@@ -39,6 +39,7 @@ mixin _$Lobby {
   String get userStatus => throw _privateConstructorUsedError;
   AdminSummary get adminSummary => throw _privateConstructorUsedError;
   ContentModel? get content => throw _privateConstructorUsedError;
+  Setting get setting => throw _privateConstructorUsedError;
   Setting? get settings => throw _privateConstructorUsedError;
   String get activity =>
       throw _privateConstructorUsedError; // Map<String,dynamic>? lobbyRules,
@@ -55,7 +56,7 @@ mixin _$Lobby {
   bool get isSaved => throw _privateConstructorUsedError;
   bool get isFormMandatory => throw _privateConstructorUsedError;
   bool get isRefundNotPossible => throw _privateConstructorUsedError;
-  double get rating => throw _privateConstructorUsedError;
+  Rating get rating => throw _privateConstructorUsedError;
   List<PriceTier>? get priceTierList => throw _privateConstructorUsedError;
   bool get ratingGiven => throw _privateConstructorUsedError;
 
@@ -87,6 +88,7 @@ abstract class $LobbyCopyWith<$Res> {
       String userStatus,
       AdminSummary adminSummary,
       ContentModel? content,
+      Setting setting,
       Setting? settings,
       String activity,
       FormModel? form,
@@ -100,18 +102,20 @@ abstract class $LobbyCopyWith<$Res> {
       bool isSaved,
       bool isFormMandatory,
       bool isRefundNotPossible,
-      double rating,
+      Rating rating,
       List<PriceTier>? priceTierList,
       bool ratingGiven});
 
   $FilterCopyWith<$Res> get filter;
   $AdminSummaryCopyWith<$Res> get adminSummary;
   $ContentModelCopyWith<$Res>? get content;
+  $SettingCopyWith<$Res> get setting;
   $SettingCopyWith<$Res>? get settings;
   $FormModelCopyWith<$Res>? get form;
   $HouseInfoCopyWith<$Res>? get houseDetail;
   $PriceDetailsCopyWith<$Res> get priceDetails;
   $AccessRequestDataCopyWith<$Res>? get accessRequestData;
+  $RatingCopyWith<$Res> get rating;
 }
 
 /// @nodoc
@@ -144,6 +148,7 @@ class _$LobbyCopyWithImpl<$Res, $Val extends Lobby>
     Object? userStatus = null,
     Object? adminSummary = null,
     Object? content = freezed,
+    Object? setting = null,
     Object? settings = freezed,
     Object? activity = null,
     Object? form = freezed,
@@ -230,6 +235,10 @@ class _$LobbyCopyWithImpl<$Res, $Val extends Lobby>
           ? _value.content
           : content // ignore: cast_nullable_to_non_nullable
               as ContentModel?,
+      setting: null == setting
+          ? _value.setting
+          : setting // ignore: cast_nullable_to_non_nullable
+              as Setting,
       settings: freezed == settings
           ? _value.settings
           : settings // ignore: cast_nullable_to_non_nullable
@@ -285,7 +294,7 @@ class _$LobbyCopyWithImpl<$Res, $Val extends Lobby>
       rating: null == rating
           ? _value.rating
           : rating // ignore: cast_nullable_to_non_nullable
-              as double,
+              as Rating,
       priceTierList: freezed == priceTierList
           ? _value.priceTierList
           : priceTierList // ignore: cast_nullable_to_non_nullable
@@ -322,6 +331,14 @@ class _$LobbyCopyWithImpl<$Res, $Val extends Lobby>
 
     return $ContentModelCopyWith<$Res>(_value.content!, (value) {
       return _then(_value.copyWith(content: value) as $Val);
+    });
+  }
+
+  @override
+  @pragma('vm:prefer-inline')
+  $SettingCopyWith<$Res> get setting {
+    return $SettingCopyWith<$Res>(_value.setting, (value) {
+      return _then(_value.copyWith(setting: value) as $Val);
     });
   }
 
@@ -380,6 +397,14 @@ class _$LobbyCopyWithImpl<$Res, $Val extends Lobby>
       return _then(_value.copyWith(accessRequestData: value) as $Val);
     });
   }
+
+  @override
+  @pragma('vm:prefer-inline')
+  $RatingCopyWith<$Res> get rating {
+    return $RatingCopyWith<$Res>(_value.rating, (value) {
+      return _then(_value.copyWith(rating: value) as $Val);
+    });
+  }
 }
 
 /// @nodoc
@@ -407,6 +432,7 @@ abstract class _$$LobbyImplCopyWith<$Res> implements $LobbyCopyWith<$Res> {
       String userStatus,
       AdminSummary adminSummary,
       ContentModel? content,
+      Setting setting,
       Setting? settings,
       String activity,
       FormModel? form,
@@ -420,7 +446,7 @@ abstract class _$$LobbyImplCopyWith<$Res> implements $LobbyCopyWith<$Res> {
       bool isSaved,
       bool isFormMandatory,
       bool isRefundNotPossible,
-      double rating,
+      Rating rating,
       List<PriceTier>? priceTierList,
       bool ratingGiven});
 
@@ -431,6 +457,8 @@ abstract class _$$LobbyImplCopyWith<$Res> implements $LobbyCopyWith<$Res> {
   @override
   $ContentModelCopyWith<$Res>? get content;
   @override
+  $SettingCopyWith<$Res> get setting;
+  @override
   $SettingCopyWith<$Res>? get settings;
   @override
   $FormModelCopyWith<$Res>? get form;
@@ -440,6 +468,8 @@ abstract class _$$LobbyImplCopyWith<$Res> implements $LobbyCopyWith<$Res> {
   $PriceDetailsCopyWith<$Res> get priceDetails;
   @override
   $AccessRequestDataCopyWith<$Res>? get accessRequestData;
+  @override
+  $RatingCopyWith<$Res> get rating;
 }
 
 /// @nodoc
@@ -470,6 +500,7 @@ class __$$LobbyImplCopyWithImpl<$Res>
     Object? userStatus = null,
     Object? adminSummary = null,
     Object? content = freezed,
+    Object? setting = null,
     Object? settings = freezed,
     Object? activity = null,
     Object? form = freezed,
@@ -556,6 +587,10 @@ class __$$LobbyImplCopyWithImpl<$Res>
           ? _value.content
           : content // ignore: cast_nullable_to_non_nullable
               as ContentModel?,
+      setting: null == setting
+          ? _value.setting
+          : setting // ignore: cast_nullable_to_non_nullable
+              as Setting,
       settings: freezed == settings
           ? _value.settings
           : settings // ignore: cast_nullable_to_non_nullable
@@ -611,7 +646,7 @@ class __$$LobbyImplCopyWithImpl<$Res>
       rating: null == rating
           ? _value.rating
           : rating // ignore: cast_nullable_to_non_nullable
-              as double,
+              as Rating,
       priceTierList: freezed == priceTierList
           ? _value._priceTierList
           : priceTierList // ignore: cast_nullable_to_non_nullable
@@ -646,6 +681,7 @@ class _$LobbyImpl implements _Lobby {
       this.userStatus = "VISITOR",
       this.adminSummary = const AdminSummary(userId: "", profilePictureUrl: ""),
       this.content,
+      this.setting = const Setting(),
       this.settings,
       this.activity = "",
       this.form,
@@ -659,7 +695,7 @@ class _$LobbyImpl implements _Lobby {
       this.isSaved = false,
       this.isFormMandatory = false,
       this.isRefundNotPossible = false,
-      this.rating = 0.0,
+      this.rating = const Rating(),
       final List<PriceTier>? priceTierList = const [],
       this.ratingGiven = false})
       : _mediaUrls = mediaUrls,
@@ -724,6 +760,9 @@ class _$LobbyImpl implements _Lobby {
   @override
   final ContentModel? content;
   @override
+  @JsonKey()
+  final Setting setting;
+  @override
   final Setting? settings;
   @override
   @JsonKey()
@@ -775,7 +814,7 @@ class _$LobbyImpl implements _Lobby {
   final bool isRefundNotPossible;
   @override
   @JsonKey()
-  final double rating;
+  final Rating rating;
   final List<PriceTier>? _priceTierList;
   @override
   @JsonKey()
@@ -793,7 +832,7 @@ class _$LobbyImpl implements _Lobby {
 
   @override
   String toString() {
-    return 'Lobby(id: $id, createdDate: $createdDate, userId: $userId, lobbyStatus: $lobbyStatus, filter: $filter, description: $description, title: $title, mediaUrls: $mediaUrls, lobbyType: $lobbyType, totalMembers: $totalMembers, currentMembers: $currentMembers, membersRequired: $membersRequired, colorScheme: $colorScheme, gender: $gender, userStatus: $userStatus, adminSummary: $adminSummary, content: $content, settings: $settings, activity: $activity, form: $form, houseDetail: $houseDetail, userSummaries: $userSummaries, dateRange: $dateRange, priceDetails: $priceDetails, accessRequestData: $accessRequestData, hasForm: $hasForm, hasOffer: $hasOffer, isSaved: $isSaved, isFormMandatory: $isFormMandatory, isRefundNotPossible: $isRefundNotPossible, rating: $rating, priceTierList: $priceTierList, ratingGiven: $ratingGiven)';
+    return 'Lobby(id: $id, createdDate: $createdDate, userId: $userId, lobbyStatus: $lobbyStatus, filter: $filter, description: $description, title: $title, mediaUrls: $mediaUrls, lobbyType: $lobbyType, totalMembers: $totalMembers, currentMembers: $currentMembers, membersRequired: $membersRequired, colorScheme: $colorScheme, gender: $gender, userStatus: $userStatus, adminSummary: $adminSummary, content: $content, setting: $setting, settings: $settings, activity: $activity, form: $form, houseDetail: $houseDetail, userSummaries: $userSummaries, dateRange: $dateRange, priceDetails: $priceDetails, accessRequestData: $accessRequestData, hasForm: $hasForm, hasOffer: $hasOffer, isSaved: $isSaved, isFormMandatory: $isFormMandatory, isRefundNotPossible: $isRefundNotPossible, rating: $rating, priceTierList: $priceTierList, ratingGiven: $ratingGiven)';
   }
 
   @override
@@ -829,6 +868,7 @@ class _$LobbyImpl implements _Lobby {
             (identical(other.adminSummary, adminSummary) ||
                 other.adminSummary == adminSummary) &&
             (identical(other.content, content) || other.content == content) &&
+            (identical(other.setting, setting) || other.setting == setting) &&
             (identical(other.settings, settings) ||
                 other.settings == settings) &&
             (identical(other.activity, activity) ||
@@ -880,6 +920,7 @@ class _$LobbyImpl implements _Lobby {
         userStatus,
         adminSummary,
         content,
+        setting,
         settings,
         activity,
         form,
@@ -931,6 +972,7 @@ abstract class _Lobby implements Lobby {
       final String userStatus,
       final AdminSummary adminSummary,
       final ContentModel? content,
+      final Setting setting,
       final Setting? settings,
       final String activity,
       final FormModel? form,
@@ -944,7 +986,7 @@ abstract class _Lobby implements Lobby {
       final bool isSaved,
       final bool isFormMandatory,
       final bool isRefundNotPossible,
-      final double rating,
+      final Rating rating,
       final List<PriceTier>? priceTierList,
       final bool ratingGiven}) = _$LobbyImpl;
 
@@ -986,6 +1028,8 @@ abstract class _Lobby implements Lobby {
   @override
   ContentModel? get content;
   @override
+  Setting get setting;
+  @override
   Setting? get settings;
   @override
   String get activity;
@@ -1012,7 +1056,7 @@ abstract class _Lobby implements Lobby {
   @override
   bool get isRefundNotPossible;
   @override
-  double get rating;
+  Rating get rating;
   @override
   List<PriceTier>? get priceTierList;
   @override
@@ -1020,6 +1064,157 @@ abstract class _Lobby implements Lobby {
   @override
   @JsonKey(ignore: true)
   _$$LobbyImplCopyWith<_$LobbyImpl> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+Rating _$RatingFromJson(Map<String, dynamic> json) {
+  return _Rating.fromJson(json);
+}
+
+/// @nodoc
+mixin _$Rating {
+  double get average => throw _privateConstructorUsedError;
+  int get count => throw _privateConstructorUsedError;
+
+  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
+  @JsonKey(ignore: true)
+  $RatingCopyWith<Rating> get copyWith => throw _privateConstructorUsedError;
+}
+
+/// @nodoc
+abstract class $RatingCopyWith<$Res> {
+  factory $RatingCopyWith(Rating value, $Res Function(Rating) then) =
+      _$RatingCopyWithImpl<$Res, Rating>;
+  @useResult
+  $Res call({double average, int count});
+}
+
+/// @nodoc
+class _$RatingCopyWithImpl<$Res, $Val extends Rating>
+    implements $RatingCopyWith<$Res> {
+  _$RatingCopyWithImpl(this._value, this._then);
+
+  // ignore: unused_field
+  final $Val _value;
+  // ignore: unused_field
+  final $Res Function($Val) _then;
+
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? average = null,
+    Object? count = null,
+  }) {
+    return _then(_value.copyWith(
+      average: null == average
+          ? _value.average
+          : average // ignore: cast_nullable_to_non_nullable
+              as double,
+      count: null == count
+          ? _value.count
+          : count // ignore: cast_nullable_to_non_nullable
+              as int,
+    ) as $Val);
+  }
+}
+
+/// @nodoc
+abstract class _$$RatingImplCopyWith<$Res> implements $RatingCopyWith<$Res> {
+  factory _$$RatingImplCopyWith(
+          _$RatingImpl value, $Res Function(_$RatingImpl) then) =
+      __$$RatingImplCopyWithImpl<$Res>;
+  @override
+  @useResult
+  $Res call({double average, int count});
+}
+
+/// @nodoc
+class __$$RatingImplCopyWithImpl<$Res>
+    extends _$RatingCopyWithImpl<$Res, _$RatingImpl>
+    implements _$$RatingImplCopyWith<$Res> {
+  __$$RatingImplCopyWithImpl(
+      _$RatingImpl _value, $Res Function(_$RatingImpl) _then)
+      : super(_value, _then);
+
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? average = null,
+    Object? count = null,
+  }) {
+    return _then(_$RatingImpl(
+      average: null == average
+          ? _value.average
+          : average // ignore: cast_nullable_to_non_nullable
+              as double,
+      count: null == count
+          ? _value.count
+          : count // ignore: cast_nullable_to_non_nullable
+              as int,
+    ));
+  }
+}
+
+/// @nodoc
+
+@JsonSerializable(explicitToJson: true)
+class _$RatingImpl implements _Rating {
+  const _$RatingImpl({this.average = 0.0, this.count = 0});
+
+  factory _$RatingImpl.fromJson(Map<String, dynamic> json) =>
+      _$$RatingImplFromJson(json);
+
+  @override
+  @JsonKey()
+  final double average;
+  @override
+  @JsonKey()
+  final int count;
+
+  @override
+  String toString() {
+    return 'Rating(average: $average, count: $count)';
+  }
+
+  @override
+  bool operator ==(dynamic other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _$RatingImpl &&
+            (identical(other.average, average) || other.average == average) &&
+            (identical(other.count, count) || other.count == count));
+  }
+
+  @JsonKey(ignore: true)
+  @override
+  int get hashCode => Object.hash(runtimeType, average, count);
+
+  @JsonKey(ignore: true)
+  @override
+  @pragma('vm:prefer-inline')
+  _$$RatingImplCopyWith<_$RatingImpl> get copyWith =>
+      __$$RatingImplCopyWithImpl<_$RatingImpl>(this, _$identity);
+
+  @override
+  Map<String, dynamic> toJson() {
+    return _$$RatingImplToJson(
+      this,
+    );
+  }
+}
+
+abstract class _Rating implements Rating {
+  const factory _Rating({final double average, final int count}) = _$RatingImpl;
+
+  factory _Rating.fromJson(Map<String, dynamic> json) = _$RatingImpl.fromJson;
+
+  @override
+  double get average;
+  @override
+  int get count;
+  @override
+  @JsonKey(ignore: true)
+  _$$RatingImplCopyWith<_$RatingImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }
 

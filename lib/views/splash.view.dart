@@ -12,6 +12,7 @@ import 'package:aroundu/utils/logger.utils.dart';
 import 'package:aroundu/views/auth/auth.service.dart';
 import 'package:aroundu/views/auth/auth.view.dart';
 import 'package:aroundu/views/dashboard/dashboard.view.dart';
+import 'package:aroundu/views/landingPage.dart';
 import 'package:aroundu/views/onboarding/view.onboarding.dart';
 import 'package:flutter/material.dart';
 
@@ -76,23 +77,21 @@ class SplashView extends StatelessWidget {
           "User's profile is not completed! Going to `OnboardingView`",
         );
 
-      
-
         Get.off(
-        const OnboardingView(),
-        arguments: [
-        true,
-        profile["status"] ?? "",
-        user.displayName ?? "",
-        "",
-        "2004-02-10T18:30:00.000+00:00",
-        "",
-        <ProfileInterest>[],
-        <UserInterest>[],
-        <String>[],
-        <Prompts>[],
-        "MALE",
-        ],
+          const OnboardingView(),
+          arguments: [
+            true,
+            profile["status"] ?? "",
+            user.displayName ?? "",
+            "",
+            "2004-02-10T18:30:00.000+00:00",
+            "",
+            <ProfileInterest>[],
+            <UserInterest>[],
+            <String>[],
+            <Prompts>[],
+            "MALE",
+          ],
         );
         return;
       } catch (e) {

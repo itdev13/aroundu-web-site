@@ -20,12 +20,55 @@ class ScrollableInfoCards extends StatelessWidget {
     return Container(
       color: Colors.white ,
       height: 132, // Adjusted height for responsiveness
-      child: ListView.builder(
-        scrollDirection: Axis.horizontal,
-        itemCount: cards.length,
-        // padding: EdgeInsets.only(right: 16.w),
-        itemBuilder: (context, index) {
-          return _buildCard(cards[index]);
+      child: StatefulBuilder(
+        builder: (context, setState) {
+          // ScrollController _scrollController = ScrollController();
+          // bool _isForward = true;
+
+          // void _autoScroll(double maxExtent, ScrollController controller) {
+          //   if (!controller.hasClients) return;
+            
+          //   if (_isForward) {
+          //     controller.animateTo(
+          //       maxExtent,
+          //       duration: Duration(seconds: 3),
+          //       curve: Curves.linear
+          //     ).then((_) {
+          //       _isForward = false;
+          //       _autoScroll(maxExtent, controller);
+          //     });
+          //   } else {
+          //     controller.animateTo(
+          //       0,
+          //       duration: Duration(seconds: 3),
+          //       curve: Curves.linear
+          //     ).then((_) {
+          //       _isForward = true;
+          //       _autoScroll(maxExtent, controller);
+          //     });
+          //   }
+          // }
+
+          // // Auto scroll animation
+          // WidgetsBinding.instance.addPostFrameCallback((_) {
+          //   if (_scrollController.hasClients) {
+          //     double maxScrollExtent = _scrollController.position.maxScrollExtent;
+              
+          //     Future.delayed(Duration(milliseconds: 500), () {
+          //       _autoScroll(maxScrollExtent, _scrollController);
+          //     });
+          //   }
+          // });
+
+          return ListView.builder(
+            // controller: _scrollController,
+            scrollDirection: Axis.horizontal,
+            itemCount: cards.length,
+            // padding: EdgeInsets.only(right: 16.w),
+            itemBuilder: (context, index) {
+              return _buildCard(cards[index]);
+            },
+          );
         },
       ),
     );

@@ -7,6 +7,7 @@ import 'package:aroundu/designs/widgets/chip.widgets.designs.dart';
 import 'package:aroundu/designs/widgets/text.widget.designs.dart';
 import 'package:aroundu/models/house.model.dart';
 import 'package:aroundu/utils/api_service/api_service.dart' as apiService;
+import 'package:aroundu/utils/appDownloadCard.dart';
 import 'package:aroundu/utils/custome_snackbar.dart';
 import 'package:aroundu/views/lobby/provider/save_lobby_provider.dart';
 import 'package:aroundu/views/lobby/widgets/rich_text_display.dart';
@@ -138,7 +139,19 @@ class _ViewAllHouseCardState extends ConsumerState<ViewAllHouseCard> {
 
         // if (houseDetails != null) {
         HapticFeedback.selectionClick();
-        Get.to(() => HouseDetailsView());
+       FancyAppDownloadDialog.show(
+          context,
+          title: "Unlock Premium Features",
+          message:
+              "Get the full AroundU experience with exclusive features, enhanced performance, and more!",
+          appStoreUrl: "https://apps.apple.com/in/app/aroundu/id6744299663",
+          playStoreUrl:
+              "https://play.google.com/store/apps/details?id=com.polar.aroundu",
+          // cancelButtonText: "Maybe Later",
+          onCancel: () {
+            print("User chose to skip download");
+          },
+        );
         //TODO : add this house detail page
 
         // await Get.to(

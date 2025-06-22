@@ -181,7 +181,6 @@ class Api {
       {String? ifscCode, int? accountNumber, String? upiId}) async {
     try {
       // final response = await apiClient.post(
-      //   "https://api.aroundu.in/user/api/v1/saveBankAccount",
 
       // );
       // async {

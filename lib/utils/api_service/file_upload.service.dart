@@ -1,6 +1,7 @@
 import 'dart:io';
 
 
+import 'package:aroundu/constants/urls.dart';
 import 'package:aroundu/views/auth/auth.service.dart';
 import 'package:aroundu/views/auth/auth_api.service.dart';
 import 'package:dio/dio.dart';
@@ -20,7 +21,7 @@ class FileUploadService {
   FileUploadService._internal() {
     dio = Dio(
       BaseOptions(
-        baseUrl: kBaseUrl,
+        baseUrl: ApiConstants.arounduBaseUrl,
         connectTimeout: const Duration(seconds: 30),
         receiveTimeout: const Duration(seconds: 30),
       ),
@@ -91,7 +92,7 @@ class FileUploadService {
     // dio.httpClientAdapter = adapter;
   }
 
-  static const String kBaseUrl = "https://api.aroundu.in/";
+  
   late final Dio dio;
   final AuthService authService = AuthService();
 
@@ -101,7 +102,7 @@ class FileUploadService {
         {'file': await MultipartFile.fromFile(file.path), ...data});
     // Dio dio = Dio();
     final response = await dio.post(
-      kBaseUrl + url,
+      ApiConstants.arounduBaseUrl + url,
       data: formData,
       options: Options(
         headers: await authService.getAuthHeaders(),

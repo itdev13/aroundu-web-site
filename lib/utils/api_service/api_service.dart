@@ -28,7 +28,7 @@ class ApiService<T> {
   ApiService() {
     dio = Dio(
       BaseOptions(
-        baseUrl: ApiConstants.baseUrl, // Set baseUrl globally
+        baseUrl: ApiConstants.arounduBaseUrl, // Set baseUrl globally
         connectTimeout: const Duration(seconds: 30),
         receiveTimeout: const Duration(seconds: 30),
         contentType: 'application/json',

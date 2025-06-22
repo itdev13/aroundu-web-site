@@ -73,7 +73,7 @@ class _ProfileDetailsFollowedScreenState
     try {
       final headers = await AuthService().getAuthHeaders();
       const postRequestUrl =
-          "https://api.aroundu.in/user/api/v1/updateProfileMedia";
+          "${ApiConstants.arounduBaseUrl}user/api/v1/updateProfileMedia";
 
       FormData formData = FormData.fromMap({"type": "COVER_PIC", "url": url});
 

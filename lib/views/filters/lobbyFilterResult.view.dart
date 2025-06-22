@@ -517,7 +517,12 @@ class _LobbyFilterResultViewState extends State<LobbyFilterResultView>
         shrinkWrap: true,
         physics: const NeverScrollableScrollPhysics(),
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: screenWidth > 800 ? 5 : screenWidth > 600 ? 4 : 2,
+          crossAxisCount:
+              screenWidth > 800
+                  ? 5
+                  : screenWidth > 600
+                  ? 4
+                  : 2,
           crossAxisSpacing: 10,
           mainAxisSpacing: 10,
           childAspectRatio: 1.0, // Perfect square ratio
@@ -658,32 +663,109 @@ class _LobbyFilterResultViewState extends State<LobbyFilterResultView>
   }
 
   Widget _buildLobbiesVerticalSection() {
-    return ListView.separated(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      itemCount: widget.results.lobbies.length,
-      separatorBuilder: (context, index) => SizedBox(height: 12),
-      itemBuilder: (context, index) {
-        final lobby = widget.results.lobbies[index];
-        return DesignLobbyWidget(
-          lobby: lobby,
-          hasCoverImage: lobby.mediaUrls.isNotEmpty,
-        );
-      },
-    );
+    if (Get.width > 910) {
+      return GridView.builder(
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount:
+              Get.width > 1344
+                  ? 3
+                  : Get.width > 910
+                  ? 2
+                  : 1,
+          crossAxisSpacing: 10,
+          mainAxisSpacing: 10,
+          childAspectRatio: 2.2, // Perfect square ratio
+        ),
+        itemCount: widget.results.lobbies.length,
+        itemBuilder: (context, index) {
+          final lobby = widget.results.lobbies[index];
+          return ConstrainedBox(
+            constraints: BoxConstraints(
+              maxWidth: 450,
+              // maxWidth: min(650, 750),
+              minWidth: 200,
+            ),
+            child: DesignLobbyWidget(
+              lobby: lobby,
+              hasCoverImage: lobby.mediaUrls.isNotEmpty,
+            ),
+          );
+        },
+      );
+    } else {
+      return ListView.separated(
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        itemCount: widget.results.lobbies.length,
+        separatorBuilder: (context, index) => SizedBox(height: 12),
+        itemBuilder: (context, index) {
+          final lobby = widget.results.lobbies[index];
+          return ConstrainedBox(
+            constraints: BoxConstraints(
+              maxWidth: 450,
+              // maxWidth: min(650, 750),
+              minWidth: 200,
+            ),
+            child: DesignLobbyWidget(
+              lobby: lobby,
+              hasCoverImage: lobby.mediaUrls.isNotEmpty,
+            ),
+          );
+        },
+      );
+    }
   }
 
   Widget _buildHousesVerticalSection() {
-    return ListView.separated(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      itemCount: widget.results.houses.length,
-      separatorBuilder: (context, index) => SizedBox(height: 12),
-      itemBuilder: (context, index) {
-        final house = widget.results.houses[index];
-        return ViewAllHouseCard(house: house, onHouseDeleted: () {});
-      },
-    );
+    if (Get.width > 910) {
+      return GridView.builder(
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount:
+              Get.width > 1344
+                  ? 3
+                  : Get.width > 910
+                  ? 2
+                  : 1,
+          crossAxisSpacing: 10,
+          mainAxisSpacing: 10,
+          childAspectRatio: 2.2, // Perfect square ratio
+        ),
+        itemCount: widget.results.houses.length,
+        itemBuilder: (context, index) {
+          final house = widget.results.houses[index];
+          return ConstrainedBox(
+            constraints: BoxConstraints(
+              maxWidth: 450,
+              // maxWidth: min(650, 750),
+              minWidth: 200,
+            ),
+            child: ViewAllHouseCard(house: house, onHouseDeleted: () {}),
+          );
+        },
+      );
+    } else {
+      return ListView.separated(
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        itemCount: widget.results.houses.length,
+        separatorBuilder: (context, index) => SizedBox(height: 12),
+        itemBuilder: (context, index) {
+          final house = widget.results.houses[index];
+          return ConstrainedBox(
+            constraints: BoxConstraints(
+              maxWidth: 450,
+              // maxWidth: min(650, 750),
+              minWidth: 200,
+            ),
+            child: ViewAllHouseCard(house: house, onHouseDeleted: () {}),
+          );
+        },
+      );
+    }
   }
 
   Widget _buildUsersVerticalSection() {

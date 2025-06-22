@@ -81,7 +81,6 @@ class _ScanQrScreenState extends ConsumerState<ScanQrScreen> {
 
   @override
   Widget build(BuildContext context) {
-   
     final color = 0xffEC4B5D;
     final qrScannerState = ref.watch(qrScannerProvider);
 
@@ -99,11 +98,7 @@ class _ScanQrScreenState extends ConsumerState<ScanQrScreen> {
           child: AppBar(
             backgroundColor: Colors.transparent,
             leading: IconButton(
-              icon: Icon(
-                Icons.arrow_back_ios,
-                color: Colors.white,
-                size: 18,
-              ),
+              icon: Icon(Icons.arrow_back_ios, color: Colors.white, size: 18),
               onPressed: () => Navigator.of(context).pop(),
             ),
             title: const Text(
@@ -115,98 +110,97 @@ class _ScanQrScreenState extends ConsumerState<ScanQrScreen> {
           ),
         ),
       ),
-      body: Obx(() => Stack(
-            children: [
-              // Background image
-              Container(
-                decoration: BoxDecoration(
-                  image: DecorationImage(
-                    image: AssetImage(DesignImages.splashBg.path),
-                    fit: BoxFit.cover,
-                  ),
+      body: Stack(
+          children: [
+            // Background image
+            Container(
+              decoration: BoxDecoration(
+                image: DecorationImage(
+                  image: AssetImage(DesignImages.splashBg.path),
+                  fit: BoxFit.cover,
                 ),
               ),
+            ),
 
-              // Main content
-              // _chatsController.lobbyJoined.value
-              //     ? qrSuccessCard(profileController.profileData.value?.name ??
-              //         profileController.profileData.value?.userName ??
-              //         "")
-              //     : 
-                  qrScannerState.when(
-                      data: (data) {
-                        if (data.isEmpty) {
-                          return const Center(child: Text('No QR data found.'));
-                        }
-                        if (data.first.isScanned == true) {
-                          // WidgetsBinding.instance.addPostFrameCallback((_) {
-                          //   _chatsController.lobbyJoined.value = true;
-                          // });
-                          return Center(
-                              child: qrSuccessCard(
-                                  data.first.userSummary?.name ??
-                                      data.first.userSummary?.userName ??
-                                      ""));
-                        }
-                        final qrData = data.first;
-                        return Center(
-                          child: SingleChildScrollView(
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                // Space(height: 16),
-
-                                buildQrDetails(qrData),
-                                Space.h(height: 16),
-                                Padding(
-                                  padding:
-                                      EdgeInsets.symmetric(horizontal: 20),
-                                  child: DesignText(
-                                    text:
-                                        "Arrive, scan your QR, and check in. Don't miss out on AURA—make sure to mark your entry!",
-                                    fontSize: 16,
-                                    maxLines: 5,
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        );
-                      },
-                      loading: () =>
-                          const Center(child: CircularProgressIndicator()),
-                      error: (error, stack) {
-                        print("$error \n $stack");
-                        return Center(
-                          child: Text(
-                            'Error loading data: $error',
-                            style:
-                                TextStyle(color: Colors.red, fontSize: 16),
-                          ),
-                        );
-                      },
+            // Main content
+            // _chatsController.lobbyJoined.value
+            //     ? qrSuccessCard(profileController.profileData.value?.name ??
+            //         profileController.profileData.value?.userName ??
+            //         "")
+            //     :
+            qrScannerState.when(
+              data: (data) {
+                if (data.isEmpty) {
+                  return const Center(child: Text('No QR data found.'));
+                }
+                if (data.first.isScanned == true) {
+                  // WidgetsBinding.instance.addPostFrameCallback((_) {
+                  //   _chatsController.lobbyJoined.value = true;
+                  // });
+                  return Center(
+                    child: qrSuccessCard(
+                      data.first.userSummary?.name ??
+                          data.first.userSummary?.userName ??
+                          "",
                     ),
+                  );
+                }
+                final qrData = data.first;
+                return Center(
+                  child: SingleChildScrollView(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        // Space(height: 16),
+                        buildQrDetails(qrData),
+                        Space.h(height: 16),
+                        Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 20),
+                          child: DesignText(
+                            text:
+                                "Arrive, scan your QR, and check in. Don't miss out on AURA—make sure to mark your entry!",
+                            fontSize: 16,
+                            maxLines: 5,
+                            color: Colors.white,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              },
+              loading: () => const Center(child: CircularProgressIndicator()),
+              error: (error, stack) {
+                print("$error \n $stack");
+                return Center(
+                  child: Text(
+                    'Error loading data: $error',
+                    style: TextStyle(color: Colors.red, fontSize: 16),
+                  ),
+                );
+              },
+            ),
 
-              // Add a button to manually toggle the state (for testing)
-              // Positioned(
-              //   bottom: 20,
-              //   right: 20,
-              //   child: FloatingActionButton(
-              //     onPressed: () {
-              //       _chatsController.lobbyJoined.value = !_chatsController.lobbyJoined.value;
-              //     },
-              //     child: Icon(_chatsController.lobbyJoined.value ? Icons.close : Icons.check),
-              //   ),
-              // ),
-            ],
-          )),
+            // Add a button to manually toggle the state (for testing)
+            // Positioned(
+            //   bottom: 20,
+            //   right: 20,
+            //   child: FloatingActionButton(
+            //     onPressed: () {
+            //       _chatsController.lobbyJoined.value = !_chatsController.lobbyJoined.value;
+            //     },
+            //     child: Icon(_chatsController.lobbyJoined.value ? Icons.close : Icons.check),
+            //   ),
+            // ),
+          ],
+        ),
+      
     );
   }
 
   Widget buildQrDetails(QrScannerModel data) {
-     double screenWidth = MediaQuery.of(context).size.width;
+    double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
 
     double sw(double size) => screenWidth * size;
@@ -226,7 +220,9 @@ class _ScanQrScreenState extends ConsumerState<ScanQrScreen> {
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 18, vertical: 8),
       child: Container(
-        height: sh(0.7),
+        height: sh(0.8),
+        width: sw(0.9),
+        constraints: BoxConstraints(),
         margin: EdgeInsets.only(top: 20),
         padding: EdgeInsets.all(16.0),
         decoration: BoxDecoration(
@@ -248,29 +244,30 @@ class _ScanQrScreenState extends ConsumerState<ScanQrScreen> {
               children: [
                 ClipRRect(
                   borderRadius: BorderRadius.all(Radius.circular(20)),
-                  child: data.lobbyDetail?.mediaUrls != null
-                      ? Image.network(
-                          data.lobbyDetail!.mediaUrls!.isNotEmpty
-                              ? data.lobbyDetail?.mediaUrls?.first ?? ""
-                              : "",
-                          width: 150,
-                          height: 120,
-                          fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) {
-                            return Container(
-                              width: 150,
-                              height: 120,
-                              color: Colors.grey,
-                              child: const Icon(Icons.error),
-                            );
-                          },
-                        )
-                      : Container(
-                          width: 150,
-                          height: 120,
-                          color: Colors.grey,
-                          child: const Icon(Icons.groups_rounded),
-                        ),
+                  child:
+                      data.lobbyDetail?.mediaUrls != null
+                          ? Image.network(
+                            data.lobbyDetail!.mediaUrls!.isNotEmpty
+                                ? data.lobbyDetail?.mediaUrls?.first ?? ""
+                                : "",
+                            width: 150,
+                            height: 120,
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) {
+                              return Container(
+                                width: 150,
+                                height: 120,
+                                color: Colors.grey,
+                                child: const Icon(Icons.error),
+                              );
+                            },
+                          )
+                          : Container(
+                            width: 150,
+                            height: 120,
+                            color: Colors.grey,
+                            child: const Icon(Icons.groups_rounded),
+                          ),
                 ),
                 SizedBox(width: 16.0),
                 Expanded(
@@ -280,14 +277,17 @@ class _ScanQrScreenState extends ConsumerState<ScanQrScreen> {
                       Text(
                         data.lobbyDetail?.lobbyType ?? 'Unknown',
                         style: DesignFonts.poppins.copyWith(
-                            fontWeight: FontWeight.w400,
-                            fontSize: 8,
-                            color: const Color(0xFF3E79A1)),
+                          fontWeight: FontWeight.w400,
+                          fontSize: 8,
+                          color: const Color(0xFF3E79A1),
+                        ),
                       ),
                       Text(
                         data.lobbyDetail?.title ?? 'Untitled Lobby',
                         style: DesignFonts.poppins.copyWith(
-                            fontWeight: FontWeight.w600, fontSize: 18),
+                          fontWeight: FontWeight.w600,
+                          fontSize: 18,
+                        ),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -319,11 +319,14 @@ class _ScanQrScreenState extends ConsumerState<ScanQrScreen> {
                     child: IconButton(
                       onPressed: () async {
                         final image = await screenshotController
-                            .captureFromWidget(buildQrDetails(data),
-                                pixelRatio: 2, context: context);
-                        Share.shareXFiles(
-                            [XFile.fromData(image, mimeType: 'image/png')],
-                            text: "Check in to ${widget.lobby.title}");
+                            .captureFromWidget(
+                              buildQrDetails(data),
+                              pixelRatio: 2,
+                              context: context,
+                            );
+                        Share.shareXFiles([
+                          XFile.fromData(image, mimeType: 'image/png'),
+                        ], text: "Check in to ${widget.lobby.title}");
                       },
                       icon: DesignIcon.icon(
                         icon: FontAwesomeIcons.shareFromSquare,
@@ -446,8 +449,14 @@ class _ScanQrScreenState extends ConsumerState<ScanQrScreen> {
                         ),
                         SizedBox(height: 4.0),
                         Text(
-                          widget.lobby.filter.otherFilterInfo.locationInfo
-                                  ?.googleSearchResponses.first.description ??
+                          widget
+                                  .lobby
+                                  .filter
+                                  .otherFilterInfo
+                                  .locationInfo
+                                  ?.googleSearchResponses
+                                  .first
+                                  .description ??
                               "Unknown",
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
@@ -464,40 +473,19 @@ class _ScanQrScreenState extends ConsumerState<ScanQrScreen> {
               ],
             ),
             SizedBox(height: 24),
-            const DashDivider(
-              color: Colors.grey,
-              dashHeight: 1,
-            ),
+            const DashDivider(color: Colors.grey, dashHeight: 1),
             SizedBox(height: 16),
-            Column(
-              children: [
-                bytes != null
-                    ? Image.memory(
-                        bytes,
-                        width: MediaQuery.of(context).size.width * 0.6,
-                      )
-                    : const Icon(Icons.error),
-                // SizedBox(height: 16.0),
-                // Row(
-                //   mainAxisAlignment: MainAxisAlignment.center,
-                //   children: [
-                //     Text(
-                //       'Reference ID: ',
-                //       style: DesignFonts.poppins.copyWith(
-                //         fontWeight: FontWeight.w500,
-                //         fontSize: 16,
-                //       ),
-                //     ),
-                //     Text(
-                //       data.qrId ?? 'N/A',
-                //       style: DesignFonts.poppins.copyWith(
-                //         fontWeight: FontWeight.w300,
-                //         fontSize: 16,
-                //       ),
-                //     ),
-                //   ],
-                // ),
-              ],
+            Expanded(
+              child: bytes != null
+                  ? Image.memory(
+                    bytes,
+                     height: sh(0.35),
+                    width: sw(0.9),
+                    fit: BoxFit.fitHeight,
+                    // height: screenHeight * 0.3,
+                    // width: screenWidth * 0.6,
+                  )
+                  : const Icon(Icons.error),
             ),
           ],
         ),
@@ -540,10 +528,7 @@ class _ScanQrScreenState extends ConsumerState<ScanQrScreen> {
               color: Color(0xFF444444),
             ),
             Space.h(height: 18),
-            const DashDivider(
-              color: Color(0xFF6E6E6E),
-              dashHeight: 0.8,
-            ),
+            const DashDivider(color: Color(0xFF6E6E6E), dashHeight: 0.8),
             Space.h(height: 24),
             Padding(
               padding: EdgeInsets.symmetric(horizontal: 32),
@@ -554,13 +539,15 @@ class _ScanQrScreenState extends ConsumerState<ScanQrScreen> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       _userDetail(
-                          icon: DesignIcons.contactCalendar,
-                          title: "Joined on",
-                          subTitle: "16 Dec, 2024"),
+                        icon: DesignIcons.contactCalendar,
+                        title: "Joined on",
+                        subTitle: "16 Dec, 2024",
+                      ),
                       _userDetail(
-                          icon: DesignIcons.slot,
-                          title: "Slot booked ",
-                          subTitle: "2"),
+                        icon: DesignIcons.slot,
+                        title: "Slot booked ",
+                        subTitle: "2",
+                      ),
                     ],
                   ),
                   Space.h(height: 28),
@@ -568,13 +555,15 @@ class _ScanQrScreenState extends ConsumerState<ScanQrScreen> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       _userDetail(
-                          icon: DesignIcons.importantDevices,
-                          title: "Lobbies attended ",
-                          subTitle: "34"),
+                        icon: DesignIcons.importantDevices,
+                        title: "Lobbies attended ",
+                        subTitle: "34",
+                      ),
                       _userDetail(
-                          icon: DesignIcons.tickUser,
-                          title: "User Rating",
-                          subTitle: "4.5"),
+                        icon: DesignIcons.tickUser,
+                        title: "User Rating",
+                        subTitle: "4.5",
+                      ),
                     ],
                   ),
                   Space.h(height: 24),
@@ -582,10 +571,7 @@ class _ScanQrScreenState extends ConsumerState<ScanQrScreen> {
                     mainAxisAlignment: MainAxisAlignment.start,
                     // crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      CircleAvatar(
-                        backgroundColor: Colors.grey,
-                        radius: 18,
-                      ),
+                      CircleAvatar(backgroundColor: Colors.grey, radius: 18),
                       Space.w(width: 8),
                       Column(
                         mainAxisAlignment: MainAxisAlignment.start,
@@ -606,7 +592,7 @@ class _ScanQrScreenState extends ConsumerState<ScanQrScreen> {
                             color: Color(0xFF444444),
                           ),
                         ],
-                      )
+                      ),
                     ],
                   ),
                 ],
@@ -620,10 +606,7 @@ class _ScanQrScreenState extends ConsumerState<ScanQrScreen> {
               color: Color(0xFF444444),
             ),
             Space.h(height: 18),
-            const DashDivider(
-              color: Color(0xFF6E6E6E),
-              dashHeight: 0.8,
-            ),
+            const DashDivider(color: Color(0xFF6E6E6E), dashHeight: 0.8),
             Space.h(height: 34),
             Padding(
               padding: EdgeInsets.symmetric(horizontal: 32),
@@ -634,13 +617,15 @@ class _ScanQrScreenState extends ConsumerState<ScanQrScreen> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       _userDetail(
-                          icon: DesignIcons.localAtm,
-                          title: "Joined on",
-                          subTitle: "Google pay"),
+                        icon: DesignIcons.localAtm,
+                        title: "Joined on",
+                        subTitle: "Google pay",
+                      ),
                       _userDetail(
-                          icon: DesignIcons.payment,
-                          title: "Joined on",
-                          subTitle: "₹4500"),
+                        icon: DesignIcons.payment,
+                        title: "Joined on",
+                        subTitle: "₹4500",
+                      ),
                     ],
                   ),
                   Space.h(height: 28),
@@ -674,11 +659,7 @@ class _ScanQrScreenState extends ConsumerState<ScanQrScreen> {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        DesignIcon.custom(
-          icon: icon,
-          size: iconSize,
-          color: Color(0xFF444444),
-        ),
+        DesignIcon.custom(icon: icon, size: iconSize, color: Color(0xFF444444)),
         Space.w(width: 12),
         Column(
           mainAxisSize: MainAxisSize.min,
@@ -766,7 +747,9 @@ class _ScanQrScreenState extends ConsumerState<ScanQrScreen> {
                       // QR code note
                       Container(
                         padding: EdgeInsets.symmetric(
-                            vertical: 10, horizontal: 16),
+                          vertical: 10,
+                          horizontal: 16,
+                        ),
                         decoration: BoxDecoration(
                           color: Color(0xFFF5F5F5),
                           borderRadius: BorderRadius.circular(8),

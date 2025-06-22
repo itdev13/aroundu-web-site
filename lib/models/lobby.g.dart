@@ -30,6 +30,9 @@ _$LobbyImpl _$$LobbyImplFromJson(Map<String, dynamic> json) => _$LobbyImpl(
       content: json['content'] == null
           ? null
           : ContentModel.fromJson(json['content'] as Map<String, dynamic>),
+      setting: json['setting'] == null
+          ? const Setting()
+          : Setting.fromJson(json['setting'] as Map<String, dynamic>),
       settings: json['settings'] == null
           ? null
           : Setting.fromJson(json['settings'] as Map<String, dynamic>),
@@ -56,7 +59,9 @@ _$LobbyImpl _$$LobbyImplFromJson(Map<String, dynamic> json) => _$LobbyImpl(
       isSaved: json['isSaved'] as bool? ?? false,
       isFormMandatory: json['isFormMandatory'] as bool? ?? false,
       isRefundNotPossible: json['isRefundNotPossible'] as bool? ?? false,
-      rating: (json['rating'] as num?)?.toDouble() ?? 0.0,
+      rating: json['rating'] == null
+          ? const Rating()
+          : Rating.fromJson(json['rating'] as Map<String, dynamic>),
       priceTierList: (json['priceTierList'] as List<dynamic>?)
               ?.map((e) => PriceTier.fromJson(e as Map<String, dynamic>))
               .toList() ??
@@ -82,6 +87,7 @@ Map<String, dynamic> _$$LobbyImplToJson(_$LobbyImpl instance) =>
       'userStatus': instance.userStatus,
       'adminSummary': instance.adminSummary.toJson(),
       'content': instance.content?.toJson(),
+      'setting': instance.setting.toJson(),
       'settings': instance.settings?.toJson(),
       'activity': instance.activity,
       'form': instance.form?.toJson(),
@@ -95,9 +101,20 @@ Map<String, dynamic> _$$LobbyImplToJson(_$LobbyImpl instance) =>
       'isSaved': instance.isSaved,
       'isFormMandatory': instance.isFormMandatory,
       'isRefundNotPossible': instance.isRefundNotPossible,
-      'rating': instance.rating,
+      'rating': instance.rating.toJson(),
       'priceTierList': instance.priceTierList?.map((e) => e.toJson()).toList(),
       'ratingGiven': instance.ratingGiven,
+    };
+
+_$RatingImpl _$$RatingImplFromJson(Map<String, dynamic> json) => _$RatingImpl(
+      average: (json['average'] as num?)?.toDouble() ?? 0.0,
+      count: (json['count'] as num?)?.toInt() ?? 0,
+    );
+
+Map<String, dynamic> _$$RatingImplToJson(_$RatingImpl instance) =>
+    <String, dynamic>{
+      'average': instance.average,
+      'count': instance.count,
     };
 
 _$FormModelImpl _$$FormModelImplFromJson(Map<String, dynamic> json) =>

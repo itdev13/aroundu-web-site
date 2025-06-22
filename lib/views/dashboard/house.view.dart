@@ -8,6 +8,7 @@ import 'package:aroundu/designs/widgets/text.widget.designs.dart';
 import 'package:aroundu/models/house.model.dart';
 import 'package:aroundu/models/lobby.dart';
 import 'package:aroundu/models/profile.model.dart';
+import 'package:aroundu/utils/appDownloadCard.dart';
 import 'package:aroundu/utils/custome_snackbar.dart';
 import 'package:aroundu/views/feedback/suggestion.dart';
 import 'package:aroundu/views/filters/lobbyFilter.view.dart';
@@ -203,11 +204,23 @@ class _HouseViewState extends ConsumerState<HouseView> {
                           const Spacer(),
                           GestureDetector(
                             onTap: () {
-                              HapticFeedback.selectionClick();
-                              Get.to(() => NotificationsView());
+                              FancyAppDownloadDialog.show(
+                                context,
+                                title: "Unlock Premium Features",
+                                message:
+                                    "Get the full AroundU experience with exclusive features, enhanced performance, and more!",
+                                appStoreUrl:
+                                    "https://apps.apple.com/in/app/aroundu/id6744299663",
+                                playStoreUrl:
+                                    "https://play.google.com/store/apps/details?id=com.polar.aroundu",
+                                // cancelButtonText: "Maybe Later",
+                                onCancel: () {
+                                  print("User chose to skip download");
+                                },
+                              );
+                              // HapticFeedback.selectionClick();
+                              // Get.to(() => NotificationsView());
                             },
-                            // onTap: () => Get.to(() => GateWayCheck()),
-                            // onTap: () => Get.to(() => TempScreen()),
                             child: Container(
                               padding: EdgeInsets.all(8),
                               decoration: const BoxDecoration(
@@ -1600,24 +1613,24 @@ class _YourInterestsState extends ConsumerState<YourInterests> {
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
                 ),
-                if (allSubCategories.length > 8)
-                  GestureDetector(
-                    onTap: () {
-                      HapticFeedback.selectionClick();
-                      //TODO: uncomment this
+                // if (allSubCategories.length > 8)
+                //   GestureDetector(
+                //     onTap: () {
+                //       HapticFeedback.selectionClick();
+                //       //TODO: uncomment this
 
-                      // Get.to(
-                      //   () => ViewAllUserInterestsPage(
-                      //     userInterests: profile.userInterests,
-                      //   ),
-                      // );
-                    },
-                    child: DesignText(
-                      text: 'View all',
-                      fontSize: 12,
-                      color: const Color(0xFF3E79A1),
-                    ),
-                  ),
+                //       // Get.to(
+                //       //   () => ViewAllUserInterestsPage(
+                //       //     userInterests: profile.userInterests,
+                //       //   ),
+                //       // );
+                //     },
+                //     child: DesignText(
+                //       text: 'View all',
+                //       fontSize: 12,
+                //       color: const Color(0xFF3E79A1),
+                //     ),
+                //   ),
               ],
             ),
             Space.h(height: 16),
@@ -1643,7 +1656,21 @@ class _YourInterestsState extends ConsumerState<YourInterests> {
                   borderColor: const Color(0xFF3E79A1),
                   textColor: const Color(0xFF3E79A1),
                   onTap: () {
-                    HapticFeedback.selectionClick();
+                    // HapticFeedback.selectionClick();
+                    FancyAppDownloadDialog.show(
+                      context,
+                      title: "Unlock Premium Features",
+                      message:
+                          "Get the full AroundU experience with exclusive features, enhanced performance, and more!",
+                      appStoreUrl:
+                          "https://apps.apple.com/in/app/aroundu/id6744299663",
+                      playStoreUrl:
+                          "https://play.google.com/store/apps/details?id=com.polar.aroundu",
+                      // cancelButtonText: "Maybe Later",
+                      onCancel: () {
+                        print("User chose to skip download");
+                      },
+                    );
                     //TODO: uncomment this
 
                     // Get.to(

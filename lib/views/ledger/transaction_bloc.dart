@@ -1,4 +1,5 @@
 
+import 'package:aroundu/constants/urls.dart';
 import 'package:aroundu/models/transactions_history_model.dart';
 import 'package:aroundu/views/auth/auth.service.dart';
 import 'package:aroundu/views/ledger/transaction_state.dart';
@@ -31,7 +32,7 @@ class TransactionHistoryBloc
     }
 
     final uri =
-        Uri.parse('https://api.aroundu.in/payment/transactions/api/v1/filter')
+        Uri.parse('${ApiConstants.arounduBaseUrl}payment/transactions/api/v1/filter')
             .replace(queryParameters: queryParams);
 
     print('API Call: ${uri.toString()}');

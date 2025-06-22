@@ -1,8 +1,9 @@
 
-import 'package:aroundu/utils/api_service/api_service.dart';
 import 'package:aroundu/utils/logger.utils.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+
+import '../../../utils/api_service/api_service.dart';
 
 // part 'lobby_settings_provider.g.dart';
 
@@ -56,8 +57,11 @@ class LobbySettingsNotifier extends StateNotifier<LobbySettingsState> {
   LobbySettingsNotifier() : super(LobbySettingsState.initial());
 
   // Update settings via API call
-  Future<bool> updateSettings(String lobbyId,
-      {bool? showLobbyMembers, bool? enableChat}) async {
+  Future<bool> updateSettings(
+    String lobbyId, {
+    bool? showLobbyMembers,
+    bool? enableChat,
+  }) async {
     try {
       // Set loading state
       state = state.copyWith(isLoading: true, error: null, success: null);
@@ -83,9 +87,10 @@ class LobbySettingsNotifier extends StateNotifier<LobbySettingsState> {
         success: success,
         error: success ? null : 'Failed to update lobby settings',
         // Update local state if successful
-        showLobbyMembers: success
-            ? (showLobbyMembers ?? state.showLobbyMembers)
-            : state.showLobbyMembers,
+        showLobbyMembers:
+            success
+                ? (showLobbyMembers ?? state.showLobbyMembers)
+                : state.showLobbyMembers,
         enableChat:
             success ? (enableChat ?? state.enableChat) : state.enableChat,
       );
@@ -104,36 +109,37 @@ class LobbySettingsNotifier extends StateNotifier<LobbySettingsState> {
   }
 
   // Fetch current settings
-  Future<void> fetchSettings(String lobbyId) async {
+  Future<void> fetchSettings({
+    required String lobbyId,
+    required bool showLobbyMembers,
+    required bool enableChat,
+  }) async {
     try {
       // Set loading state
       state = state.copyWith(isLoading: true, error: null);
 
       // Make API call to get current settings
-      final response = await ApiService().get(
-        "match/lobby/$lobbyId/settings",
-        (json) => json,
-      );
+      // final response = await ApiService().get(
+      //   "match/lobby/$lobbyId/settings",
+      //   (json) => json,
+      // );
 
-      if (response != null) {
-        // Update state with fetched settings
-        state = state.copyWith(
-          isLoading: false,
-          showLobbyMembers: response['showLobbyMembers'] ?? false,
-          enableChat: response['enableChat'] ?? false,
-        );
-      } else {
-        state = state.copyWith(
-          isLoading: false,
-          error: 'Failed to fetch lobby settings',
-        );
-      }
-    } catch (e) {
-      // Update state with error
+      // if (response != null) {
+      // Update state with fetched settings
       state = state.copyWith(
         isLoading: false,
-        error: e.toString(),
+        showLobbyMembers: showLobbyMembers,
+        enableChat: enableChat,
       );
+      // } else {
+      //   state = state.copyWith(
+      //     isLoading: false,
+      //     error: 'Failed to fetch lobby settings',
+      //   );
+      // }
+    } catch (e) {
+      // Update state with error
+      state = state.copyWith(isLoading: false, error: e.toString());
       kLogger.error('Error fetching lobby settings: $e');
     }
   }
@@ -141,6 +147,7 @@ class LobbySettingsNotifier extends StateNotifier<LobbySettingsState> {
 
 // Provider for the lobby settings
 final lobbySettingsProvider = StateNotifierProvider.family<
-    LobbySettingsNotifier, LobbySettingsState, String>(
-  (ref, lobbyId) => LobbySettingsNotifier(),
-);
+  LobbySettingsNotifier,
+  LobbySettingsState,
+  String
+>((ref, lobbyId) => LobbySettingsNotifier());

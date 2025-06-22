@@ -1,5 +1,6 @@
 
 import 'package:aroundu/views/dashboard/dashboard.view.dart';
+import 'package:aroundu/views/landingPage.dart';
 import 'package:aroundu/views/notifications/notifications.view.dart';
 import 'package:aroundu/views/profile/user_profile_followed_view.dart';
 import 'package:aroundu/views/splash.view.dart';
@@ -7,7 +8,8 @@ import 'package:get/get.dart';
 
 class AppRoutes {
   // Route name constants
-  static const String splash = '/';
+  static const String landing = '/';
+  static const String splash = '/splash';
   static const String dashboard = '/dashboard';
 
   //notifications
@@ -28,6 +30,11 @@ class AppRoutes {
 
   // Define all routes as GetPage objects
   static final List<GetPage> routes = [
+    GetPage(
+      name: landing,
+      page: () => AppLandingPage(),
+      transition: Transition.fadeIn,
+    ),
     GetPage(
       name: splash,
       page: () => SplashView(),

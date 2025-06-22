@@ -30,6 +30,7 @@ class Lobby with _$Lobby {
     @Default(AdminSummary(userId: "", profilePictureUrl: ""))
     AdminSummary adminSummary,
     ContentModel? content,
+    @Default(Setting()) Setting setting,
     Setting? settings,
     @Default("") String activity,
     // Map<String,dynamic>? lobbyRules,
@@ -45,13 +46,21 @@ class Lobby with _$Lobby {
     @Default(false) bool isSaved,
     @Default(false) bool isFormMandatory,
     @Default(false) bool isRefundNotPossible,
-    @Default(0.0) double rating,
+    @Default(Rating()) Rating rating,
     @Default([]) List<PriceTier>? priceTierList,
     @Default(false) bool ratingGiven,
     
   }) = _Lobby;
 
   factory Lobby.fromJson(Map<String, dynamic> json) => _$LobbyFromJson(json);
+}
+
+@freezed
+class Rating with _$Rating {
+  @JsonSerializable(explicitToJson: true)
+  const factory Rating({@Default(0.0) double average, @Default(0) int count}) =
+      _Rating;
+  factory Rating.fromJson(Map<String, dynamic> json) => _$RatingFromJson(json);
 }
 
 @freezed

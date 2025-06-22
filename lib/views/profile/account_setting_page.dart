@@ -5,6 +5,7 @@ import 'package:aroundu/views/auth/auth.view.dart';
 import 'package:aroundu/views/dashboard/house.view.dart';
 import 'package:aroundu/views/house/provider/houses_providers.dart';
 import 'package:aroundu/views/house/provider/houses_providers_util.dart';
+import 'package:aroundu/views/landingPage.dart';
 import 'package:aroundu/views/lobby/provider/lobbies_providers_util.dart';
 import 'package:aroundu/views/profile/services/apis.dart';
 import 'package:aroundu/views/profile/user_profile_followed_view.dart';
@@ -239,13 +240,13 @@ class _AccountAndSettingsPageState
                         HouseProviderUtil.getProvider(HouseType.created));
                     final authService = AuthService();
                     await Api.deleteAccount();
-                    Get.offAll(() => const AuthView());
+                    // Get.offAll(() => const AppLandingPage());
                     await authService.clearAuthData();
                     await GetStorage().remove("fcmToken");
                     await GetStorage().remove("userUID");
                     await GetStorage().write('isLoggedOut', true);
                     await Get.deleteAll();
-                    Get.offAll(() => const AuthView());
+                    Get.offAll(() => const AppLandingPage());
                   },
                   child: CustomSettingsCardWithoutImage(
                     // imagePath: "",
@@ -319,7 +320,7 @@ class _AccountAndSettingsPageState
 
                                 // Delete all controllers and navigate to auth view
                                 await Get.deleteAll();
-                                Get.offAll(() => const AuthView());
+                                Get.offAll(() => const AppLandingPage());
                               },
                               child: const DesignText(
                                 text: 'Sign Out',

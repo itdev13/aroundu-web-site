@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:aroundu/constants/urls.dart';
 import 'package:aroundu/designs/colors.designs.dart';
 import 'package:aroundu/designs/widgets/button.widget.designs.dart';
 import 'package:aroundu/designs/widgets/icon.widget.designs.dart';
@@ -6,6 +7,7 @@ import 'package:aroundu/designs/widgets/text.widget.designs.dart';
 import 'package:aroundu/designs/widgets/textfield.widget.designs.dart';
 import 'package:aroundu/utils/api_service/api.service.dart';
 import 'package:aroundu/utils/custome_snackbar.dart';
+import 'package:aroundu/utils/google_search.dart';
 import 'package:aroundu/utils/logger.utils.dart';
 import 'package:aroundu/views/lobby/provider/lobby_details_provider.dart';
 import 'package:dio/dio.dart';
@@ -74,7 +76,7 @@ class _NewMarkdownEditorPageState extends ConsumerState<NewMarkdownEditorPage> {
   }) async {
     try {
       final postRequestUrl =
-          'https://api.aroundu.in/match/lobby/content/$lobbyId';
+          '${ApiConstants.arounduBaseUrl}match/lobby/content/$lobbyId';
 
       final response = await ApiService().put(
         postRequestUrl,

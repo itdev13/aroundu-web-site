@@ -1,5 +1,7 @@
 
+import 'package:aroundu/constants/urls.dart';
 import 'package:aroundu/designs/widgets/text.widget.designs.dart';
+import 'package:aroundu/utils/google_search.dart';
 import 'package:aroundu/views/auth/auth.service.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
@@ -31,7 +33,7 @@ Future<Response?> socialMediaHandel(String type, String url) async {
     try {
       final headers = await AuthService().getAuthHeaders();
       const postRequestUrl =
-          "https://api.aroundu.in/user/api/v1/updateProfileMedia";
+          "${ApiConstants.arounduBaseUrl}user/api/v1/updateProfileMedia";
 
       FormData formData = FormData.fromMap({"type": type, "url": url});
 

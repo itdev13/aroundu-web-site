@@ -32,7 +32,6 @@ Future<Response?> updateUserRatingApi(String userId, String action) async {
     try {
       print("$userId $action");
       const postRequestUrl = "user/api/v1/updateUserRating";
-      //  https://api.aroundu.in/user/api/v1/updateUserRating
       final response = await ApiService().post(
         postRequestUrl,
         body: {

@@ -956,15 +956,7 @@ class _AuthViewState extends State<AuthView>
                 // Verify OTP with the API
                 final verifyResponse = await _authApiService.verifyOtp(otp);
 
-                if (context.mounted) {
-                  if (dialogKey.currentContext != null &&
-                      Navigator.canPop(dialogKey.currentContext!)) {
-                    Navigator.pop(dialogKey.currentContext!);
-                  }
-                }
-
-                if (verifyResponse.status =='SUCCESS') {
-                  print(verifyResponse.message);
+                if (verifyResponse.isSuccess) {
                   // await _updateFCMToken();
                   await GetStorage().write('isFirstRun', false);
                   await GetStorage().write('isLoggedOut', false);
@@ -976,7 +968,19 @@ class _AuthViewState extends State<AuthView>
                     message: verifyResponse.message,
                     type: SnackBarType.error,
                   );
+                  if (context.mounted) {
+                    if (dialogKey.currentContext != null &&
+                        Navigator.canPop(dialogKey.currentContext!)) {
+                      Navigator.pop(dialogKey.currentContext!);
+                    }
+                  }
                 }
+                // if (context.mounted) {
+                //   if (dialogKey.currentContext != null &&
+                //       Navigator.canPop(dialogKey.currentContext!)) {
+                //     Navigator.pop(dialogKey.currentContext!);
+                //   }
+                // }
               } catch (e, s) {
                 if (context.mounted) {
                   if (dialogKey.currentContext != null &&

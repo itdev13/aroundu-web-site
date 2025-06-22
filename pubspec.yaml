@@ -56,6 +56,7 @@ dependencies:
   video_thumbnail: ^0.5.6
   video_player: ^2.10.0
   screenshot: ^3.0.0
+  flutter_cashfree_pg_sdk: ^2.2.8+46
 
 dev_dependencies:
   flutter_test:
@@ -67,6 +68,20 @@ dev_dependencies:
   custom_lint: ^0.7.00
   riverpod_lint: ^2.3.13
   json_serializable: ^6.8.0
+  flutter_launcher_icons: ^0.14.3
+
+flutter_launcher_icons:
+  # android: true
+  # ios: true
+  image_path: "assets/icons/aroundu.png"
+  # remove_alpha_ios: true
+  adaptive_icon_background: "#EC4B5D"
+  adaptive_icon_foreground: "assets/icons/aroundu.png"
+  web:
+    generate: true
+    image_path: "assets/icons/aroundu.png"
+    background_color: "#EC4B5D"
+    theme_color: "#EC4B5D"
 
 flutter:
 
@@ -74,6 +89,7 @@ flutter:
 
   assets:
     - assets/
+    - assets/appshots/
     - assets/images/
     - assets/icons/
     - assets/animations/

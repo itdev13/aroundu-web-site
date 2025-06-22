@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:aroundu/constants/urls.dart';
 import 'package:aroundu/utils/api_service/api.service.dart';
 import 'package:aroundu/views/auth/auth.service.dart';
 import 'package:aroundu/models/auth_api_models.dart';
@@ -101,7 +102,7 @@ class AuthApiService {
 
       // Create a new Dio instance to avoid using the interceptors
       final dio = Dio(BaseOptions(
-        baseUrl: ApiService.kBaseUrl,
+        baseUrl: ApiConstants.arounduBaseUrl,
         connectTimeout: const Duration(seconds: 30),
         receiveTimeout: const Duration(seconds: 30),
       ));

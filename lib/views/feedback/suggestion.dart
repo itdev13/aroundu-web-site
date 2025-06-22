@@ -42,7 +42,6 @@ class _SuggestionFormWidgetState extends State<SuggestionFormWidget> {
     try {
       print("$tag $message");
       const postRequestUrl = "user/api/feedback";
-      //  https://api.aroundu.in/user/api/v1/updateUserRating
       final response = await ApiService().post(
         postRequestUrl,
         body: {

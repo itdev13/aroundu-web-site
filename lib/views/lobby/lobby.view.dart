@@ -9,44 +9,35 @@ import 'package:aroundu/designs/fonts.designs.dart';
 import 'package:aroundu/models/detailed.lobby.model.dart';
 import 'package:aroundu/models/house.model.dart';
 import 'package:aroundu/utils/api_service/api.service.dart';
+import 'package:aroundu/utils/appDownloadCard.dart';
 import 'package:aroundu/utils/custome_snackbar.dart';
 import 'package:aroundu/utils/logger.utils.dart';
+import 'package:aroundu/utils/share_util.dart';
 import 'package:aroundu/views/dashboard/home.view.dart';
+import 'package:aroundu/views/landingPage.dart';
 import 'package:aroundu/views/ledger/lobby_ledger.dart';
 import 'package:aroundu/views/lobby/access_request.view.dart';
-import 'package:aroundu/views/lobby/access_request_user.lobby.view.dart';
 import 'package:aroundu/views/lobby/add_tier_pricing.dart';
-import 'package:aroundu/views/lobby/attendee.screen.dart';
-import 'package:aroundu/views/lobby/checkout.view.lobby%20copy.dart';
-import 'package:aroundu/views/lobby/co_host.lobby.view.dart';
-import 'package:aroundu/views/lobby/invite.lobby.view.dart';
-import 'package:aroundu/views/lobby/lobby_content_section.dart';
 import 'package:aroundu/views/lobby/lobby_settings_screen.dart';
+import 'package:aroundu/views/lobby/lobby_content_section.dart';
 import 'package:aroundu/views/lobby/markdown_editor.dart';
 import 'package:aroundu/views/lobby/provider/activate_lobby_provider.dart';
-import 'package:aroundu/views/lobby/provider/delete_lobby_provider.dart';
 import 'package:aroundu/views/lobby/provider/get_price_provider.dart';
 import 'package:aroundu/views/lobby/provider/lobbies_providers.dart';
 import 'package:aroundu/views/lobby/provider/lobby_access_provider.dart';
 import 'package:aroundu/views/lobby/provider/lobby_details_provider.dart';
-import 'package:aroundu/views/lobby/provider/markClosed_lobby_provider.dart';
 import 'package:aroundu/views/lobby/provider/save_lobby_provider.dart';
+import 'package:aroundu/views/lobby/shared.lobby.extended.view.dart';
 import 'package:aroundu/views/lobby/widgets/featured_Conversation.dart';
 import 'package:aroundu/views/lobby/widgets/feedback.dart';
 import 'package:aroundu/views/lobby/widgets/infoCard.dart';
 import 'package:aroundu/views/lobby/widgets/mediaGallery.dart';
 import 'package:aroundu/views/lobby/widgets/rich_text_display.dart';
 import 'package:aroundu/views/lobby/widgets/small_edit_sheet.lobby.dart';
-import 'package:aroundu/views/offer/create.offer.dart';
-import 'package:aroundu/views/offer/manage_offer.dart';
 import 'package:aroundu/views/offer/offerViewer.dart';
 import 'package:aroundu/views/profile/controllers/controller.profile.dart';
-import 'package:aroundu/views/scanner/open_scanner.dart';
 import 'package:aroundu/views/scanner/scanner_view.dart';
-import 'package:aroundu/views/temp/tempHoseDetailsView.dart';
-
-// import 'package:aroundu/views/lobby/lobby_rules/lobby_rules_section.dart';
-
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -70,7 +61,11 @@ import '../../models/lobby.dart';
 import '../../models/offers_model.dart';
 import '../dashboard/dashboard.view.dart';
 import '../profile/controllers/controller.groups.profiledart.dart';
+import 'access_request_user.lobby.view.dart';
+import 'attendee.screen.dart';
 import 'checkout.view.lobby.dart';
+import 'co_host.lobby.view.dart';
+import 'invite.lobby.view.dart';
 
 final housesForLobbiesProvider = FutureProvider.family<List<House>, String>((
   ref,
@@ -101,31 +96,6 @@ final housesForLobbiesProvider = FutureProvider.family<List<House>, String>((
   }
 });
 
-// final lobbyDetailsProvider =
-//     FutureProvider.family<LobbyDetails?, String>((ref, lobbyId) async {
-//   try {
-//     await Future.delayed(Duration(seconds: 5), () {
-//       print("Delay completed at ${DateTime.now()}");
-//       return true; // Return a value instead of null
-//     });
-//
-//     final response =
-//         await ApiService().get("match/lobby/api/v1/$lobbyId/detail");
-//
-//     if (response.data != null) {
-//       kLogger.debug('Lobby details fetched successfully');
-//       return LobbyDetails.fromJson(response.data);
-//     } else {
-//       kLogger.debug('Lobby data not found for ID: $lobbyId');
-//       return null;
-//     }
-//   } catch (e, stack) {
-//     kLogger.error('Error in fetching lobby details: $e \n $stack');
-//     // Instead of throwing, return null or a custom error state
-//     return null; // This ensures the provider completes rather than stays in error state
-//   }
-// });
-
 final isLocationsExpandedProvider = StateProvider.family<bool, String>(
   (ref, houseId) => false,
 );
@@ -151,7 +121,6 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
 
   final groupController = Get.put(GroupController());
   final profileController = Get.put(ProfileController());
-  // final ChatsController chatController = Get.find<ChatsController>();
 
   @override
   void initState() {
@@ -199,12 +168,8 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
     required Lobby lobby,
   }) async {
     // final lobby = widget.lobbyDetail.lobby;
-    double screenWidth = MediaQuery.of(context).size.width;
-    double screenHeight = MediaQuery.of(context).size.height;
-
-    double sw(double size) => screenWidth * size;
-
-    double sh(double size) => screenHeight * size;
+    double sw = MediaQuery.of(context).size.width;
+    double sh = MediaQuery.of(context).size.height;
     // If user is ADMIN, directly go to invite people view
     if (lobby.userStatus == "ADMIN") {
       InviteOptionsModal.show(
@@ -242,11 +207,24 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
               .fetchLobbyDetails(lobby.id);
         },
         onInviteExternalMembers: () async {
-          await Get.to(() => InviteExternalMembers(lobby: lobby));
-          ref.read(lobbyDetailsProvider(lobby.id).notifier).reset();
-          await ref
-              .read(lobbyDetailsProvider(lobby.id).notifier)
-              .fetchLobbyDetails(lobby.id);
+          FancyAppDownloadDialog.show(
+            context,
+            title: "Unlock Premium Features",
+            message:
+                "Get the full AroundU experience with exclusive features, enhanced performance, and more!",
+            appStoreUrl: "https://apps.apple.com/in/app/aroundu/id6744299663",
+            playStoreUrl:
+                "https://play.google.com/store/apps/details?id=com.polar.aroundu",
+            // cancelButtonText: "Maybe Later",
+            onCancel: () {
+              print("User chose to skip download");
+            },
+          );
+          // await Get.to(() => InviteExternalMembers(lobby: lobby));
+          // ref.read(lobbyDetailsProvider(lobby.id).notifier).reset();
+          // await ref
+          //     .read(lobbyDetailsProvider(lobby.id).notifier)
+          //     .fetchLobbyDetails(lobby.id);
         },
       );
     }
@@ -334,7 +312,7 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
             // Fetch pricing data
             await ref
                 .read(pricingProvider(lobby.id).notifier)
-                .fetchPricing(lobby.id);
+                .fetchPricing(lobby.id, groupSize: 1);
 
             // Close the loading dialog
             Navigator.of(context, rootNavigator: true).pop();
@@ -380,7 +358,7 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
             // Fetch pricing data
             await ref
                 .read(pricingProvider(lobby.id).notifier)
-                .fetchPricing(lobby.id);
+                .fetchPricing(lobby.id, groupSize: 1);
 
             // Close the loading dialog
             Navigator.of(context, rootNavigator: true).pop();
@@ -422,17 +400,17 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                                 'assets/animations/success_badge.json',
                                 repeat: false,
                                 fit: BoxFit.fitHeight,
-                                height: sh(0.2),
-                                width: sw(0.9),
+                                height: 0.2 * sh,
+                                width: 0.9 * sw,
                               ),
-                              SizedBox(height: 8),
+                              Space.h(height: 8),
                               DesignText(
                                 text: "  Congratulations 🎉",
                                 fontSize: 24,
                                 fontWeight: FontWeight.w600,
                                 color: Color(0xFF323232),
                               ),
-                              SizedBox(height: 8),
+                              Space.h(height: 8),
                               DesignText(
                                 text: "you have successfully joined the lobby",
                                 fontSize: 18,
@@ -485,15 +463,12 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
 
   @override
   Widget build(BuildContext context) {
+    double sw = MediaQuery.of(context).size.width;
+    double sh = MediaQuery.of(context).size.height;
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
 
     final lobbyDetailsAsync = ref.watch(lobbyDetailsProvider(widget.lobbyId));
-    double screenWidth = MediaQuery.of(context).size.width;
-    double screenHeight = MediaQuery.of(context).size.height;
 
-    double sw(double size) => screenWidth * size;
-
-    double sh(double size) => screenHeight * size;
     return lobbyDetailsAsync.when(
       data: (lobbyData) {
         List<UserSummary> userInfos = <UserSummary>[];
@@ -503,23 +478,12 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
           isSaved = lobbyData.lobby.isSaved;
           userInfos = lobbyData.lobby.userSummaries ?? [];
 
-          // userInfos.sort((a, b) {
-          //   final hasProfilePicA =
-          //       a.profilePictureUrl != null && a.profilePictureUrl!.isNotEmpty;
-          //   final hasProfilePicB =
-          //       b.profilePictureUrl != null && b.profilePictureUrl!.isNotEmpty;
-
-          //   if (hasProfilePicA && !hasProfilePicB) return -1;
-          //   if (!hasProfilePicA && hasProfilePicB) return 1;
-
-          //   return 0;
-          // });
-
           displayAvatars = userInfos.take(3).toList();
           remainingCount =
               lobbyData.lobby.currentMembers - displayAvatars.length;
           print(lobbyData.lobby.userStatus);
         }
+        final deviceType = DesignUtils.getDeviceType(context);
         return lobbyData == null
             ? Scaffold(
               appBar: AppBar(
@@ -548,7 +512,7 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                 },
                 child: SingleChildScrollView(
                   child: SizedBox(
-                    height: sh(0.85),
+                    height: 0.85 * sh,
                     child: Center(
                       child: DesignText(
                         text: "Lobby Not Found !!!",
@@ -564,7 +528,7 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
             )
             : Scaffold(
               key: scaffoldKey,
-              extendBodyBehindAppBar: true,
+              extendBodyBehindAppBar: deviceType == DeviceScreenType.phone,
               appBar: AppBar(
                 leading: IconButton(
                   style: IconButton.styleFrom(backgroundColor: Colors.white70),
@@ -577,25 +541,6 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                   ),
                 ),
                 actions: [
-                  // Add features from _buildBottomNavigationBarLeftSideWidget based on conditions
-                  // if (lobbyData.lobby.lobbyStatus == "PAST" &&
-                  //     (lobbyData.lobby.userStatus == "MEMBER" ||
-                  //         lobbyData.lobby.userStatus == "ADMIN"))
-                  //   IconButton(
-                  //     style: IconButton.styleFrom(
-                  //         backgroundColor: Colors.white70),
-                  //     onPressed: () {
-                  //       Get.to(() => CreateMomentsTabView(
-                  //             lobbyId: lobbyData.lobby.id,
-                  //             lobbyTitle: lobbyData.lobby.title,
-                  //           ));
-                  //     },
-                  //     icon: DesignIcon.custom(
-                  //       icon: DesignIcons.all,
-                  //       color: Color(0xFF323232),
-                  //     ),
-                  //   ),
-
                   // For FULL or CLOSED lobbies with privileged users
                   if ((lobbyData.lobby.lobbyStatus == "FULL" ||
                           lobbyData.lobby.lobbyStatus == "CLOSED") &&
@@ -647,37 +592,22 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                       ),
                     ),
 
-                  // For ACTIVE lobby with ADMIN status
-                  if (lobbyData.lobby.userStatus == "ADMIN")
+                  if (lobbyData.lobby.userStatus == "MEMBER" &&
+                      lobbyData.lobby.lobbyStatus != "PAST")
                     IconButton(
                       style: IconButton.styleFrom(
                         backgroundColor: Colors.white70,
                       ),
                       onPressed: () {
-                        HapticFeedback.selectionClick();
-                        showModalBottomSheet(
-                          backgroundColor: Colors.white,
-                          context: context,
-                          // constraints: BoxConstraints(
-                          //   minHeight: 0.9.sh,
-                          // ),
-                          isScrollControlled: true,
-                          useSafeArea: true,
-                          builder: (BuildContext context) {
-                            return Padding(
-                              padding: EdgeInsets.only(
-                                bottom:
-                                    MediaQuery.of(context).viewInsets.bottom,
-                              ),
-                              child: LobbySmallEditSheet(
-                                lobby: lobbyData.lobby,
-                              ),
-                            );
-                          },
+                        Get.to(
+                          () => ScanQrScreen(
+                            lobbyId: lobbyData.lobby.id,
+                            lobby: lobbyData.lobby,
+                          ),
                         );
                       },
                       icon: DesignIcon.icon(
-                        icon: Icons.edit_square,
+                        icon: Icons.qr_code_scanner,
                         color: Color(0xFF323232),
                       ),
                     ),
@@ -687,11 +617,12 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                     style: IconButton.styleFrom(
                       backgroundColor: Colors.white70,
                     ),
-                    onPressed: () {
+                    onPressed: () async {
                       HapticFeedback.selectionClick();
-                      Share.share(
-                        'Check out this amazing app! https://aroundu.in/lobby/${lobbyData.lobby.id}',
-                        subject: 'Check this out!',
+                      await ShareUtility.showShareBottomSheet(
+                        context: context,
+                        entityType: EntityType.lobby,
+                        entity: lobbyData.lobby,
                       );
                     },
                     icon: DesignIcon.icon(
@@ -735,69 +666,19 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                 scrolledUnderElevation: 0,
               ),
               bottomNavigationBar: Container(
-                height: sh(0.08),
+                height: 0.09 * sh,
                 // color: DesignColors.accent.withValues(alpha: 0.5),
-                padding: EdgeInsets.only(
-                  left: sw(0.05),
-                  right: sw(0.05),
-                  bottom: sh(0.02),
-                  top: sh(0.005),
-                ),
+                // padding: EdgeInsets.only(
+                //   left: 0.05 * sw,
+                //   right: 0.05 * sw,
+                //   bottom: 0.02 * sh,
+                //   top: 0.005 * sh,
+                // ),
+                padding: EdgeInsets.all(12),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    // Chat button on the left side
-                    // if ((lobbyData.lobby.userStatus == 'MEMBER' ||
-                    //         lobbyData.lobby.userStatus == 'ADMIN') &&
-                    //     (lobbyData.lobby.settings?.enableChat == true))
-                    //   Card(
-                    //     elevation: 1,
-                    //     color: Colors.transparent,
-                    //     margin: EdgeInsets.only(right: sw(0.02)),
-                    //     child: Container(
-                    //       width: sw(0.15),
-                    //       height: double.infinity,
-                    //       decoration: BoxDecoration(
-                    //         // color: DesignColors.accent,
-                    //         color: Colors.white,
-                    //         borderRadius: BorderRadius.circular(12),
-                    //       ),
-                    //       child: IconButton(
-                    //         onPressed: () async {
-                    //           HapticFeedback.lightImpact();
-                    //           if (await chatController
-                    //               .ensureSocketConnected()) {
-                    //             await chatController.getMessages(
-                    //               lobbyData.conversationId,
-                    //               chatController.currentUserId.value,
-                    //             );
-
-                    //             await chatController.updateOnChatScreenState(
-                    //               userId: chatController.currentUserId.value,
-                    //               conversationId: lobbyData.conversationId,
-                    //               isOnChatScreen: true,
-                    //             );
-                    //             Get.to(
-                    //               () => const ChatDetailsView(),
-                    //               arguments: {
-                    //                 'userName': lobbyData.lobby.title,
-                    //                 'otherUserId': lobbyData.lobby.id,
-                    //                 'conversationId': lobbyData.conversationId,
-                    //                 'isGroup': true,
-                    //               },
-                    //             );
-                    //           }
-                    //         },
-                    //         icon: DesignIcon.custom(
-                    //           icon: DesignIcons.chat,
-                    //           // color: Colors.white,
-                    //           color: DesignColors.accent,
-                    //           size: 24,
-                    //         ),
-                    //       ),
-                    //     ),
-                    //   ),
                     _buildBottomNavigationBarLeftSideWidget(
                       lobbyDetail: lobbyData,
                     ),
@@ -813,148 +694,49 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
               ),
               endDrawer: Drawer(
                 backgroundColor: DesignColors.bg,
-                width: sw(0.65),
+                width: 0.65 * sw,
                 child: ListView(
                   padding: EdgeInsets.symmetric(
-                    vertical: sh(0.12),
-                    horizontal: sw(0.05),
+                    vertical: 0.12 * sh,
+                    horizontal: 0.05 * sw,
                   ),
                   children: [
-                    // ListTile(
-                    //   leading: DesignIcon.custom(
-                    //     icon: DesignIcons.pencil,
-                    //     size: 16,
-                    //     color: const Color(0xFFEC4B5D),
-                    //   ),
-                    //   title: DesignText(
-                    //     text: 'Edit',
-                    //     fontSize: 14,
-                    //     fontWeight: FontWeight.w500,
-                    //     color: const Color(0xFF323232),
-                    //   ),
-                    //   onTap: () async {
-                    //     ref.read(nameProvider.notifier).state =
-                    //         lobbyData.lobby.title;
-                    //     ref
-                    //         .read(filterInfoDtoProvider.notifier)
-                    //         .updateFilterInfo(
-                    //           lobbyData.lobby.filter.filterInfoList
-                    //               .map((e) => e.toJson())
-                    //               .toList(),
-                    //         );
-                    //     ref
-                    //         .read(advancedFilterInfoDtoProvider.notifier)
-                    //         .updateAdvancedFilterInfo(
-                    //           lobbyData.lobby.filter.advancedFilterInfoList
-                    //               .map((e) => e.toJson())
-                    //               .toList(),
-                    //         );
-                    //     ref
-                    //         .read(otherFilterInfoProvider.notifier)
-                    //         .updateOtherFilterInfo(
-                    //           lobbyData.lobby.filter.otherFilterInfo.toJson(),
-                    //         );
-                    //     ref.read(descriptionProvider.notifier).state =
-                    //         lobbyData.lobby.description;
-                    //     ref.read(isAccessProvider.notifier).state =
-                    //         lobbyData.lobby.lobbyType;
-                    //     ref
-                    //         .read(addMediaProvider.notifier)
-                    //         .downloadAndStoreImages(lobbyData.lobby.mediaUrls);
-                    //     await Get.to(
-                    //       () => EditLobbyScreen(lobby: lobbyData.lobby),
-                    //     );
-                    //     ref
-                    //         .read(
-                    //           lobbyDetailsProvider(lobbyData.lobby.id).notifier,
-                    //         )
-                    //         .reset();
-                    //     await ref
-                    //         .read(
-                    //           lobbyDetailsProvider(lobbyData.lobby.id).notifier,
-                    //         )
-                    //         .fetchLobbyDetails(lobbyData.lobby.id);
-                    //   },
-                    // ),
-                    // SizedBox(height: 8),
-                    if (lobbyData.lobby.lobbyStatus != "CLOSED") ...[
-                      ListTile(
-                        leading: DesignIcon.custom(
-                          icon: DesignIcons.disabled,
-                          size: 16,
-                          color: const Color(0xFFEC4B5D),
-                        ),
-                        title: DesignText(
-                          text: 'Mark as closed',
-                          fontSize: 14,
-                          fontWeight: FontWeight.w500,
-                          color: const Color(0xFF323232),
-                        ),
-                        onTap: () async {
-                          bool isClosedSuccess = await ref.read(
-                            markAsClosedLobbyProvider(
-                              lobbyData.lobby.id,
-                            ).future,
-                          );
-                          Navigator.pop(context);
-                          if (isClosedSuccess) {
-                            Fluttertoast.showToast(
-                              msg: "Lobby marked as closed",
-                            );
-                            ref
-                                .read(
-                                  lobbyDetailsProvider(
-                                    lobbyData.lobby.id,
-                                  ).notifier,
-                                )
-                                .reset();
-                            await ref
-                                .read(
-                                  lobbyDetailsProvider(
-                                    lobbyData.lobby.id,
-                                  ).notifier,
-                                )
-                                .fetchLobbyDetails(lobbyData.lobby.id);
-                          } else {
-                            Fluttertoast.showToast(
-                              msg: "Something went wrong please try again",
-                            );
-                          }
-                        },
+                    ListTile(
+                      leading: DesignIcon.custom(
+                        icon: DesignIcons.pencil,
+                        size: 16,
+                        color: const Color(0xFFEC4B5D),
                       ),
-                      SizedBox(height: 8),
-                    ],
-                    if (lobbyData.lobby.userSummaries == null ||
-                        (lobbyData.lobby.userSummaries?.isEmpty ?? true)) ...[
-                      ListTile(
-                        leading: DesignIcon.custom(
-                          icon: DesignIcons.delete,
-                          size: 16,
-                          color: const Color(0xFFEC4B5D),
-                        ),
-                        title: DesignText(
-                          text: 'Delete',
-                          fontSize: 14,
-                          fontWeight: FontWeight.w500,
-                          color: const Color(0xFF323232),
-                        ),
-                        onTap: () async {
-                          bool isDeleteSuccess = await ref.read(
-                            deleteLobbyProvider(lobbyData.lobby.id).future,
-                          );
-                          // Navigator.pop(context);
-                          Get.offAll(const DashboardView());
-                          if (isDeleteSuccess) {
-                            Fluttertoast.showToast(msg: "Lobby Deleted");
-                          } else {
-                            Fluttertoast.showToast(
-                              msg: "Something went wrong please try again",
-                            );
-                          }
-                        },
+                      title: DesignText(
+                        text: 'Edit',
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                        color: const Color(0xFF323232),
                       ),
-                      SizedBox(height: 8),
-                    ],
+                      onTap: () async {
+                        showModalBottomSheet(
+                          backgroundColor: Colors.white,
+                          context: context,
+                          // constraints: BoxConstraints(
+                          //   minHeight: 0.9.sh,
+                          // ),
+                          isScrollControlled: true,
+                          useSafeArea: true,
+                          builder: (BuildContext context) {
+                            return Padding(
+                              padding: EdgeInsets.only(
+                                bottom:
+                                    MediaQuery.of(context).viewInsets.bottom,
+                              ),
+                              child: LobbySmallEditSheet(
+                                lobby: lobbyData.lobby,
+                              ),
+                            );
+                          },
+                        );
+                      },
+                    ),
+                    Space.h(height: 8),
 
                     ListTile(
                       leading: DesignIcon.custom(
@@ -984,58 +766,7 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                         // Get.to(() => const AccessRequestPage());
                       },
                     ),
-                    SizedBox(height: 8),
-                    //Link to house
-                    // ListTile(
-                    //   leading: DesignIcon.custom(
-                    //     icon: DesignIcons.shopAdd,
-                    //     size: 16,
-                    //     color: const Color(0xFFEC4B5D),
-                    //   ),
-                    //   title: DesignText(
-                    //     text: 'Link to house',
-                    //     fontSize: 14,
-                    //     fontWeight: FontWeight.w500,
-                    //     color: const Color(0xFF323232),
-                    //   ),
-                    //   onTap: () {},
-                    // ),
-                    // SizedBox(height: 8),
-                    ListTile(
-                      leading: DesignIcon.custom(
-                        icon: DesignIcons.qr,
-                        size: 16,
-                        color: const Color(0xFFEC4B5D),
-                      ),
-                      title: DesignText(
-                        text: 'Scan QR',
-                        fontSize: 14,
-                        fontWeight: FontWeight.w500,
-                        color: const Color(0xFF323232),
-                      ),
-                      onTap: () {
-                        Get.to(() => OpenScanner(lobbyId: lobbyData.lobby.id));
-                      },
-                    ),
-                    ListTile(
-                      leading: DesignIcon.icon(
-                        icon: Icons.local_offer_outlined,
-                        size: 16,
-                        color: const Color(0xFFEC4B5D),
-                      ),
-                      title: DesignText(
-                        text: 'Manage Offer',
-                        fontSize: 14,
-                        fontWeight: FontWeight.w500,
-                        color: const Color(0xFF323232),
-                      ),
-                      onTap: () {
-                        Get.to(
-                          () => ManageOfferScreen(lobbyId: lobbyData.lobby.id),
-                        );
-                      },
-                    ),
-                    SizedBox(height: 8),
+                    Space.h(height: 8),
                     ListTile(
                       leading: DesignIcon.icon(
                         icon: Icons.local_offer_outlined,
@@ -1049,29 +780,27 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                         color: const Color(0xFF323232),
                       ),
                       onTap: () {
-                        Get.to(
-                          () => LobbyLedgerPage(lobbyId: lobbyData.lobby.id),
+                        // Get.to(
+                        //   () => LobbyLedgerPage(lobbyId: lobbyData.lobby.id),
+                        // );
+                        FancyAppDownloadDialog.show(
+                          context,
+                          title: "Unlock Premium Features",
+                          message:
+                              "Get the full AroundU experience with exclusive features, enhanced performance, and more!",
+                          appStoreUrl:
+                              "https://apps.apple.com/in/app/aroundu/id6744299663",
+                          playStoreUrl:
+                              "https://play.google.com/store/apps/details?id=com.polar.aroundu",
+                          // cancelButtonText: "Maybe Later",
+                          onCancel: () {
+                            print("User chose to skip download");
+                          },
                         );
                       },
                     ),
-                    SizedBox(height: 8),
-                    // ListTile(
-                    //   leading: DesignIcon.icon(
-                    //     icon: Icons.edit_note_outlined,
-                    //     size: 16,
-                    //     color: const Color(0xFFEC4B5D),
-                    //   ),
-                    //   title: DesignText(
-                    //     text: 'Form Page',
-                    //     fontSize: 14,
-                    //     fontWeight: FontWeight.w500,
-                    //     color: const Color(0xFF323232),
-                    //   ),
-                    //   onTap: () {
-                    //     Get.to(() => EditFormPage(lobby: lobbyData.lobby));
-                    //   },
-                    // ),
-                    // SizedBox(height: 8),
+                    Space.h(height: 8),
+
                     ListTile(
                       leading: DesignIcon.icon(
                         icon: Icons.settings_outlined,
@@ -1086,14 +815,11 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                       ),
                       onTap: () {
                         Get.to(
-                          () => LobbySettingsScreen(
-                            lobbyId: lobbyData.lobby.id,
-                            lobbyTitle: lobbyData.lobby.title,
-                          ),
+                          () => LobbySettingsScreen(lobby: lobbyData.lobby),
                         );
                       },
                     ),
-                    SizedBox(height: 8),
+                    Space.h(height: 8),
                   ],
                 ),
               ),
@@ -1106,598 +832,2895 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                   await ref
                       .read(lobbyDetailsProvider(lobbyData.lobby.id).notifier)
                       .fetchLobbyDetails(lobbyData.lobby.id);
-
-                  // await Future.wait([
-                  //   Future.delayed(Duration(seconds: 3)),
-                  //   ref.read(
-                  //       lobbyDetailsProvider(lobbyDetails.lobby.id).future),
-                  //   ref.read(offersProvider(lobbyDetails.lobby.id).future),
-                  // ]);
                 },
                 child: SingleChildScrollView(
                   physics: const AlwaysScrollableScrollPhysics(),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      Stack(
-                        clipBehavior: Clip.none,
-                        alignment: AlignmentDirectional.bottomCenter,
+                  child: responsiveLayout(lobbyData: lobbyData, sh: sh, sw: sw),
+                ),
+              ),
+            );
+      },
+      error:
+          (error, stack) => Scaffold(
+            appBar: AppBar(
+              leading: IconButton(
+                style: IconButton.styleFrom(backgroundColor: Colors.white70),
+                onPressed: () {
+                  Get.back();
+                },
+                icon: DesignIcon.icon(
+                  icon: Icons.arrow_back_ios_sharp,
+                  size: 20,
+                ),
+              ),
+              backgroundColor: Colors.transparent,
+              scrolledUnderElevation: 0,
+            ),
+            body: RefreshIndicator(
+              key: Key("errorStateRefreshIndicator"),
+              onRefresh: () async {
+                ref.read(lobbyDetailsProvider(widget.lobbyId).notifier).reset();
+                await ref
+                    .read(lobbyDetailsProvider(widget.lobbyId).notifier)
+                    .fetchLobbyDetails(widget.lobbyId);
+              },
+              child: SingleChildScrollView(
+                child: SizedBox(
+                  height: 0.85 * sh,
+                  child: Center(
+                    child: DesignText(
+                      text: "Something went wrong \n Please try again !!!",
+                      fontSize: 18,
+                      fontWeight: FontWeight.w500,
+                      color: Color(0xFF444444),
+                      maxLines: 10,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+      loading:
+          () => Scaffold(
+            appBar: AppBar(
+              leading: IconButton(
+                style: IconButton.styleFrom(backgroundColor: Colors.white70),
+                onPressed: () {
+                  Get.back();
+                },
+                icon: DesignIcon.icon(
+                  icon: Icons.arrow_back_ios_sharp,
+                  size: 20,
+                ),
+              ),
+              backgroundColor: Colors.transparent,
+              scrolledUnderElevation: 0,
+            ),
+            body: SingleChildScrollView(
+              child: SizedBox(
+                height: 0.85 * sh,
+                child: Center(
+                  child: CircularProgressIndicator(color: DesignColors.accent),
+                ),
+              ),
+            ),
+          ),
+    );
+  }
+
+  Widget responsiveLayout({
+    required LobbyDetails lobbyData,
+    required double sw,
+    required double sh,
+  }) {
+    return SimpleScreenBuilder(
+      mobileLayout: mobileLayout(lobbyData: lobbyData, sh: sh, sw: sw),
+      desktopLayout: desktopLayout(lobbyData: lobbyData, sh: sh, sw: sw),
+    );
+  }
+
+  Widget mobileLayout({
+    required LobbyDetails lobbyData,
+    required double sw,
+    required double sh,
+  }) {
+    List<UserSummary> userInfos = <UserSummary>[];
+    List<UserSummary> displayAvatars = <UserSummary>[];
+    int remainingCount = 0;
+    if (lobbyData != null) {
+      isSaved = lobbyData.lobby.isSaved;
+      userInfos = lobbyData.lobby.userSummaries ?? [];
+
+      displayAvatars = userInfos.take(3).toList();
+      remainingCount = lobbyData.lobby.currentMembers - displayAvatars.length;
+      print(lobbyData.lobby.userStatus);
+    }
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.start,
+      children: [
+        Stack(
+          clipBehavior: Clip.none,
+          alignment: AlignmentDirectional.bottomCenter,
+          children: [
+            Column(
+              children: [
+                SizedBox(
+                  height: 0.3 * sh,
+                  child: MediaGallery.fromUrls(
+                    lobbyData.lobby.mediaUrls.isNotEmpty
+                        ? lobbyData.lobby.mediaUrls
+                        : [
+                          "https://media.istockphoto.com/id/1329350253/vector/image-vector-simple-mountain-landscape-photo-adding-photos-to-the-album.jpg?s=612x612&w=0&k=20&c=3iXykf5ZQI2eBo0DaQ7W-e_8E5rhFEammFqO9XCisnI=",
+                        ],
+                  ),
+                ),
+                // if ((lobbyData.lobby.lobbyStatus == "ACTIVE" &&
+                //         lobbyData.lobby.userStatus == "ADMIN") ||
+                //     (lobbyData.lobby.lobbyStatus == "ACTIVE" &&
+                //         lobbyData.lobby.userStatus == "MEMBER"))
+                //   Container(
+                //     color: Colors.white,
+                //     height: 0.06 * sh,
+                //     width: double.infinity,
+                //   ),
+              ],
+            ),
+            Positioned(
+              top: 0.1 * sh,
+              left: 0,
+              child: Container(
+                padding: EdgeInsets.only(
+                  left: 16,
+                  right: 12,
+                  top: 8,
+                  bottom: 8,
+                ),
+                decoration: BoxDecoration(
+                  color:
+                      (() {
+                        switch (lobbyData.lobby.lobbyStatus) {
+                          case "UPCOMING":
+                            return Color(0xFF52D17C);
+                          case "PAST":
+                            return Color(0xFFF97853);
+                          case "CLOSED":
+                            return Color(0xFF3E79A1);
+                          case "FULL":
+                            return Color(0xFFF97853);
+                          default:
+                            return Color(0xFF52D17C);
+                        }
+                      })(),
+                  borderRadius: BorderRadius.horizontal(
+                    right: Radius.circular(24),
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    DesignIcon.custom(
+                      icon:
+                          (() {
+                            switch (lobbyData.lobby.lobbyStatus) {
+                              case "UPCOMING":
+                                return DesignIcons.upcoming;
+                              case "PAST":
+                                return DesignIcons.past;
+                              case "CLOSED":
+                                return DesignIcons.closed;
+                              case "FULL":
+                                return DesignIcons.past;
+                              default:
+                                return DesignIcons.running;
+                            }
+                          })(),
+                      color:
+                          (lobbyData.lobby.lobbyStatus == 'ACTIVE')
+                              ? Colors.white
+                              : null,
+                    ),
+                    Space.w(width: 8),
+                    DesignText(
+                      text:
+                          (() {
+                            switch (lobbyData.lobby.lobbyStatus) {
+                              case "UPCOMING":
+                                return "Upcoming";
+                              case "PAST":
+                                return "Past";
+                              case "CLOSED":
+                                return "Closed";
+                              case "ACTIVE":
+                                return "Active";
+                              case "FULL":
+                                return "Full";
+                              default:
+                                return "Join Now!";
+                            }
+                          })(),
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.white,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            Positioned(
+              bottom: 0.02 * sh,
+              left: 16,
+              right: 16,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Container(
+                    padding: EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: Color(0xFF5750E2),
+                      borderRadius: BorderRadius.circular(24),
+                    ),
+                    child: DesignText(
+                      text:
+                          "${lobbyData.subCategory.iconUrl}    ${lobbyData.subCategory.name}",
+                      fontSize: 10,
+                      fontWeight: FontWeight.w400,
+                      color: Colors.white,
+                    ),
+                  ),
+                  if (lobbyData.lobby.lobbyStatus != "PAST" &&
+                      lobbyData.lobby.lobbyStatus != "CLOSED")
+                    IconButton(
+                      style: IconButton.styleFrom(
+                        backgroundColor: Colors.black38,
+                      ),
+                      onPressed: () {},
+                      icon: DesignIcon.icon(
+                        icon:
+                            (lobbyData.lobby.isPrivate)
+                                ? Icons.lock_outline_rounded
+                                : Icons.lock_open_outlined,
+                        color: Color(0xFFFFFFFF),
+                      ),
+                    ),
+                  if (lobbyData.lobby.lobbyStatus == "PAST" ||
+                      lobbyData.lobby.lobbyStatus == "CLOSED")
+                    Container(
+                      padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(6),
+                        color: Colors.white,
+                      ),
+                      child: Row(
                         children: [
-                          Column(
-                            children: [
-                              SizedBox(
-                                height: sh(0.3),
-                                child: MediaGallery.fromUrls(
-                                  lobbyData.lobby.mediaUrls.isNotEmpty
-                                      ? lobbyData.lobby.mediaUrls
-                                      : [
-                                        "https://media.istockphoto.com/id/1329350253/vector/image-vector-simple-mountain-landscape-photo-adding-photos-to-the-album.jpg?s=612x612&w=0&k=20&c=3iXykf5ZQI2eBo0DaQ7W-e_8E5rhFEammFqO9XCisnI=",
+                          DesignIcon.custom(
+                            icon: DesignIcons.star,
+                            color: null,
+                            size: 14,
+                          ),
+                          Space.w(width: 4),
+                          DesignText(
+                            text:
+                                "${lobbyData.lobby.rating.average} (${lobbyData.lobby.rating.count})",
+                            fontSize: 12,
+                            fontWeight: FontWeight.w400,
+                            color: Color(0xFF444444),
+                          ),
+                        ],
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        Padding(
+          padding: DesignUtils.scaffoldPadding,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              (() {
+                String combinedStatus = lobbyData.lobby.userStatus;
+
+                switch (lobbyData.lobby.lobbyStatus) {
+                  case "PAST":
+                    combinedStatus =
+                        "${lobbyData.lobby.userStatus}_${lobbyData.lobby.lobbyStatus}";
+                  case "UPCOMING":
+                  case "CLOSED":
+                    combinedStatus =
+                        "${lobbyData.lobby.userStatus}_${lobbyData.lobby.lobbyStatus}";
+
+                  default: // ACTIVE
+                }
+
+                switch (combinedStatus) {
+                  case "MEMBER":
+                    return SizedBox.shrink();
+                  case "ADMIN_PAST":
+                    return SizedBox.shrink();
+                  case "ADMIN":
+                    if (lobbyData.lobby.priceDetails.originalPrice > 0.0) {
+                      return Column(
+                        children: [
+                          GestureDetector(
+                            onTap: () {
+                              FancyAppDownloadDialog.show(
+                                context,
+                                title: "Unlock Premium Features",
+                                message:
+                                    "Get the full AroundU experience with exclusive features, enhanced performance, and more!",
+                                appStoreUrl:
+                                    "https://apps.apple.com/in/app/aroundu/id6744299663",
+                                playStoreUrl:
+                                    "https://play.google.com/store/apps/details?id=com.polar.aroundu",
+                                // cancelButtonText: "Maybe Later",
+                                onCancel: () {
+                                  print("User chose to skip download");
+                                },
+                              );
+
+                              //   Get.to(
+                              //   () => EditOfferScreen(
+                              //     lobbyId: lobbyData.lobby.id,
+                              //   ),
+                              // );
+                            },
+                            child: const CustomOfferCard(
+                              boldText: "Add Custom Offers",
+                              normalText:
+                                  "to attract more attendees to your lobby now.",
+                            ),
+                          ),
+                          Space.h(height: 24),
+                        ],
+                      );
+                    } else {
+                      return SizedBox.shrink();
+                    }
+                  case "VISITOR_PAST":
+                    return SizedBox.shrink();
+                  default:
+                    return OfferSwiper(lobbyId: lobbyData.lobby.id);
+                }
+              })(),
+
+              (() {
+                String combinedStatus = lobbyData.lobby.userStatus;
+
+                switch (lobbyData.lobby.lobbyStatus) {
+                  case "PAST":
+                    combinedStatus =
+                        "${lobbyData.lobby.userStatus}_${lobbyData.lobby.lobbyStatus}";
+                  case "UPCOMING":
+                  case "CLOSED":
+                    combinedStatus =
+                        "${lobbyData.lobby.userStatus}_${lobbyData.lobby.lobbyStatus}";
+
+                  default: // ACTIVE
+                }
+
+                switch (combinedStatus) {
+                  case "MEMBER":
+                    return SizedBox.shrink();
+                  case "ADMIN_PAST":
+                    return SizedBox.shrink();
+                  case "ADMIN":
+                    if (lobbyData.lobby.priceDetails.originalPrice > 0.0) {
+                      return Column(
+                        children: [
+                          GestureDetector(
+                            onTap: () async {
+                              // await Get.to(
+                              //   () => AddTierPricingPage(
+                              //     lobbyDetail: lobbyData,
+                              //     lobbyId: lobbyData.lobby.id,
+                              //   ),
+                              // );
+
+                              // ref
+                              //     .read(
+                              //       lobbyDetailsProvider(
+                              //         lobbyData.lobby.id,
+                              //       ).notifier,
+                              //     )
+                              //     .reset();
+                              // await ref
+                              //     .read(
+                              //       lobbyDetailsProvider(
+                              //         lobbyData.lobby.id,
+                              //       ).notifier,
+                              //     )
+                              //     .fetchLobbyDetails(lobbyData.lobby.id);
+                              FancyAppDownloadDialog.show(
+                                context,
+                                title: "Unlock Premium Features",
+                                message:
+                                    "Get the full AroundU experience with exclusive features, enhanced performance, and more!",
+                                appStoreUrl:
+                                    "https://apps.apple.com/in/app/aroundu/id6744299663",
+                                playStoreUrl:
+                                    "https://play.google.com/store/apps/details?id=com.polar.aroundu",
+                                // cancelButtonText: "Maybe Later",
+                                onCancel: () {
+                                  print("User chose to skip download");
+                                },
+                              );
+                            },
+                            child: const CustomOfferCard(
+                              boldText: "Add tier pricing ",
+                              normalText: "to your lobby",
+                            ),
+                          ),
+                          Space.h(height: 24),
+                        ],
+                      );
+                    } else {
+                      return SizedBox.shrink();
+                    }
+                  default:
+                    return SizedBox.shrink();
+                }
+              })(),
+
+              DesignText(
+                text: lobbyData.lobby.title,
+                fontSize: 20,
+                fontWeight: FontWeight.w600,
+                maxLines: 2,
+                color: const Color(0xFF444444),
+              ),
+              // Space.h(height: 8.h),
+              // DesignText(
+              //   text: lobbyData.lobby.description,
+              //   fontSize: 12,
+              //   fontWeight: FontWeight.w300,
+              //   maxLines: 10,
+              //   color: const Color(0xFF323232),
+              // ),
+              Space.h(height: 16),
+
+              Wrap(
+                runSpacing: 12,
+                direction: Axis.vertical,
+                children: [
+                  if (lobbyData.lobby.filter.otherFilterInfo.dateInfo !=
+                      null) ...[
+                    InfoItemWithTitle(
+                      iconUrl:
+                          lobbyData
+                              .lobby
+                              .filter
+                              .otherFilterInfo
+                              .dateInfo!
+                              .iconUrl,
+                      title:
+                          lobbyData
+                              .lobby
+                              .filter
+                              .otherFilterInfo
+                              .dateInfo!
+                              .title,
+                      subTitle:
+                          lobbyData
+                              .lobby
+                              .filter
+                              .otherFilterInfo
+                              .dateInfo!
+                              .formattedDate ??
+                          "",
+                    ),
+                    const Space.h(height: 4),
+                  ],
+                  if (lobbyData.lobby.filter.otherFilterInfo.dateRange !=
+                      null) ...[
+                    InfoItemWithTitle(
+                      iconUrl:
+                          lobbyData
+                              .lobby
+                              .filter
+                              .otherFilterInfo
+                              .dateRange!
+                              .iconUrl,
+                      title:
+                          lobbyData
+                              .lobby
+                              .filter
+                              .otherFilterInfo
+                              .dateRange!
+                              .title,
+                      subTitle:
+                          lobbyData
+                              .lobby
+                              .filter
+                              .otherFilterInfo
+                              .dateRange!
+                              .formattedDateCompactView,
+                    ),
+                    const Space.h(height: 4),
+                  ],
+
+                  if (lobbyData.lobby.filter.otherFilterInfo.pickUp != null ||
+                      lobbyData.lobby.filter.otherFilterInfo.destination !=
+                          null) ...[
+                    InfoItemWithTitle(
+                      iconUrl:
+                          lobbyData
+                              .lobby
+                              .filter
+                              .otherFilterInfo
+                              .pickUp!
+                              .iconUrl,
+                      title:
+                          lobbyData
+                              .lobby
+                              .filter
+                              .otherFilterInfo
+                              .pickUp
+                              ?.title ??
+                          "",
+                      subTitle:
+                          lobbyData
+                              .lobby
+                              .filter
+                              .otherFilterInfo
+                              .pickUp!
+                              .locationResponse
+                              ?.areaName ??
+                          "",
+                    ),
+                    const Space.h(height: 4),
+                    InfoItemWithTitle(
+                      iconUrl:
+                          lobbyData
+                              .lobby
+                              .filter
+                              .otherFilterInfo
+                              .pickUp!
+                              .iconUrl,
+                      title:
+                          lobbyData
+                              .lobby
+                              .filter
+                              .otherFilterInfo
+                              .destination
+                              ?.title ??
+                          "",
+                      subTitle:
+                          lobbyData
+                              .lobby
+                              .filter
+                              .otherFilterInfo
+                              .destination!
+                              .locationResponse
+                              ?.areaName ??
+                          "",
+                    ),
+                    if (lobbyData.lobby.filter.otherFilterInfo.pickUp != null ||
+                        lobbyData.lobby.filter.otherFilterInfo.destination !=
+                            null) ...[
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          Card(
+                            elevation: 8,
+                            shadowColor: const Color(0x143E79A1),
+                            child: Container(
+                              padding: EdgeInsets.all(8),
+                              // constraints:
+                              //     BoxConstraints(minWidth: 0.15.sw),
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(12),
+                                color: Colors.white,
+                              ),
+                              child: InfoItemWithIcon(
+                                iconUrl: "googleMaps",
+                                text: "Show directions",
+                                fontSize: 10,
+                                iconSize: 14,
+                                iconColor: null,
+                                onTap: () async {
+                                  double latPickUp = 0.0;
+                                  double lngPickUp = 0.0;
+                                  double latDestination = 0.0;
+                                  double lngDestination = 0.0;
+
+                                  if (lobbyData
+                                              .lobby
+                                              .filter
+                                              .otherFilterInfo
+                                              .pickUp
+                                              ?.locationResponse !=
+                                          null ||
+                                      lobbyData
+                                              .lobby
+                                              .filter
+                                              .otherFilterInfo
+                                              .destination
+                                              ?.locationResponse !=
+                                          null) {
+                                    if (lobbyData.lobby.userStatus !=
+                                        "MEMBER") {
+                                      latPickUp =
+                                          (lobbyData
+                                              .lobby
+                                              .filter
+                                              .otherFilterInfo
+                                              .pickUp
+                                              ?.locationResponse!
+                                              .exactLocation
+                                              .lat) ??
+                                          0.0;
+                                      lngPickUp =
+                                          (lobbyData
+                                              .lobby
+                                              .filter
+                                              .otherFilterInfo
+                                              .pickUp
+                                              ?.locationResponse!
+                                              .exactLocation
+                                              .lon) ??
+                                          0.0;
+                                      latDestination =
+                                          (lobbyData
+                                              .lobby
+                                              .filter
+                                              .otherFilterInfo
+                                              .destination
+                                              ?.locationResponse!
+                                              .exactLocation
+                                              .lat) ??
+                                          0.0;
+                                      lngDestination =
+                                          (lobbyData
+                                              .lobby
+                                              .filter
+                                              .otherFilterInfo
+                                              .destination
+                                              ?.locationResponse!
+                                              .exactLocation
+                                              .lon) ??
+                                          0.0;
+                                    } else {
+                                      latPickUp =
+                                          (lobbyData
+                                              .lobby
+                                              .filter
+                                              .otherFilterInfo
+                                              .pickUp
+                                              ?.locationResponse!
+                                              .exactLocation
+                                              .lat) ??
+                                          0.0;
+                                      lngPickUp =
+                                          (lobbyData
+                                              .lobby
+                                              .filter
+                                              .otherFilterInfo
+                                              .pickUp
+                                              ?.locationResponse!
+                                              .exactLocation
+                                              .lon) ??
+                                          0.0;
+                                      latDestination =
+                                          (lobbyData
+                                              .lobby
+                                              .filter
+                                              .otherFilterInfo
+                                              .destination
+                                              ?.locationResponse!
+                                              .exactLocation
+                                              .lat) ??
+                                          0.0;
+                                      lngDestination =
+                                          (lobbyData
+                                              .lobby
+                                              .filter
+                                              .otherFilterInfo
+                                              .destination
+                                              ?.locationResponse!
+                                              .exactLocation
+                                              .lon) ??
+                                          0.0;
+                                    }
+                                  }
+
+                                  // Only proceed if we have valid coordinates
+                                  if (latPickUp != 0.0 ||
+                                      lngPickUp != 0.0 ||
+                                      latDestination != 0.0 ||
+                                      lngDestination != 0.0) {
+                                    Uri? mapsUri;
+                                    bool launched = false;
+
+                                    kLogger.trace(
+                                      "latP : $latPickUp \n lngP : $lngPickUp \n latD : $latDestination \n lngD : $lngDestination",
+                                    );
+
+                                    // Check if running on web
+                                    if (kIsWeb) {
+                                      // For web, always use Google Maps web interface
+                                      mapsUri = Uri.parse(
+                                        'https://www.google.com/maps/dir/?api=1&origin=$latPickUp,$lngPickUp&destination=$latDestination,$lngDestination',
+                                      );
+
+                                      try {
+                                        await launchUrl(
+                                          mapsUri,
+                                          mode:
+                                              LaunchMode
+                                                  .platformDefault, // Use platformDefault for web
+                                          webOnlyWindowName:
+                                              '_blank', // Open in new tab
+                                        );
+                                        launched = true;
+                                      } catch (e) {
+                                        kLogger.error(
+                                          'Error launching directions URL on web: $e',
+                                        );
+                                      }
+                                    } else {
+                                      // Mobile platform handling
+                                      if (Platform.isAndroid) {
+                                        // Try Google Maps app first
+                                        mapsUri = Uri.parse(
+                                          'https://www.google.com/maps/dir/?api=1&origin=$latPickUp,$lngPickUp&destination=$latDestination,$lngDestination',
+                                        );
+                                        if (await canLaunchUrl(mapsUri)) {
+                                          await launchUrl(
+                                            mapsUri,
+                                            mode:
+                                                LaunchMode.externalApplication,
+                                          );
+                                          launched = true;
+                                        }
+                                      } else if (Platform.isIOS) {
+                                        // Try Google Maps on iOS first
+                                        mapsUri = Uri.parse(
+                                          'comgooglemaps://?saddr=$latPickUp,$lngPickUp&daddr=$latDestination,$lngDestination&directionsmode=driving',
+                                        );
+                                        if (await canLaunchUrl(mapsUri)) {
+                                          await launchUrl(
+                                            mapsUri,
+                                            mode:
+                                                LaunchMode.externalApplication,
+                                          );
+                                          launched = true;
+                                        } else {
+                                          // Fall back to Apple Maps
+                                          mapsUri = Uri.parse(
+                                            'https://maps.apple.com/?saddr=$latPickUp,$lngPickUp&daddr=$latDestination,$lngDestination&dirflg=d',
+                                          );
+                                          if (await canLaunchUrl(mapsUri)) {
+                                            await launchUrl(
+                                              mapsUri,
+                                              mode:
+                                                  LaunchMode
+                                                      .externalApplication,
+                                            );
+                                            launched = true;
+                                          }
+                                        }
+                                      }
+
+                                      // If none of the above worked, fall back to web browser
+                                      if (!launched) {
+                                        mapsUri = Uri.parse(
+                                          'https://www.google.com/maps/dir/?api=1&origin=$latPickUp,$lngPickUp&destination=$latDestination,$lngDestination',
+                                        );
+                                        try {
+                                          await launchUrl(
+                                            mapsUri,
+                                            mode:
+                                                LaunchMode.externalApplication,
+                                          );
+                                        } catch (e) {
+                                          kLogger.error(
+                                            'Error launching URL: $e',
+                                          );
+                                        }
+                                      }
+                                    }
+                                  }
+                                },
+                              ),
+                            ),
+                          ),
+                          // Space.w(width: 8.w),
+                          if (lobbyData
+                                      .lobby
+                                      .filter
+                                      .otherFilterInfo
+                                      .locationInfo !=
+                                  null &&
+                              (lobbyData
+                                  .lobby
+                                  .filter
+                                  .otherFilterInfo
+                                  .locationInfo!
+                                  .hideLocation) &&
+                              (lobbyData.lobby.userStatus != "MEMBER" ||
+                                  lobbyData.lobby.userStatus != "ADMIN"))
+                            GestureDetector(
+                              onTap: () {
+                                showDialog(
+                                  context: context,
+                                  builder: (BuildContext context) {
+                                    return AlertDialog(
+                                      backgroundColor: Colors.white,
+                                      title: const Text(
+                                        "Approximate Location Shown 🌍",
+                                      ),
+                                      content: const Text(
+                                        "The admin has chosen to hide the exact location. You're seeing an approximate location within a 1 km radius. Once you join the lobby, the exact location will be visible.",
+                                      ),
+                                      actions: <Widget>[
+                                        TextButton(
+                                          child: const Text("Got it!"),
+                                          onPressed: () {
+                                            Navigator.of(
+                                              context,
+                                            ).pop(); // Dismiss the dialog
+                                          },
+                                        ),
                                       ],
+                                    );
+                                  },
+                                );
+                              },
+                              child: Icon(Icons.info_outline, size: 18),
+                            ),
+                        ],
+                      ),
+                    ],
+                    const Space.h(height: 4),
+                  ],
+                ],
+              ),
+              // Space.h(height: 8.h),
+              if (lobbyData.lobby.filter.otherFilterInfo.locationInfo !=
+                  null) ...[
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () async {
+                          double lat = 0.0;
+                          double lng = 0.0;
+
+                          if (lobbyData
+                                      .lobby
+                                      .filter
+                                      .otherFilterInfo
+                                      .locationInfo !=
+                                  null &&
+                              lobbyData
+                                  .lobby
+                                  .filter
+                                  .otherFilterInfo
+                                  .locationInfo!
+                                  .locationResponses
+                                  .isNotEmpty) {
+                            if ((lobbyData
+                                    .lobby
+                                    .filter
+                                    .otherFilterInfo
+                                    .locationInfo!
+                                    .hideLocation) &&
+                                (lobbyData.lobby.userStatus != "MEMBER")) {
+                              lat =
+                                  lobbyData
+                                      .lobby
+                                      .filter
+                                      .otherFilterInfo
+                                      .locationInfo
+                                      ?.locationResponses
+                                      .first
+                                      .approxLocation
+                                      ?.lat ??
+                                  0.0;
+                              lng =
+                                  lobbyData
+                                      .lobby
+                                      .filter
+                                      .otherFilterInfo
+                                      .locationInfo
+                                      ?.locationResponses
+                                      .first
+                                      .approxLocation
+                                      ?.lon ??
+                                  0.0;
+                            } else {
+                              lat =
+                                  lobbyData
+                                      .lobby
+                                      .filter
+                                      .otherFilterInfo
+                                      .locationInfo
+                                      ?.locationResponses
+                                      .first
+                                      .exactLocation
+                                      ?.lat ??
+                                  0.0;
+                              lng =
+                                  lobbyData
+                                      .lobby
+                                      .filter
+                                      .otherFilterInfo
+                                      .locationInfo
+                                      ?.locationResponses
+                                      .first
+                                      .exactLocation
+                                      ?.lon ??
+                                  0.0;
+                            }
+                          }
+
+                          // Only proceed if we have valid coordinates
+                          if (lat != 0.0 || lng != 0.0) {
+                            Uri? mapsUri;
+                            bool launched = false;
+
+                            kLogger.trace("lat : $lat \n lng : $lng");
+
+                            // Check if running on web
+                            if (kIsWeb) {
+                              // For web, always use Google Maps web interface
+                              mapsUri = Uri.parse(
+                                'https://www.google.com/maps/search/?api=1&query=$lat,$lng',
+                              );
+
+                              try {
+                                await launchUrl(
+                                  mapsUri,
+                                  mode:
+                                      LaunchMode
+                                          .platformDefault, // Use platformDefault for web
+                                  webOnlyWindowName:
+                                      '_blank', // Open in new tab
+                                );
+                                launched = true;
+                              } catch (e) {
+                                kLogger.error(
+                                  'Error launching maps URL on web: $e',
+                                );
+                              }
+                            } else {
+                              // Mobile platform handling (your existing code)
+                              if (Platform.isAndroid) {
+                                // Try Android's native maps app first
+                                mapsUri = Uri.parse(
+                                  'http://maps.google.com/maps?z=12&t=m&q=$lat,$lng',
+                                );
+                                if (await canLaunchUrl(mapsUri)) {
+                                  await launchUrl(
+                                    mapsUri,
+                                    mode: LaunchMode.externalApplication,
+                                  );
+                                  launched = true;
+                                }
+                              } else if (Platform.isIOS) {
+                                // Try Google Maps on iOS first
+                                mapsUri = Uri.parse(
+                                  'comgooglemaps://?center=$lat,$lng&zoom=12&q=$lat,$lng',
+                                );
+                                if (await canLaunchUrl(mapsUri)) {
+                                  await launchUrl(
+                                    mapsUri,
+                                    mode: LaunchMode.externalApplication,
+                                  );
+                                  launched = true;
+                                } else {
+                                  // Fall back to Apple Maps
+                                  mapsUri = Uri.parse(
+                                    'https://maps.apple.com/?q=${Uri.encodeFull("Location")}&sll=$lat,$lng&z=12',
+                                  );
+                                  if (await canLaunchUrl(mapsUri)) {
+                                    await launchUrl(
+                                      mapsUri,
+                                      mode: LaunchMode.externalApplication,
+                                    );
+                                    launched = true;
+                                  }
+                                }
+                              }
+
+                              // If none of the above worked, fall back to web browser
+                              if (!launched) {
+                                mapsUri = Uri.parse(
+                                  'https://www.google.com/maps/search/?api=1&query=$lat,$lng',
+                                );
+                                try {
+                                  await launchUrl(
+                                    mapsUri,
+                                    mode: LaunchMode.externalApplication,
+                                  );
+                                } catch (e) {
+                                  kLogger.error('Error launching URL: $e');
+                                }
+                              }
+                            }
+                          }
+                        },
+                        child: DesignText(
+                          text:
+                              "📍 ${((lobbyData.lobby.filter.otherFilterInfo.locationInfo!.hideLocation) && (lobbyData.lobby.filter.otherFilterInfo.locationInfo!.locationResponses.firstOrNull?.fuzzyAddress.isNotEmpty ?? false) && (lobbyData.lobby.userStatus != "MEMBER") && (lobbyData.lobby.userStatus != "ADMIN"))
+                                  ? lobbyData.lobby.filter.otherFilterInfo.locationInfo!.locationResponses.firstOrNull?.fuzzyAddress
+                                  : (lobbyData.lobby.filter.otherFilterInfo.locationInfo?.googleSearchResponses?.isNotEmpty == true)
+                                  ? lobbyData.lobby.filter.otherFilterInfo.locationInfo!.googleSearchResponses.first.description
+                                  : 'No location details available'}",
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                          color: const Color(0xFF3E79A1),
+                          maxLines: 10,
+                        ),
+                      ),
+                    ),
+                    // Space.w(width: 8.w),
+                    if (lobbyData.lobby.filter.otherFilterInfo.locationInfo !=
+                            null &&
+                        (lobbyData
+                            .lobby
+                            .filter
+                            .otherFilterInfo
+                            .locationInfo!
+                            .hideLocation) &&
+                        (lobbyData.lobby.userStatus != "MEMBER" ||
+                            lobbyData.lobby.userStatus != "ADMIN"))
+                      GestureDetector(
+                        onTap: () {
+                          showDialog(
+                            context: context,
+                            builder: (BuildContext context) {
+                              return AlertDialog(
+                                backgroundColor: Colors.white,
+                                title: const Text(
+                                  "Approximate Location Shown 🌍",
+                                ),
+                                content: const Text(
+                                  "The admin has chosen to hide the exact location. You're seeing an approximate location within a 1 km radius. Once you join the lobby, the exact location will be visible.",
+                                ),
+                                actions: <Widget>[
+                                  TextButton(
+                                    child: const Text("Got it!"),
+                                    onPressed: () {
+                                      Navigator.of(
+                                        context,
+                                      ).pop(); // Dismiss the dialog
+                                    },
+                                  ),
+                                ],
+                              );
+                            },
+                          );
+                        },
+                        child: Icon(Icons.info_outline, size: 20),
+                      ),
+                  ],
+                ),
+              ],
+
+              if (lobbyData.lobby.filter.otherFilterInfo.multipleLocations !=
+                  null) ...[
+                Space.h(height: 16),
+                DesignText(
+                  text:
+                      lobbyData
+                          .lobby
+                          .filter
+                          .otherFilterInfo
+                          .multipleLocations
+                          ?.title ??
+                      'Multiple Location',
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                  color: const Color(0xFF444444),
+                  maxLines: 10,
+                ),
+                Space.h(height: 8),
+                _buildLocationSection(lobby: lobbyData.lobby),
+              ],
+
+              Space.h(height: 8),
+              if ((lobbyData.lobby.lobbyStatus == 'PAST') &&
+                  lobbyData.lobby.userStatus == 'MEMBER' &&
+                  !lobbyData.lobby.ratingGiven) ...[
+                Container(
+                  padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  decoration: BoxDecoration(
+                    color: const Color(0x143E79A1),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        child: DesignText(
+                          text:
+                              "Tell us about your experience, so we can improve further in future.",
+                          fontSize: 12,
+                          fontWeight: FontWeight.w400,
+                          maxLines: 3,
+                          color: const Color(0xFF444444),
+                        ),
+                      ),
+                      Space.w(width: 24),
+                      OutlinedButton(
+                        onPressed: () {
+                          showDialog(
+                            context: context,
+                            builder:
+                                (context) => FeedbackWidget(
+                                  onSubmit: (emoji, rating) {
+                                    print("Selected Emoji: $emoji");
+                                    print("Selected Rating: $rating");
+                                  },
+                                  lobbyId: lobbyData.lobby.id,
+                                ),
+                          );
+                        },
+                        style: OutlinedButton.styleFrom(
+                          side: const BorderSide(color: Color(0xFFEC4B5D)),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(24),
+                          ),
+                          padding: EdgeInsets.symmetric(
+                            vertical: 12,
+                            horizontal: 24,
+                          ),
+                        ),
+                        child: DesignText(
+                          text: "Feedback",
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500,
+                          color: Color(0xFFEC4B5D),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Space.h(height: 24),
+              ],
+
+              RichTextDisplay(
+                controller: TextEditingController(
+                  text: lobbyData.lobby.description,
+                ),
+                hintText: '',
+              ),
+
+              // Space.h(height: 8.h),
+              ScrollableInfoCards(
+                cards: [
+                  InfoCard(
+                    icon: Icons.payment,
+                    title:
+                        (lobbyData.lobby.priceDetails.originalPrice > 0.0)
+                            ? "Refund Policies :"
+                            : "Pricing ",
+                    subtitle:
+                        (lobbyData.lobby.priceDetails.isRefundAllowed)
+                            ? "Up to 2 days before the lobby."
+                            : (lobbyData.lobby.priceDetails.originalPrice > 0.0)
+                            ? "refund not allowed for this lobby"
+                            : "This Lobby is Free",
+                  ),
+                  InfoCard(
+                    icon: Icons.groups,
+                    title: "Lobby Size",
+                    subtitle: "Maximum: ${lobbyData.lobby.totalMembers}",
+                  ),
+                  if (lobbyData.lobby.filter.otherFilterInfo.range != null)
+                    InfoCard(
+                      icon: Icons.cake,
+                      title:
+                          lobbyData.lobby.filter.otherFilterInfo.range?.title ??
+                          "Age Limit",
+                      subtitle:
+                          "${lobbyData.lobby.filter.otherFilterInfo.range?.min ?? 0} to ${lobbyData.lobby.filter.otherFilterInfo.range?.max ?? 0} ",
+                    ),
+                ],
+              ),
+
+              if (lobbyData.lobby.userStatus != "MEMBER" ||
+                  (lobbyData.lobby.houseDetail != null)) ...[
+                Space.h(height: 8),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      // Wrap the GestureDetector in Expanded
+                      child: GestureDetector(
+                        onTap: () async {
+                         FancyAppDownloadDialog.show(
+                            context,
+                            title: "Unlock Premium Features",
+                            message:
+                                "Get the full AroundU experience with exclusive features, enhanced performance, and more!",
+                            appStoreUrl:
+                                "https://apps.apple.com/in/app/aroundu/id6744299663",
+                            playStoreUrl:
+                                "https://play.google.com/store/apps/details?id=com.polar.aroundu",
+                            // cancelButtonText: "Maybe Later",
+                            onCancel: () {
+                              print("User chose to skip download");
+                            },
+                          );
+
+                          // if (lobbyData.lobby.houseDetail !=
+                          //     null) {
+                          //   if (lobbyData
+                          //           .lobby
+                          //           .houseDetail!
+                          //           .houseId !=
+                          //       "") {
+                          //     Get.to(
+                          //       () => HouseDetailPage(
+                          //         houseId:
+                          //             lobbyData
+                          //                 .lobby
+                          //                 .houseDetail!
+                          //                 .houseId,
+                          //       ),
+                          //     );
+                          //   }
+                          // } else {
+                          //   if (lobbyData
+                          //           .lobby
+                          //           .adminSummary
+                          //           .userId !=
+                          //       "") {
+                          //     final uid =
+                          //         await GetStorage().read(
+                          //           "userUID",
+                          //         ) ??
+                          //         '';
+                          //     Get.to(
+                          //       () =>
+                          //           (uid ==
+                          //                   lobbyData
+                          //                       .lobby
+                          //                       .adminSummary
+                          //                       .userId)
+                          //               ? ProfileDetailsFollowedScreen()
+                          //               : ProfileDetailsScreen(
+                          //                 userId:
+                          //                     lobbyData
+                          //                         .lobby
+                          //                         .adminSummary
+                          //                         .userId,
+                          //               ),
+                          //     );
+                          //   }
+                          // }
+                        },
+                        child: Row(
+                          children: [
+                            CircleAvatar(
+                              radius: 16,
+                              backgroundColor: const Color(0xFFEAEFF2),
+                              child: ClipOval(
+                                child: Image.network(
+                                  (lobbyData.lobby.houseDetail != null)
+                                      ? lobbyData
+                                          .lobby
+                                          .houseDetail!
+                                          .profilePhoto
+                                      : lobbyData
+                                          .lobby
+                                          .adminSummary
+                                          .profilePictureUrl,
+                                  fit: BoxFit.cover,
+                                  width: 32,
+                                  height: 32,
+                                  errorBuilder: (context, error, stackTrace) {
+                                    return Icon(Icons.person, size: 16);
+                                  },
+                                  loadingBuilder: (
+                                    context,
+                                    child,
+                                    loadingProgress,
+                                  ) {
+                                    if (loadingProgress == null) return child;
+                                    return Center(
+                                      child: SizedBox(
+                                        width: 32,
+                                        height: 32,
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2,
+                                          value:
+                                              loadingProgress
+                                                          .expectedTotalBytes !=
+                                                      null
+                                                  ? loadingProgress
+                                                          .cumulativeBytesLoaded /
+                                                      loadingProgress
+                                                          .expectedTotalBytes!
+                                                  : null,
+                                        ),
+                                      ),
+                                    );
+                                  },
                                 ),
                               ),
-                              if ((lobbyData.lobby.lobbyStatus == "ACTIVE" &&
-                                      lobbyData.lobby.userStatus == "ADMIN") ||
-                                  (lobbyData.lobby.lobbyStatus == "ACTIVE" &&
-                                      lobbyData.lobby.userStatus == "MEMBER"))
-                                Container(
-                                  color: Colors.white,
-                                  height: sh(0.06),
-                                  width: double.infinity,
+                            ),
+                            SizedBox(width: 8),
+                            Flexible(
+                              // Wrap RichText with Flexible
+                              child: RichText(
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                                text: TextSpan(
+                                  children: [
+                                    TextSpan(
+                                      text: 'Hosted by ',
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w600,
+                                        fontFamily: 'Poppins',
+                                        color: const Color(0xFF444444),
+                                      ),
+                                    ),
+                                    TextSpan(
+                                      text:
+                                          (lobbyData.lobby.houseDetail != null)
+                                              ? lobbyData
+                                                  .lobby
+                                                  .houseDetail!
+                                                  .name
+                                              : lobbyData
+                                                  .lobby
+                                                  .adminSummary
+                                                  .name,
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w400,
+                                        fontFamily: 'Poppins',
+                                        color: const Color(0xFF444444),
+                                      ),
+                                    ),
+                                  ],
                                 ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    if (lobbyData.lobby.userStatus == "ADMIN")
+                      SizedBox(
+                        width: 124,
+                        child: DesignButton(
+                          padding: EdgeInsets.all(12),
+                          onPress:
+                              () {
+                              //   Get.to(
+                              //   () => CoHostSelectionView(
+                              //     lobbyDetails: lobbyData,
+                              //   ),
+                              // );
+                              FancyAppDownloadDialog.show(
+                              context,
+                              title: "Unlock Premium Features",
+                              message:
+                                  "Get the full AroundU experience with exclusive features, enhanced performance, and more!",
+                              appStoreUrl:
+                                  "https://apps.apple.com/in/app/aroundu/id6744299663",
+                              playStoreUrl:
+                                  "https://play.google.com/store/apps/details?id=com.polar.aroundu",
+                              // cancelButtonText: "Maybe Later",
+                              onCancel: () {
+                                print("User chose to skip download");
+                              },
+                            );
+                              },
+                          bgColor: const Color(0x143E79A1),
+                          child: Row(
+                            children: [
+                              DesignIcon.icon(
+                                icon: Icons.person_add_outlined,
+                                color: const Color(0xFF3E79A1),
+                                size: 16,
+                              ),
+                              Space.w(width: 4),
+                              DesignText(
+                                text: "Invite Co-host",
+                                fontSize: 10,
+                                fontWeight: FontWeight.w500,
+                                color: const Color(0xFF3E79A1),
+                              ),
                             ],
                           ),
-                          Positioned(
-                            top: sh(0.11),
-                            left: 0,
-                            child: Container(
-                              padding: EdgeInsets.only(
-                                left: 16,
-                                right: 12,
-                                top: 8,
-                                bottom: 8,
+                        ),
+                      ),
+                  ],
+                ),
+              ],
+
+              Space.h(height: 24),
+              if (userInfos.isEmpty)
+                DesignText(
+                  text: "Attendee",
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: const Color(0xFF323232),
+                ),
+              lobbyData.lobby.userStatus == "MEMBER"
+                  ? SizedBox(
+                    height: 70,
+                    child: Row(
+                      children: [
+                        // Host section - Taking up 40% of space
+                        Expanded(
+                          flex: 40,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              DesignText(
+                                text: "Host",
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                                color: const Color(0xFF323232),
                               ),
-                              decoration: BoxDecoration(
-                                color:
-                                    (() {
-                                      switch (lobbyData.lobby.lobbyStatus) {
-                                        case "UPCOMING":
-                                          return Color(0xFF52D17C);
-                                        case "PAST":
-                                          return Color(0xFFF97853);
-                                        case "CLOSED":
-                                          return Color(0xFF3E79A1);
-                                        case "FULL":
-                                          return Color(0xFFF97853);
-                                        default:
-                                          return Color(0xFF52D17C);
-                                      }
-                                    })(),
-                                borderRadius: BorderRadius.horizontal(
-                                  right: Radius.circular(24),
+                              Space.h(height: 4),
+                              GestureDetector(
+                                onTap: () async {
+                                  FancyAppDownloadDialog.show(
+                                    context,
+                                    title: "Unlock Premium Features",
+                                    message:
+                                        "Get the full AroundU experience with exclusive features, enhanced performance, and more!",
+                                    appStoreUrl:
+                                        "https://apps.apple.com/in/app/aroundu/id6744299663",
+                                    playStoreUrl:
+                                        "https://play.google.com/store/apps/details?id=com.polar.aroundu",
+                                    // cancelButtonText: "Maybe Later",
+                                    onCancel: () {
+                                      print("User chose to skip download");
+                                    },
+                                  );
+
+                                  // if (lobbyData
+                                  //         .lobby
+                                  //         .houseDetail !=
+                                  //     null) {
+                                  //   if (lobbyData
+                                  //           .lobby
+                                  //           .houseDetail!
+                                  //           .houseId !=
+                                  //       "") {
+                                  //     Get.to(
+                                  //       () => HouseDetailPage(
+                                  //         houseId:
+                                  //             lobbyData
+                                  //                 .lobby
+                                  //                 .houseDetail!
+                                  //                 .houseId,
+                                  //       ),
+                                  //     );
+                                  //   }
+                                  // } else {
+                                  //   if (lobbyData
+                                  //           .lobby
+                                  //           .adminSummary
+                                  //           .userId !=
+                                  //       "") {
+                                  //     final uid =
+                                  //         await GetStorage().read(
+                                  //           "userUID",
+                                  //         ) ??
+                                  //         '';
+                                  //     Get.to(
+                                  //       () =>
+                                  //           (uid ==
+                                  //                   lobbyData
+                                  //                       .lobby
+                                  //                       .adminSummary
+                                  //                       .userId)
+                                  //               ? ProfileDetailsFollowedScreen()
+                                  //               : ProfileDetailsScreen(
+                                  //                 userId:
+                                  //                     lobbyData
+                                  //                         .lobby
+                                  //                         .adminSummary
+                                  //                         .userId,
+                                  //                 // isFriend: widget.lobbyDetail.lobby
+                                  //                 //     .adminSummary.isFriend,
+                                  //                 // isRequestSent: widget
+                                  //                 //     .lobbyDetail
+                                  //                 //     .lobby
+                                  //                 //     .adminSummary
+                                  //                 //     .requestSent,
+                                  //                 // isRequestReceived: widget
+                                  //                 //     .lobbyDetail
+                                  //                 //     .lobby
+                                  //                 //     .adminSummary
+                                  //                 //     .requestReceived,
+                                  //               ),
+                                  //     );
+                                  //   }
+                                  // }
+                                },
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    CircleAvatar(
+                                      radius: 20,
+                                      backgroundColor: const Color(0xFFEAEFF2),
+                                      child: ClipOval(
+                                        child: Image.network(
+                                          (lobbyData.lobby.houseDetail != null)
+                                              ? lobbyData
+                                                  .lobby
+                                                  .houseDetail!
+                                                  .profilePhoto
+                                              : lobbyData
+                                                  .lobby
+                                                  .adminSummary
+                                                  .profilePictureUrl,
+                                          fit: BoxFit.cover,
+                                          width: 40,
+                                          height: 40,
+                                          errorBuilder: (
+                                            context,
+                                            error,
+                                            stackTrace,
+                                          ) {
+                                            return Icon(Icons.person, size: 18);
+                                          },
+                                          loadingBuilder: (
+                                            context,
+                                            child,
+                                            loadingProgress,
+                                          ) {
+                                            if (loadingProgress == null) {
+                                              return child;
+                                            }
+                                            return Center(
+                                              child: SizedBox(
+                                                width: 24,
+                                                height: 24,
+                                                child: CircularProgressIndicator(
+                                                  strokeWidth: 2,
+                                                  value:
+                                                      loadingProgress
+                                                                  .expectedTotalBytes !=
+                                                              null
+                                                          ? loadingProgress
+                                                                  .cumulativeBytesLoaded /
+                                                              loadingProgress
+                                                                  .expectedTotalBytes!
+                                                          : null,
+                                                ),
+                                              ),
+                                            );
+                                          },
+                                        ),
+                                      ),
+                                    ),
+                                    Space.w(width: 16),
+                                    Flexible(
+                                      // Wrapped in Flexible to handle overflow
+                                      child: Column(
+                                        mainAxisSize: MainAxisSize.min,
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          DesignText(
+                                            text:
+                                                (lobbyData.lobby.houseDetail !=
+                                                        null)
+                                                    ? lobbyData
+                                                        .lobby
+                                                        .houseDetail!
+                                                        .name
+                                                    : lobbyData
+                                                        .lobby
+                                                        .adminSummary
+                                                        .userName,
+                                            fontSize: 12,
+                                            fontWeight: FontWeight.w400,
+                                            color: const Color(0xFF323232),
+                                            maxLines: 1,
+                                          ),
+                                          Space.h(height: 2),
+                                          DesignText(
+                                            text:
+                                                "Joined | ${DateFormat('MMMM yyyy').format(DateTime.fromMillisecondsSinceEpoch(lobbyData.lobby.createdDate))}",
+                                            fontSize: 8,
+                                            fontWeight: FontWeight.w400,
+                                            maxLines: 2,
+                                            color: const Color(0xFF444444),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
-                              child: Row(
+                            ],
+                          ),
+                        ),
+
+                        // Vertical Divider - Taking up 20% of space
+                        const Expanded(
+                          flex: 20,
+                          child: Center(
+                            child: VerticalDivider(
+                              color: Color(0xFFBBBCBD),
+                              thickness: 1,
+                            ),
+                          ),
+                        ),
+
+                        // Attendee section - Taking up 40% of space
+                        Expanded(
+                          flex: 40,
+                          child: GestureDetector(
+                            onTap: () {
+                              FancyAppDownloadDialog.show(
+                                context,
+                                title: "Unlock Premium Features",
+                                message:
+                                    "Get the full AroundU experience with exclusive features, enhanced performance, and more!",
+                                appStoreUrl:
+                                    "https://apps.apple.com/in/app/aroundu/id6744299663",
+                                playStoreUrl:
+                                    "https://play.google.com/store/apps/details?id=com.polar.aroundu",
+                                // cancelButtonText: "Maybe Later",
+                                onCancel: () {
+                                  print("User chose to skip download");
+                                },
+                              );
+                              // if (lobbyData.lobby.setting?.showLobbyMembers !=
+                              //         false ||
+                              //     lobbyData.lobby.userStatus == "ADMIN") {
+                              //   Get.to(
+                              //     () => AttendeeScreen(lobbyDetails: lobbyData),
+                              //   );
+                              // } else {
+                              //   Fluttertoast.showToast(
+                              //     msg:
+                              //         "The lobby host has disabled attendee view",
+                              //   );
+                              // }
+                            },
+                            child: Container(
+                              color: Colors.transparent,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  DesignIcon.custom(
-                                    icon:
-                                        (() {
-                                          switch (lobbyData.lobby.lobbyStatus) {
-                                            case "UPCOMING":
-                                              return DesignIcons.upcoming;
-                                            case "PAST":
-                                              return DesignIcons.past;
-                                            case "CLOSED":
-                                              return DesignIcons.closed;
-                                            case "FULL":
-                                              return DesignIcons.past;
-                                            default:
-                                              return DesignIcons.running;
-                                          }
-                                        })(),
-                                    color:
-                                        (lobbyData.lobby.lobbyStatus ==
-                                                'ACTIVE')
-                                            ? Colors.white
-                                            : null,
+                                  Row(
+                                    children: [
+                                      DesignText(
+                                        text: "Attendee ",
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w600,
+                                        color: const Color(0xFF323232),
+                                      ),
+                                      DesignText(
+                                        text:
+                                            "(${lobbyData.lobby.currentMembers})",
+                                        fontSize: 8,
+                                        fontWeight: FontWeight.w400,
+                                        color: const Color(0xFF444444),
+                                      ),
+                                    ],
                                   ),
-                                  SizedBox(width: 8),
-                                  DesignText(
-                                    text:
-                                        (() {
-                                          switch (lobbyData.lobby.lobbyStatus) {
-                                            case "UPCOMING":
-                                              return "Upcoming";
-                                            case "PAST":
-                                              return "Past";
-                                            case "CLOSED":
-                                              return "Closed";
-                                            case "ACTIVE":
-                                              return "Active";
-                                            case "FULL":
-                                              return "Full";
-                                            default:
-                                              return "Join Now!";
-                                          }
-                                        })(),
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w700,
-                                    color: Colors.white,
+                                  Space.h(height: 4),
+                                  Expanded(
+                                    child: SizedBox(
+                                      width:
+                                          userInfos.length >= 4
+                                              ? 0.3 * sw
+                                              : userInfos.length == 3
+                                              ? 0.24
+                                              : userInfos.length == 2
+                                              ? 0.18 * sw
+                                              : userInfos.length == 1
+                                              ? 0.12 * sw
+                                              : 0.1 * sw,
+                                      child: Stack(
+                                        clipBehavior: Clip.none,
+                                        alignment: AlignmentDirectional.center,
+                                        children: List.generate(
+                                          remainingCount > 0
+                                              ? displayAvatars.length + 1
+                                              : displayAvatars.length,
+                                          (index) {
+                                            print(
+                                              "remainingCount `$remainingCount",
+                                            );
+                                            final positionIndex =
+                                                displayAvatars.length -
+                                                1 -
+                                                index;
+
+                                            if (index ==
+                                                    displayAvatars.length &&
+                                                remainingCount > 0) {
+                                              return Positioned(
+                                                left: index * 20,
+                                                child: CircleAvatar(
+                                                  radius: 20,
+                                                  backgroundColor:
+                                                      Colors.teal[200],
+                                                  child: Text(
+                                                    '+$remainingCount',
+                                                    style: const TextStyle(
+                                                      color: Colors.white,
+                                                      fontSize: 16,
+                                                    ),
+                                                  ),
+                                                ),
+                                              );
+                                            }
+                                            final url =
+                                                displayAvatars[index]
+                                                    .profilePictureUrl;
+                                            return Positioned(
+                                              left: index * 20,
+                                              child: CircleAvatar(
+                                                radius: 20,
+                                                backgroundColor:
+                                                    avatarColors[index],
+                                                child:
+                                                    url!.isEmpty
+                                                        ? const Icon(
+                                                          Icons.person,
+                                                          color: Colors.white,
+                                                        )
+                                                        : ClipRRect(
+                                                          borderRadius:
+                                                              BorderRadius.circular(
+                                                                20,
+                                                              ),
+                                                          child: Image.network(
+                                                            url,
+                                                            width: 40,
+                                                            height: 40,
+                                                            fit: BoxFit.cover,
+                                                          ),
+                                                        ),
+                                              ),
+                                            );
+                                          },
+                                        ),
+                                      ),
+                                    ),
                                   ),
                                 ],
                               ),
                             ),
                           ),
-                          Positioned(
-                            bottom:
-                                ((lobbyData.lobby.lobbyStatus == "ACTIVE" &&
-                                            lobbyData.lobby.userStatus ==
-                                                "ADMIN") ||
-                                        (lobbyData.lobby.lobbyStatus ==
-                                                "ACTIVE" &&
-                                            lobbyData.lobby.userStatus ==
-                                                "MEMBER"))
-                                    ? sh(0.13)
-                                    : sh(0.02),
-                            left: 16,
-                            right: 16,
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Container(
-                                  padding: EdgeInsets.symmetric(
-                                    horizontal: 14,
-                                    vertical: 8,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: Color(0xFF5750E2),
-                                    borderRadius: BorderRadius.circular(24),
-                                  ),
-                                  child: DesignText(
-                                    text:
-                                        "${lobbyData.subCategory.iconUrl}    ${lobbyData.subCategory.name}",
-                                    fontSize: 10,
-                                    fontWeight: FontWeight.w400,
-                                    color: Colors.white,
-                                  ),
-                                ),
-                                if (lobbyData.lobby.lobbyStatus != "PAST" &&
-                                    lobbyData.lobby.lobbyStatus != "CLOSED")
-                                  IconButton(
-                                    style: IconButton.styleFrom(
-                                      backgroundColor: Colors.black38,
+                        ),
+                      ],
+                    ),
+                  )
+                  : SizedBox(
+                    height: 56,
+                    child: Row(
+                      mainAxisAlignment:
+                          (userInfos.length == 1)
+                              ? MainAxisAlignment.start
+                              : MainAxisAlignment
+                                  .spaceAround, // This will add space around the elements
+                      children: [
+                        // Combined stack and column in a Row
+                        userInfos.isNotEmpty
+                            ? InkWell(
+                              onTap: () {
+                                FancyAppDownloadDialog.show(
+                                  context,
+                                  title: "Unlock Premium Features",
+                                  message:
+                                      "Get the full AroundU experience with exclusive features, enhanced performance, and more!",
+                                  appStoreUrl:
+                                      "https://apps.apple.com/in/app/aroundu/id6744299663",
+                                  playStoreUrl:
+                                      "https://play.google.com/store/apps/details?id=com.polar.aroundu",
+                                  // cancelButtonText: "Maybe Later",
+                                  onCancel: () {
+                                    print("User chose to skip download");
+                                  },
+                                );
+                                // if (lobbyData.lobby.setting?.showLobbyMembers !=
+                                //         false ||
+                                //     lobbyData.lobby.userStatus == "ADMIN") {
+                                //   Get.to(
+                                //     () =>
+                                //         AttendeeScreen(lobbyDetails: lobbyData),
+                                //   );
+                                // } else {
+                                //   Fluttertoast.showToast(
+                                //     msg:
+                                //         "The lobby host has disabled attendee view",
+                                //   );
+                                // }
+                              },
+                              child: Row(
+                                children: [
+                                  // Stack of avatars
+                                  SizedBox(
+                                    width:
+                                        userInfos.length >= 4
+                                            ? 0.3 * sw
+                                            : userInfos.length == 3
+                                            ? 0.24 * sw
+                                            : userInfos.length == 2
+                                            ? 0.18 * sw
+                                            : userInfos.length == 1
+                                            ? 0.12 * sw
+                                            : 0.1 *
+                                                sw, // Adjust width as needed
+                                    child: Stack(
+                                      clipBehavior: Clip.none,
+                                      alignment: AlignmentDirectional.centerEnd,
+                                      children: List.generate(
+                                        remainingCount > 0
+                                            ? displayAvatars.length + 1
+                                            : displayAvatars.length,
+                                        (index) {
+                                          final positionIndex =
+                                              displayAvatars.length - 1 - index;
+
+                                          // Show the '+remainingCount' for more avatars
+                                          if (index == displayAvatars.length &&
+                                              remainingCount > 0) {
+                                            return Positioned(
+                                              left: index * 24,
+                                              child: CircleAvatar(
+                                                radius: 24,
+                                                backgroundColor:
+                                                    Colors.teal[200],
+                                                child: Text(
+                                                  '+$remainingCount',
+                                                  style: const TextStyle(
+                                                    color: Colors.white,
+                                                    fontSize: 16,
+                                                  ),
+                                                ),
+                                              ),
+                                            );
+                                          }
+                                          final url =
+                                              displayAvatars[index]
+                                                  .profilePictureUrl;
+                                          // Regular avatar logic
+                                          return Positioned(
+                                            left: index * 24,
+                                            child: CircleAvatar(
+                                              radius: 24,
+                                              backgroundColor:
+                                                  avatarColors[index],
+                                              child:
+                                                  url == null || url.isEmpty
+                                                      ? const Icon(
+                                                        Icons.person,
+                                                        color: Colors.white,
+                                                      )
+                                                      : ClipRRect(
+                                                        borderRadius:
+                                                            BorderRadius.circular(
+                                                              24,
+                                                            ),
+                                                        child: Image.network(
+                                                          url,
+                                                          width: 48,
+                                                          height: 48,
+                                                          fit: BoxFit.cover,
+                                                          errorBuilder: (
+                                                            context,
+                                                            error,
+                                                            stackTrace,
+                                                          ) {
+                                                            return const Icon(
+                                                              Icons.person,
+                                                              color:
+                                                                  Colors.white,
+                                                            );
+                                                          },
+                                                          loadingBuilder: (
+                                                            context,
+                                                            child,
+                                                            loadingProgress,
+                                                          ) {
+                                                            if (loadingProgress ==
+                                                                null) {
+                                                              return child;
+                                                            }
+                                                            return const Center(
+                                                              child: CircularProgressIndicator(
+                                                                color:
+                                                                    Colors
+                                                                        .white,
+                                                              ),
+                                                            );
+                                                          },
+                                                        ),
+                                                      ),
+                                            ),
+                                          );
+                                        },
+                                      ),
                                     ),
-                                    onPressed: () {},
-                                    icon: DesignIcon.icon(
-                                      icon:
-                                          (lobbyData.lobby.isPrivate)
-                                              ? Icons.lock_outline_rounded
-                                              : Icons.lock_open_outlined,
-                                      color: Color(0xFFFFFFFF),
-                                    ),
                                   ),
-                                if (lobbyData.lobby.lobbyStatus == "PAST" ||
-                                    lobbyData.lobby.lobbyStatus == "CLOSED")
-                                  Container(
-                                    padding: EdgeInsets.symmetric(
-                                      horizontal: 8,
-                                      vertical: 4,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(6),
-                                      color: Colors.white,
-                                    ),
-                                    child: Row(
-                                      children: [
-                                        DesignIcon.custom(
-                                          icon: DesignIcons.star,
-                                          color: null,
-                                          size: 14,
-                                        ),
-                                        SizedBox(width: 4),
-                                        DesignText(
-                                          text: "${lobbyData.lobby.rating}",
-                                          fontSize: 12,
-                                          fontWeight: FontWeight.w400,
-                                          color: Color(0xFF444444),
-                                        ),
-                                      ],
-                                    ),
+
+                                  SizedBox(width: 32),
+
+                                  // Column for the text
+                                  Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      DesignText(
+                                        text: "Attendee",
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w600,
+                                        color: const Color(0xFF323232),
+                                      ),
+                                      SizedBox(height: 4),
+                                      DesignText(
+                                        text:
+                                            "${lobbyData.lobby.currentMembers} ${lobbyData.lobby.currentMembers == 1 ? "person is" : "people are"} joining this lobby ",
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w400,
+                                        color: const Color(0xFF444444),
+                                      ),
+                                    ],
                                   ),
-                              ],
+                                ],
+                              ),
+                            )
+                            : DesignText(
+                              text: "No Attendees",
+                              fontSize: 12,
+                              fontWeight: FontWeight.w400,
+                              color: const Color(0xFF444444),
+                            ),
+                        if (userInfos.length == 1 &&
+                            (((lobbyData.lobby.lobbyStatus != 'PAST') &&
+                                    (lobbyData.lobby.lobbyStatus !=
+                                        'CLOSED')) ||
+                                (lobbyData.lobby.userStatus == 'MEMBER'))) ...[
+                          const Spacer(),
+                          InkWell(
+                            onTap:
+                                () {
+                                  FancyAppDownloadDialog.show(
+                                context,
+                                title: "Unlock Premium Features",
+                                message:
+                                    "Get the full AroundU experience with exclusive features, enhanced performance, and more!",
+                                appStoreUrl:
+                                    "https://apps.apple.com/in/app/aroundu/id6744299663",
+                                playStoreUrl:
+                                    "https://play.google.com/store/apps/details?id=com.polar.aroundu",
+                                // cancelButtonText: "Maybe Later",
+                                onCancel: () {
+                                  print("User chose to skip download");
+                                },
+                              );
+                                //   Get.to(
+                                //   () => AttendeeScreen(lobbyDetails: lobbyData),
+                                // );
+                                },
+                            child: DesignText(
+                              text: "View All",
+                              fontSize: 12,
+                              fontWeight: FontWeight.w500,
+                              color: const Color(0xFF3E79A1),
                             ),
                           ),
-                          if (lobbyData.lobby.userStatus == "ADMIN")
-                            Positioned(
-                              bottom: 0,
-                              child: GestureDetector(
-                                onTap: () {
-                                  Get.to(
-                                    () => OpenScanner(
-                                      lobbyId: lobbyData.lobby.id,
-                                    ),
-                                  );
-                                },
-                                child: Image.asset(
-                                  // height: 104,
-                                  width: sw(1),
-                                  'assets/images/bgQrAdmin.png',
-                                  fit: BoxFit.fill,
-                                ),
-                              ),
-                            ),
-                          if (lobbyData.lobby.userStatus == "MEMBER")
-                            Positioned(
-                              bottom: 0,
-                              child: GestureDetector(
-                                onTap: () {
-                                  Get.to(
-                                    () => ScanQrScreen(
-                                      lobbyId: lobbyData.lobby.id,
-                                      lobby: lobbyData.lobby,
-                                    ),
-                                  );
-                                },
-                                child: Image.asset(
-                                  // height: 104,
-                                  width: sw(1),
-                                  'assets/images/bgQrAttendee.png',
-                                  fit: BoxFit.fill,
-                                ),
-                              ),
-                            ),
-
-                          // Positioned(
-                          //   bottom: -40,
-                          //   child: Container(
-                          //     height: 0.1.sh,
-                          //     width: 0.9.sw,
-                          //     padding: EdgeInsets.symmetric(
-                          //         vertical: 8, horizontal: 20),
-                          //     decoration: BoxDecoration(
-                          //       color: Colors.white,
-                          //       borderRadius: BorderRadius.circular(24),
-                          //       boxShadow: const [
-                          //         BoxShadow(
-                          //           color: Color(0x143E79A1),
-                          //           spreadRadius: 0,
-                          //           blurRadius: 4,
-                          //           offset: Offset(0, 4),
-                          //         ),
-                          //       ],
-                          //     ),
-                          //     child: widget.lobbyDetail.lobby.userStatus ==
-                          //             "MEMBER"
-                          //         ? GestureDetector(
-                          //             onTap: () => Get.to(() => ScanQrScreen()),
-                          //             child: Row(
-                          //               mainAxisAlignment:
-                          //                   MainAxisAlignment.spaceBetween,
-                          //               children: [
-                          //                 Column(
-                          //                   mainAxisSize: MainAxisSize.min,
-                          //                   mainAxisAlignment:
-                          //                       MainAxisAlignment.center,
-                          //                   crossAxisAlignment:
-                          //                       CrossAxisAlignment.start,
-                          //                   children: [
-                          //                     DesignText(
-                          //                       text: "Attendee QR Code ",
-                          //                       fontSize: 14,
-                          //                       fontWeight: FontWeight.w600,
-                          //                       color: const Color(0xFF323232),
-                          //                     ),
-                          //                     SizedBox(height: 4),
-                          //                     DesignText(
-                          //                       text:
-                          //                           "Show QR Code at the time of Entrance",
-                          //                       fontSize: 12,
-                          //                       fontWeight: FontWeight.w400,
-                          //                       color: const Color(0xFF444444),
-                          //                     ),
-                          //                   ],
-                          //                 ),
-                          //                 CircleAvatar(
-                          //                   radius: 24,
-                          //                   backgroundColor:
-                          //                       const Color(0x143E79A1),
-                          //                   child: DesignIcon.custom(
-                          //                     icon: DesignIcons.qr,
-                          //                     size: 24,
-                          //                     color: const Color(0xFF323232),
-                          //                   ),
-                          //                 ),
-                          //               ],
-                          //             ),
-                          //           )
-                          //         : Row(
-                          //             mainAxisSize: MainAxisSize.min,
-                          //             mainAxisAlignment:
-                          //                 MainAxisAlignment.spaceBetween,
-                          //             children: [
-                          //               GestureDetector(
-                          //                 onTap: () {
-                          //                   if (widget.lobbyDetail.lobby
-                          //                           .adminSummary.userId !=
-                          //                       "") {
-                          //                     Get.to(
-                          //                       () => PublicProfileView(
-                          //                         userId: widget
-                          //                             .lobbyDetail
-                          //                             .lobby
-                          //                             .adminSummary
-                          //                             .userId,
-                          //                         // isFriend: widget.lobbyDetail.lobby
-                          //                         //     .adminSummary.isFriend,
-                          //                         // isRequestSent: widget.lobbyDetail.lobby
-                          //                         //     .adminSummary.requestSent,
-                          //                         // isRequestReceived: widget.lobbyDetail
-                          //                         //     .lobby.adminSummary.requestReceived,
-                          //                       ),
-                          //                     );
-                          //                   }
-                          //                 },
-                          //                 child: Row(
-                          //                   mainAxisSize: MainAxisSize.min,
-                          //                   children: [
-                          //                     CircleAvatar(
-                          //                       radius: 28,
-                          //                       backgroundColor:
-                          //                           const Color(0xFFEAEFF2),
-                          //                       child: ClipOval(
-                          //                         child: Image.network(
-                          //                           widget
-                          //                               .lobbyDetail
-                          //                               .lobby
-                          //                               .adminSummary
-                          //                               .profilePicture,
-                          //                           fit: BoxFit.cover,
-                          //                           width: 48
-                          //                               , // diameter = 2 * radius
-                          //                           height: 48,
-                          //                           errorBuilder: (context,
-                          //                               error, stackTrace) {
-                          //                             return Icon(
-                          //                               Icons.person,
-                          //                               size: 24,
-                          //                             );
-                          //                           },
-                          //                           loadingBuilder: (context,
-                          //                               child,
-                          //                               loadingProgress) {
-                          //                             if (loadingProgress ==
-                          //                                 null) {
-                          //                               return child;
-                          //                             }
-                          //                             return Center(
-                          //                               child: SizedBox(
-                          //                                 width: 24,
-                          //                                 height: 24,
-                          //                                 child:
-                          //                                     CircularProgressIndicator(
-                          //                                   strokeWidth: 2,
-                          //                                   value: loadingProgress
-                          //                                               .expectedTotalBytes !=
-                          //                                           null
-                          //                                       ? loadingProgress
-                          //                                               .cumulativeBytesLoaded /
-                          //                                           loadingProgress
-                          //                                               .expectedTotalBytes!
-                          //                                       : null,
-                          //                                 ),
-                          //                               ),
-                          //                             );
-                          //                           },
-                          //                         ),
-                          //                       ),
-                          //                     ),
-                          //                     SizedBox(width: 16),
-                          //                     Column(
-                          //                       mainAxisSize: MainAxisSize.min,
-                          //                       mainAxisAlignment:
-                          //                           MainAxisAlignment.center,
-                          //                       crossAxisAlignment:
-                          //                           CrossAxisAlignment.start,
-                          //                       children: [
-                          //                         DesignText(
-                          //                           text: "Hosted by",
-                          //                           fontSize: 14,
-                          //                           fontWeight: FontWeight.w600,
-                          //                           color:
-                          //                               const Color(0xFF323232),
-                          //                         ),
-                          //                         SizedBox(height: 4),
-                          //                         DesignText(
-                          //                           text: widget
-                          //                               .lobbyDetail
-                          //                               .lobby
-                          //                               .adminSummary
-                          //                               .userName,
-                          //                           fontSize: 12,
-                          //                           fontWeight: FontWeight.w400,
-                          //                           color:
-                          //                               const Color(0xFF323232),
-                          //                         ),
-                          //                       ],
-                          //                     ),
-                          //                   ],
-                          //                 ),
-                          //               ),
-                          //               if (widget
-                          //                       .lobbyDetail.lobby.userStatus ==
-                          //                   "ADMIN")
-                          //                 IconButton(
-                          //                   onPressed: () {
-                          //                     scaffoldKey.currentState
-                          //                         ?.openEndDrawer();
-                          //                   },
-                          //                   icon: DesignIcon.icon(
-                          //                     icon: Icons.more_vert_rounded,
-                          //                   ),
-                          //                 ),
-                          //             ],
-                          //           ),
-                          //   ),
-                          // ),
                         ],
+                      ],
+                    ),
+                  ),
+              Space.h(height: 34),
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 0.0,
+                  vertical: 5,
+                ),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(16.0),
+                    border: Border.all(color: Colors.grey.shade300, width: 1),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: List.generate(
+                      lobbyData.lobby.filter.filterInfoList.length,
+                      (index) {
+                        final item =
+                            lobbyData.lobby.filter.filterInfoList[index];
+
+                        // Format the options list as a string
+                        String formattedOptions = item.options
+                            .take(3)
+                            .join(', ');
+                        if (item.options.length > 3) {
+                          formattedOptions += '...';
+                        }
+
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            buildDetailCard(
+                              context,
+                              icon: item.iconUrl ?? "",
+                              title: item.title,
+                              subtitle: formattedOptions,
+                            ),
+                            if (index !=
+                                (lobbyData.lobby.filter.filterInfoList.length -
+                                    1))
+                              Divider(color: Colors.grey.shade300, height: 2.0),
+                          ],
+                        );
+                      },
+                    ),
+                  ),
+                ),
+              ),
+              Space.h(height: 16),
+              ResponsiveAppDownloadCard(
+                appStoreUrl:
+                    "https://apps.apple.com/in/app/aroundu/id6744299663",
+                playStoreUrl:
+                    "https://play.google.com/store/apps/details?id=com.polar.aroundu",
+                onClose: () {
+                  FancyAppDownloadDialog.show(
+                    context,
+                    title: "Unlock Premium Features",
+                    message:
+                        "Get the full AroundU experience with exclusive features, enhanced performance, and more!",
+                    appStoreUrl:
+                        "https://apps.apple.com/in/app/aroundu/id6744299663",
+                    playStoreUrl:
+                        "https://play.google.com/store/apps/details?id=com.polar.aroundu",
+                    // cancelButtonText: "Maybe Later",
+                    onCancel: () {
+                      print("User chose to skip download");
+                    },
+                  );
+                  // Get.to(()=> AppLandingPage());
+                },
+              ),
+              // Row(
+              //   children: [
+              //     if (lobbyData.lobby.content == null &&
+              //         lobbyData.lobby.userStatus == "ADMIN")
+              //       DesignText(
+              //         text: lobbyData.lobby.content?.title ?? "Add Guidelines",
+              //         fontSize: 18,
+              //         fontWeight: FontWeight.w600,
+              //       )
+              //     else if (lobbyData.lobby.content != null)
+              //       DesignText(
+              //         text: lobbyData.lobby.content?.title ?? "Guidelines",
+              //         fontSize: 18,
+              //         fontWeight: FontWeight.w600,
+              //       ),
+              //     const Spacer(),
+              //     if (lobbyData.lobby.userStatus == "ADMIN")
+              //       InkWell(
+              //         onTap: () {
+              //           Navigator.push(
+              //             context,
+              //             MaterialPageRoute(
+              //               builder:
+              //                   (_) => NewMarkdownEditorPage(
+              //                     lobbyId: lobbyData.lobby.id,
+              //                     initialTitle:
+              //                         lobbyData.lobby.content?.title ?? '',
+              //                     initialBody:
+              //                         lobbyData.lobby.content?.body ?? '',
+              //                     isHost: true, // set false for viewers
+              //                   ),
+              //             ),
+              //           );
+              //         },
+              //         child: DesignText(
+              //           text:
+              //               (lobbyData.lobby.content != null) ? "Edit" : "Add",
+              //           fontSize: 12,
+              //           fontWeight: FontWeight.w500,
+              //           color: const Color(0xFF3E79A1),
+              //         ),
+              //       ),
+              //   ],
+              // ),
+              // if (lobbyData.lobby.content != null) ...[
+              //   Space.h(height: 16),
+              //   NewLobbyContentSection(content: lobbyData.lobby.content!),
+              // ],
+
+              // Space.h(height: 16),
+              // FeaturedConversation(
+              //   lobby: lobbyData.lobby,
+              //   lobbyDetail: lobbyData,
+              // ),
+
+              
+              // Space.h(height: 16),
+            ],
+          ),
+        ),
+        const LobbiesList(
+          lobbyType: LobbyType.recommendations,
+          title: "Recommended Lobbies",
+        ),
+        Space.h(height: 34),
+        // LobbyHousesList(lobbyId: lobbyData.lobby.id),
+        // Space.h(height: 16.h),
+      ],
+    );
+  }
+
+  Widget desktopLayout({
+    required LobbyDetails lobbyData,
+    required double sw,
+    required double sh,
+  }) {
+    List<UserSummary> userInfos = <UserSummary>[];
+    List<UserSummary> displayAvatars = <UserSummary>[];
+    int remainingCount = 0;
+    if (lobbyData != null) {
+      isSaved = lobbyData.lobby.isSaved;
+      userInfos = lobbyData.lobby.userSummaries ?? [];
+
+      displayAvatars = userInfos.take(3).toList();
+      remainingCount = lobbyData.lobby.currentMembers - displayAvatars.length;
+      print(lobbyData.lobby.userStatus);
+    }
+    return Padding(
+      padding: const EdgeInsets.all(24.0),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          DesignText(
+            text: lobbyData.lobby.title,
+            fontSize: 20,
+            fontWeight: FontWeight.w600,
+            maxLines: 2,
+            color: const Color(0xFF444444),
+          ),
+          SizedBox(height: 8),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                // Wrap the GestureDetector in Expanded
+                child: GestureDetector(
+                  onTap: () async {
+                   FancyAppDownloadDialog.show(
+                      context,
+                      title: "Unlock Premium Features",
+                      message:
+                          "Get the full AroundU experience with exclusive features, enhanced performance, and more!",
+                      appStoreUrl:
+                          "https://apps.apple.com/in/app/aroundu/id6744299663",
+                      playStoreUrl:
+                          "https://play.google.com/store/apps/details?id=com.polar.aroundu",
+                      // cancelButtonText: "Maybe Later",
+                      onCancel: () {
+                        print("User chose to skip download");
+                      },
+                    );
+
+                    // if (lobbyData.lobby.houseDetail !=
+                    //     null) {
+                    //   if (lobbyData
+                    //           .lobby
+                    //           .houseDetail!
+                    //           .houseId !=
+                    //       "") {
+                    //     Get.to(
+                    //       () => HouseDetailPage(
+                    //         houseId:
+                    //             lobbyData
+                    //                 .lobby
+                    //                 .houseDetail!
+                    //                 .houseId,
+                    //       ),
+                    //     );
+                    //   }
+                    // } else {
+                    //   if (lobbyData
+                    //           .lobby
+                    //           .adminSummary
+                    //           .userId !=
+                    //       "") {
+                    //     final uid =
+                    //         await GetStorage().read(
+                    //           "userUID",
+                    //         ) ??
+                    //         '';
+                    //     Get.to(
+                    //       () =>
+                    //           (uid ==
+                    //                   lobbyData
+                    //                       .lobby
+                    //                       .adminSummary
+                    //                       .userId)
+                    //               ? ProfileDetailsFollowedScreen()
+                    //               : ProfileDetailsScreen(
+                    //                 userId:
+                    //                     lobbyData
+                    //                         .lobby
+                    //                         .adminSummary
+                    //                         .userId,
+                    //               ),
+                    //     );
+                    //   }
+                    // }
+                  },
+                  child: Row(
+                    children: [
+                      CircleAvatar(
+                        radius: 16,
+                        backgroundColor: const Color(0xFFEAEFF2),
+                        child: ClipOval(
+                          child: Image.network(
+                            (lobbyData.lobby.houseDetail != null)
+                                ? lobbyData.lobby.houseDetail!.profilePhoto
+                                : lobbyData
+                                    .lobby
+                                    .adminSummary
+                                    .profilePictureUrl,
+                            fit: BoxFit.cover,
+                            width: 32,
+                            height: 32,
+                            errorBuilder: (context, error, stackTrace) {
+                              return Icon(Icons.person, size: 16);
+                            },
+                            loadingBuilder: (context, child, loadingProgress) {
+                              if (loadingProgress == null) return child;
+                              return Center(
+                                child: SizedBox(
+                                  width: 32,
+                                  height: 32,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    value:
+                                        loadingProgress.expectedTotalBytes !=
+                                                null
+                                            ? loadingProgress
+                                                    .cumulativeBytesLoaded /
+                                                loadingProgress
+                                                    .expectedTotalBytes!
+                                            : null,
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                        ),
                       ),
+                      SizedBox(width: 8),
+                      Flexible(
+                        // Wrap RichText with Flexible
+                        child: RichText(
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          text: TextSpan(
+                            children: [
+                              TextSpan(
+                                text: 'Hosted by ',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
+                                  fontFamily: 'Poppins',
+                                  color: const Color(0xFF444444),
+                                ),
+                              ),
+                              TextSpan(
+                                text:
+                                    (lobbyData.lobby.houseDetail != null)
+                                        ? lobbyData.lobby.houseDetail!.name
+                                        : lobbyData.lobby.adminSummary.name,
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w400,
+                                  fontFamily: 'Poppins',
+                                  color: const Color(0xFF444444),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              // if (lobbyData.lobby.userStatus == "ADMIN")
+              //   SizedBox(
+              //     width: 124,
+              //     child: DesignButton(
+              //       padding: EdgeInsets.all(12),
+              //       onPress:
+              //           () => Get.to(
+              //             () => CoHostSelectionView(lobbyDetails: lobbyData),
+              //           ),
+              //       bgColor: const Color(0x143E79A1),
+              //       child: Row(
+              //         children: [
+              //           DesignIcon.icon(
+              //             icon: Icons.person_add_outlined,
+              //             color: const Color(0xFF3E79A1),
+              //             size: 16,
+              //           ),
+              //           Space.w(width: 4),
+              //           DesignText(
+              //             text: "Invite Co-host",
+              //             fontSize: 10,
+              //             fontWeight: FontWeight.w500,
+              //             color: const Color(0xFF3E79A1),
+              //           ),
+              //         ],
+              //       ),
+              //     ),
+              //   ),
+            ],
+          ),
+
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                flex: 3,
+                child: Padding(
+                  padding: EdgeInsets.only(
+                    // left: 16,
+                    top: 16,
+                    bottom: 16,
+                    right: 8,
+                  ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      ConstrainedBox(
+                        constraints: BoxConstraints(maxHeight: 0.45 * sh),
+                        child: Stack(
+                          children: [
+                            MediaGallery.fromUrls(
+                              lobbyData.lobby.mediaUrls.isNotEmpty
+                                  ? lobbyData.lobby.mediaUrls
+                                  : [
+                                    "https://media.istockphoto.com/id/1329350253/vector/image-vector-simple-mountain-landscape-photo-adding-photos-to-the-album.jpg?s=612x612&w=0&k=20&c=3iXykf5ZQI2eBo0DaQ7W-e_8E5rhFEammFqO9XCisnI=",
+                                  ],
+                            ),
+                            Positioned(
+                              top: 0.1 * sh,
+                              left: 0,
+                              child: Container(
+                                padding: EdgeInsets.only(
+                                  left: 16,
+                                  right: 12,
+                                  top: 8,
+                                  bottom: 8,
+                                ),
+                                decoration: BoxDecoration(
+                                  color:
+                                      (() {
+                                        switch (lobbyData.lobby.lobbyStatus) {
+                                          case "UPCOMING":
+                                            return Color(0xFF52D17C);
+                                          case "PAST":
+                                            return Color(0xFFF97853);
+                                          case "CLOSED":
+                                            return Color(0xFF3E79A1);
+                                          case "FULL":
+                                            return Color(0xFFF97853);
+                                          default:
+                                            return Color(0xFF52D17C);
+                                        }
+                                      })(),
+                                  borderRadius: BorderRadius.horizontal(
+                                    right: Radius.circular(24),
+                                  ),
+                                ),
+                                child: Row(
+                                  children: [
+                                    DesignIcon.custom(
+                                      icon:
+                                          (() {
+                                            switch (lobbyData
+                                                .lobby
+                                                .lobbyStatus) {
+                                              case "UPCOMING":
+                                                return DesignIcons.upcoming;
+                                              case "PAST":
+                                                return DesignIcons.past;
+                                              case "CLOSED":
+                                                return DesignIcons.closed;
+                                              case "FULL":
+                                                return DesignIcons.past;
+                                              default:
+                                                return DesignIcons.running;
+                                            }
+                                          })(),
+                                      color:
+                                          (lobbyData.lobby.lobbyStatus ==
+                                                  'ACTIVE')
+                                              ? Colors.white
+                                              : null,
+                                    ),
+                                    Space.w(width: 8),
+                                    DesignText(
+                                      text:
+                                          (() {
+                                            switch (lobbyData
+                                                .lobby
+                                                .lobbyStatus) {
+                                              case "UPCOMING":
+                                                return "Upcoming";
+                                              case "PAST":
+                                                return "Past";
+                                              case "CLOSED":
+                                                return "Closed";
+                                              case "ACTIVE":
+                                                return "Active";
+                                              case "FULL":
+                                                return "Full";
+                                              default:
+                                                return "Join Now!";
+                                            }
+                                          })(),
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w700,
+                                      color: Colors.white,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                            Positioned(
+                              bottom: 0.02 * sh,
+                              left: 16,
+                              right: 16,
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Container(
+                                    padding: EdgeInsets.symmetric(
+                                      horizontal: 14,
+                                      vertical: 8,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: Color(0xFF5750E2),
+                                      borderRadius: BorderRadius.circular(24),
+                                    ),
+                                    child: DesignText(
+                                      text:
+                                          "${lobbyData.subCategory.iconUrl}    ${lobbyData.subCategory.name}",
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.w400,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                  if (lobbyData.lobby.lobbyStatus != "PAST" &&
+                                      lobbyData.lobby.lobbyStatus != "CLOSED")
+                                    IconButton(
+                                      style: IconButton.styleFrom(
+                                        backgroundColor: Colors.black38,
+                                      ),
+                                      onPressed: () {},
+                                      icon: DesignIcon.icon(
+                                        icon:
+                                            (lobbyData.lobby.isPrivate)
+                                                ? Icons.lock_outline_rounded
+                                                : Icons.lock_open_outlined,
+                                        color: Color(0xFFFFFFFF),
+                                      ),
+                                    ),
+                                  if (lobbyData.lobby.lobbyStatus == "PAST" ||
+                                      lobbyData.lobby.lobbyStatus == "CLOSED")
+                                    Container(
+                                      padding: EdgeInsets.symmetric(
+                                        horizontal: 8,
+                                        vertical: 4,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(6),
+                                        color: Colors.white,
+                                      ),
+                                      child: Row(
+                                        children: [
+                                          DesignIcon.custom(
+                                            icon: DesignIcons.star,
+                                            color: null,
+                                            size: 14,
+                                          ),
+                                          Space.w(width: 4),
+                                          DesignText(
+                                            text:
+                                                "${lobbyData.lobby.rating.average} (${lobbyData.lobby.rating.count})",
+                                            fontSize: 12,
+                                            fontWeight: FontWeight.w400,
+                                            color: Color(0xFF444444),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      SizedBox(height: 16),
+                      RichTextDisplay(
+                        controller: TextEditingController(
+                          text: lobbyData.lobby.description,
+                        ),
+                        hintText: '',
+                        maxHeight: 0.4 * sh,
+                      ),
+                      SizedBox(height: 16),
+                      GestureDetector(
+                        onTap: (){
+                          FancyAppDownloadDialog.show(
+                            context,
+                            title: "Unlock Premium Features",
+                            message:
+                                "Get the full AroundU experience with exclusive features, enhanced performance, and more!",
+                            appStoreUrl:
+                                "https://apps.apple.com/in/app/aroundu/id6744299663",
+                            playStoreUrl:
+                                "https://play.google.com/store/apps/details?id=com.polar.aroundu",
+                            // cancelButtonText: "Maybe Later",
+                            onCancel: () {
+                              print("User chose to skip download");
+                            },
+                          );
+                        },
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: Color(0xFFF9F9F9),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          padding: EdgeInsets.all(12),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: [
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  DesignText(
+                                    text:
+                                        "Attendees (${lobbyData.lobby.currentMembers})",
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w600,
+                                    color: const Color(0xFF323232),
+                                  ),
+                                  DesignText(
+                                    text: "View all",
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w500,
+                                    color: const Color(0xFF3E79A1),
+                                  ),
+                                ],
+                              ),
+                              Wrap(
+                                spacing: 8,
+                                runSpacing: 8,
+                                children:
+                                    displayAvatars.take(3).map((user) {
+                                      return ConstrainedBox(
+                                        constraints: BoxConstraints(
+                                          minWidth: min(0.12 * sw, 140),
+                                          maxWidth: max(0.12 * sw, 100),
+                                          minHeight: min(0.16 * sh, 140),
+                                          maxHeight: max(0.16 * sh, 140),
+                                        ),
+                                        child: Card(
+                                          color: Colors.white,
+                                          child: Padding(
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 24.0,
+                                              vertical: 12.0,
+                                            ),
+                                            child: Column(
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: [
+                                                CircleAvatar(
+                                                  radius: 24,
+                                                  backgroundColor: const Color(
+                                                    0xFFEAEFF2,
+                                                  ),
+                                                  backgroundImage:
+                                                      user
+                                                              .profilePictureUrl
+                                                              .isNotEmpty
+                                                          ? NetworkImage(
+                                                            user.profilePictureUrl,
+                                                          )
+                                                          : null,
+                                                  child:
+                                                      user
+                                                              .profilePictureUrl
+                                                              .isEmpty
+                                                          ? Icon(
+                                                            Icons.person,
+                                                            size: 24,
+                                                          )
+                                                          : null,
+                                                ),
+                                                SizedBox(height: 4),
+                                                Text(
+                                                  user.name,
+                                                  style: TextStyle(fontSize: 12),
+                                                  textAlign: TextAlign.center,
+                                                  maxLines: 2,
+                                                  overflow: TextOverflow.ellipsis,
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ),
+                                      );
+                                    }).toList(),
+                              ),
+                              if (remainingCount > 0)
+                                Padding(
+                                  padding: EdgeInsets.only(top: 8),
+                                  child: Text(
+                                    "+$remainingCount more attendees",
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      color: Color(0xFF666666),
+                                    ),
+                                  ),
+                                ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      SizedBox(height: 16),
                       Padding(
-                        padding: DesignUtils.scaffoldPadding,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 0.0,
+                          vertical: 5,
+                        ),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(16.0),
+                            border: Border.all(
+                              color: Colors.grey.shade300,
+                              width: 1,
+                            ),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: List.generate(
+                              lobbyData.lobby.filter.filterInfoList.length,
+                              (index) {
+                                final item =
+                                    lobbyData
+                                        .lobby
+                                        .filter
+                                        .filterInfoList[index];
+
+                                // Format the options list as a string
+                                String formattedOptions = item.options
+                                    .take(3)
+                                    .join(', ');
+                                if (item.options.length > 3) {
+                                  formattedOptions += '...';
+                                }
+
+                                return Column(
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment.stretch,
+                                  children: [
+                                    buildDetailCard(
+                                      context,
+                                      icon: item.iconUrl ?? "",
+                                      title: item.title,
+                                      subtitle: formattedOptions,
+                                    ),
+                                    if (index !=
+                                        (lobbyData
+                                                .lobby
+                                                .filter
+                                                .filterInfoList
+                                                .length -
+                                            1))
+                                      Divider(
+                                        color: Colors.grey.shade300,
+                                        height: 2.0,
+                                      ),
+                                  ],
+                                );
+                              },
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              Expanded(
+                flex: 2,
+                child: Padding(
+                  padding: EdgeInsets.only(
+                    // right: 16,
+                    top: 16,
+                    bottom: 16,
+                    left: 8,
+                  ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      (() {
+                        String combinedStatus = lobbyData.lobby.userStatus;
+
+                        switch (lobbyData.lobby.lobbyStatus) {
+                          case "PAST":
+                            combinedStatus =
+                                "${lobbyData.lobby.userStatus}_${lobbyData.lobby.lobbyStatus}";
+                          case "UPCOMING":
+                          case "CLOSED":
+                            combinedStatus =
+                                "${lobbyData.lobby.userStatus}_${lobbyData.lobby.lobbyStatus}";
+
+                          default: // ACTIVE
+                        }
+
+                        switch (combinedStatus) {
+                          case "MEMBER":
+                            return SizedBox.shrink();
+                          case "ADMIN_PAST":
+                            return SizedBox.shrink();
+                          case "ADMIN":
+                            if (lobbyData.lobby.priceDetails.originalPrice >
+                                0.0) {
+                              return Column(
+                                children: [
+                                  GestureDetector(
+                                    onTap: () {
+                                      FancyAppDownloadDialog.show(
+                                        context,
+                                        title: "Unlock Premium Features",
+                                        message:
+                                            "Get the full AroundU experience with exclusive features, enhanced performance, and more!",
+                                        appStoreUrl:
+                                            "https://apps.apple.com/in/app/aroundu/id6744299663",
+                                        playStoreUrl:
+                                            "https://play.google.com/store/apps/details?id=com.polar.aroundu",
+                                        // cancelButtonText: "Maybe Later",
+                                        onCancel: () {
+                                          print("User chose to skip download");
+                                        },
+                                      );
+
+                                      //   Get.to(
+                                      //   () => EditOfferScreen(
+                                      //     lobbyId: lobbyData.lobby.id,
+                                      //   ),
+                                      // );
+                                    },
+                                    child: const CustomOfferCard(
+                                      boldText: "Add Custom Offers",
+                                      normalText:
+                                          "to attract more attendees to your lobby now.",
+                                    ),
+                                  ),
+                                  Space.h(height: 24),
+                                ],
+                              );
+                            } else {
+                              return SizedBox.shrink();
+                            }
+                          case "VISITOR_PAST":
+                            return SizedBox.shrink();
+                          default:
+                            return OfferSwiper(lobbyId: lobbyData.lobby.id);
+                        }
+                      })(),
+
+                      (() {
+                        String combinedStatus = lobbyData.lobby.userStatus;
+
+                        switch (lobbyData.lobby.lobbyStatus) {
+                          case "PAST":
+                            combinedStatus =
+                                "${lobbyData.lobby.userStatus}_${lobbyData.lobby.lobbyStatus}";
+                          case "UPCOMING":
+                          case "CLOSED":
+                            combinedStatus =
+                                "${lobbyData.lobby.userStatus}_${lobbyData.lobby.lobbyStatus}";
+
+                          default: // ACTIVE
+                        }
+
+                        switch (combinedStatus) {
+                          case "MEMBER":
+                            return SizedBox.shrink();
+                          case "ADMIN_PAST":
+                            return SizedBox.shrink();
+                          case "ADMIN":
+                            if (lobbyData.lobby.priceDetails.originalPrice >
+                                0.0) {
+                              return Column(
+                                children: [
+                                  GestureDetector(
+                                    onTap: () async {
+                                      FancyAppDownloadDialog.show(
+                                        context,
+                                        title: "Unlock Premium Features",
+                                        message:
+                                            "Get the full AroundU experience with exclusive features, enhanced performance, and more!",
+                                        appStoreUrl:
+                                            "https://apps.apple.com/in/app/aroundu/id6744299663",
+                                        playStoreUrl:
+                                            "https://play.google.com/store/apps/details?id=com.polar.aroundu",
+                                        // cancelButtonText: "Maybe Later",
+                                        onCancel: () {
+                                          print("User chose to skip download");
+                                        },
+                                      );
+                                      // await Get.to(
+                                      //   () => AddTierPricingPage(
+                                      //     lobbyDetail: lobbyData,
+                                      //     lobbyId: lobbyData.lobby.id,
+                                      //   ),
+                                      // );
+
+                                      // ref
+                                      //     .read(
+                                      //       lobbyDetailsProvider(
+                                      //         lobbyData.lobby.id,
+                                      //       ).notifier,
+                                      //     )
+                                      //     .reset();
+                                      // await ref
+                                      //     .read(
+                                      //       lobbyDetailsProvider(
+                                      //         lobbyData.lobby.id,
+                                      //       ).notifier,
+                                      //     )
+                                      //     .fetchLobbyDetails(
+                                      //       lobbyData.lobby.id,
+                                      //     );
+                                      
+                                    },
+                                    child: const CustomOfferCard(
+                                      boldText: "Add tier pricing ",
+                                      normalText: "to your lobby",
+                                    ),
+                                  ),
+                                  Space.h(height: 24),
+                                ],
+                              );
+                            } else {
+                              return SizedBox.shrink();
+                            }
+                          default:
+                            return SizedBox.shrink();
+                        }
+                      })(),
+
+                      Container(
+                        decoration: BoxDecoration(
+                          color: Color(0xFFF9F9F9),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        padding: EdgeInsets.all(24),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            // SizedBox(height: 24),
-                            // const OfferSwiper(
-                            //   offers: [
-                            //     "  50% OFF for new users only !",
-                            //     "  ₹100 cashback on 1st booking",
-                            //     "  Exclusive deals for Premium members",
-                            //   ],
-                            // ),
-                            // SizedBox(height: 24),
-                            // const CustomOfferCard(
-                            //   boldText: "Add Custom Offers",
-                            //   normalText:
-                            //       "to attract more attendees to your lobby now.",
-                            // ),
-                            (() {
-                              String combinedStatus =
-                                  lobbyData.lobby.userStatus;
-
-                              switch (lobbyData.lobby.lobbyStatus) {
-                                case "PAST":
-                                  combinedStatus =
-                                      "${lobbyData.lobby.userStatus}_${lobbyData.lobby.lobbyStatus}";
-                                case "UPCOMING":
-                                case "CLOSED":
-                                  combinedStatus =
-                                      "${lobbyData.lobby.userStatus}_${lobbyData.lobby.lobbyStatus}";
-
-                                default: // ACTIVE
-                              }
-
-                              switch (combinedStatus) {
-                                case "MEMBER":
-                                  return SizedBox.shrink();
-                                case "ADMIN_PAST":
-                                  return SizedBox.shrink();
-                                case "ADMIN":
-                                  if (lobbyData.lobby.priceDetails.price >
-                                      0.0) {
-                                    return Column(
-                                      children: [
-                                        GestureDetector(
-                                          onTap:
-                                              () => Get.to(
-                                                () => EditOfferScreen(
-                                                  lobbyId: lobbyData.lobby.id,
-                                                ),
-                                              ),
-                                          child: const CustomOfferCard(
-                                            boldText: "Add Custom Offers",
-                                            normalText:
-                                                "to attract more attendees to your lobby now.",
-                                          ),
-                                        ),
-                                        SizedBox(height: 24),
-                                      ],
-                                    );
-                                  } else {
-                                    return SizedBox.shrink();
-                                  }
-                                case "VISITOR_PAST":
-                                  return SizedBox.shrink();
-                                default:
-                                  return OfferSwiper(
-                                    lobbyId: lobbyData.lobby.id,
-                                  );
-                              }
-                            })(),
-
-                            (() {
-                              String combinedStatus =
-                                  lobbyData.lobby.userStatus;
-
-                              switch (lobbyData.lobby.lobbyStatus) {
-                                case "PAST":
-                                  combinedStatus =
-                                      "${lobbyData.lobby.userStatus}_${lobbyData.lobby.lobbyStatus}";
-                                case "UPCOMING":
-                                case "CLOSED":
-                                  combinedStatus =
-                                      "${lobbyData.lobby.userStatus}_${lobbyData.lobby.lobbyStatus}";
-
-                                default: // ACTIVE
-                              }
-
-                              switch (combinedStatus) {
-                                case "MEMBER":
-                                  return SizedBox.shrink();
-                                case "ADMIN_PAST":
-                                  return SizedBox.shrink();
-                                case "ADMIN":
-                                  if (lobbyData.lobby.priceDetails.price >
-                                      0.0) {
-                                    return Column(
-                                      children: [
-                                        GestureDetector(
-                                          onTap: () async {
-                                            await Get.to(
-                                              () => AddTierPricingPage(
-                                                lobbyDetail: lobbyData,
-                                                lobbyId: lobbyData.lobby.id,
-                                              ),
-                                            );
-
-                                            ref
-                                                .read(
-                                                  lobbyDetailsProvider(
-                                                    lobbyData.lobby.id,
-                                                  ).notifier,
-                                                )
-                                                .reset();
-                                            await ref
-                                                .read(
-                                                  lobbyDetailsProvider(
-                                                    lobbyData.lobby.id,
-                                                  ).notifier,
-                                                )
-                                                .fetchLobbyDetails(
-                                                  lobbyData.lobby.id,
-                                                );
-                                          },
-                                          child: const CustomOfferCard(
-                                            boldText: "Add tier pricing ",
-                                            normalText: "to your lobby",
-                                          ),
-                                        ),
-                                        SizedBox(height: 24),
-                                      ],
-                                    );
-                                  } else {
-                                    return SizedBox.shrink();
-                                  }
-                                default:
-                                  return SizedBox.shrink();
-                              }
-                            })(),
-
-                            DesignText(
-                              text: lobbyData.lobby.title,
-                              fontSize: 20,
-                              fontWeight: FontWeight.w600,
-                              maxLines: 2,
-                              color: const Color(0xFF444444),
-                            ),
-                            // SizedBox(height: 8),
-                            // DesignText(
-                            //   text: lobbyData.lobby.description,
-                            //   fontSize: 12,
-                            //   fontWeight: FontWeight.w300,
-                            //   maxLines: 10,
-                            //   color: const Color(0xFF323232),
-                            // ),
-                            SizedBox(height: 16),
-
                             Wrap(
                               runSpacing: 12,
                               direction: Axis.vertical,
@@ -1732,7 +3755,7 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                                             .formattedDate ??
                                         "",
                                   ),
-                                  const SizedBox(height: 4),
+                                  const Space.h(height: 4),
                                 ],
                                 if (lobbyData
                                         .lobby
@@ -1763,58 +3786,9 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                                             .dateRange!
                                             .formattedDateCompactView,
                                   ),
-                                  const SizedBox(height: 4),
+                                  const Space.h(height: 4),
                                 ],
-                                if (lobbyData.lobby.priceDetails != null) ...[
-                                  InfoItemWithTitle(
-                                    iconUrl: "💰",
-                                    title: "Lobby Price : ",
-                                    subTitle:
-                                        (lobbyData.lobby.userStatus == "ADMIN")
-                                            ? (lobbyData
-                                                        .lobby
-                                                        .priceDetails
-                                                        .originalPrice ==
-                                                    0.0
-                                                ? "Free"
-                                                : "₹ ${lobbyData.lobby.priceDetails.originalPrice}")
-                                            : (lobbyData
-                                                        .lobby
-                                                        .priceDetails
-                                                        .price ==
-                                                    0.0
-                                                ? "Free"
-                                                : "₹ ${lobbyData.lobby.priceDetails.price}"),
-                                    // "${lobbyData.lobby.userStatus == "ADMIN" ? "₹" : ""}${lobbyData.lobby.priceDetails.price}",
-                                  ),
-                                  const SizedBox(height: 4),
-                                ],
-                                if (lobbyData
-                                        .lobby
-                                        .filter
-                                        .otherFilterInfo
-                                        .range !=
-                                    null) ...[
-                                  InfoItemWithTitle(
-                                    iconUrl:
-                                        lobbyData
-                                            .lobby
-                                            .filter
-                                            .otherFilterInfo
-                                            .range!
-                                            .iconUrl,
-                                    title:
-                                        lobbyData
-                                            .lobby
-                                            .filter
-                                            .otherFilterInfo
-                                            .range!
-                                            .title,
-                                    subTitle:
-                                        "${lobbyData.lobby.filter.otherFilterInfo.range!.min} to ${lobbyData.lobby.filter.otherFilterInfo.range!.max}",
-                                  ),
-                                  const SizedBox(height: 4),
-                                ],
+
                                 if (lobbyData
                                             .lobby
                                             .filter
@@ -1853,7 +3827,7 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                                             ?.areaName ??
                                         "",
                                   ),
-                                  const SizedBox(height: 4),
+                                  const Space.h(height: 4),
                                   InfoItemWithTitle(
                                     iconUrl:
                                         lobbyData
@@ -2029,67 +4003,102 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                                                     lngDestination != 0.0) {
                                                   Uri? mapsUri;
                                                   bool launched = false;
+
                                                   kLogger.trace(
                                                     "latP : $latPickUp \n lngP : $lngPickUp \n latD : $latDestination \n lngD : $lngDestination",
                                                   );
-                                                  if (Platform.isAndroid) {
-                                                    // Try Android's native maps app first
-                                                    mapsUri = Uri.parse(
-                                                      'https://www.google.com/maps/dir/?api=1&origin=$latPickUp,$lngPickUp&destination=$latDestination,$lngDestination',
-                                                    );
-                                                    if (await canLaunchUrl(
-                                                      mapsUri,
-                                                    )) {
-                                                      await launchUrl(
-                                                        mapsUri,
-                                                        mode:
-                                                            LaunchMode
-                                                                .externalApplication,
-                                                      );
-                                                      launched = true;
-                                                    }
-                                                  }
-                                                  // else if (Platform.isIOS) {
-                                                  //   // Try Google Maps on iOS first
-                                                  //   mapsUri = Uri.parse(
-                                                  //       'comgooglemaps://?center=$lat,$lng&zoom=12&q=$lat,$lng');
-                                                  //   if (await canLaunchUrl(
-                                                  //       mapsUri)) {
-                                                  //     await launchUrl(mapsUri,
-                                                  //         mode: LaunchMode
-                                                  //             .externalApplication);
-                                                  //     launched = true;
-                                                  //   } else {
-                                                  //     // Fall back to Apple Maps
-                                                  //     mapsUri = Uri.parse(
-                                                  //         'https://maps.apple.com/?q=${Uri.encodeFull("Location")}&sll=$lat,$lng&z=12');
-                                                  //     if (await canLaunchUrl(
-                                                  //         mapsUri)) {
-                                                  //       await launchUrl(
-                                                  //           mapsUri,
-                                                  //           mode: LaunchMode
-                                                  //               .externalApplication);
-                                                  //       launched = true;
-                                                  //     }
-                                                  //   }
-                                                  // }
 
-                                                  // If none of the above worked, fall back to web browser
-                                                  if (!launched) {
+                                                  // Check if running on web
+                                                  if (kIsWeb) {
+                                                    // For web, always use Google Maps web interface
                                                     mapsUri = Uri.parse(
                                                       'https://www.google.com/maps/dir/?api=1&origin=$latPickUp,$lngPickUp&destination=$latDestination,$lngDestination',
                                                     );
+
                                                     try {
                                                       await launchUrl(
                                                         mapsUri,
                                                         mode:
                                                             LaunchMode
-                                                                .externalApplication,
+                                                                .platformDefault, // Use platformDefault for web
+                                                        webOnlyWindowName:
+                                                            '_blank', // Open in new tab
                                                       );
+                                                      launched = true;
                                                     } catch (e) {
                                                       kLogger.error(
-                                                        'Error launching URL: $e',
+                                                        'Error launching directions URL on web: $e',
                                                       );
+                                                    }
+                                                  } else {
+                                                    // Mobile platform handling
+                                                    if (Platform.isAndroid) {
+                                                      // Try Google Maps app first
+                                                      mapsUri = Uri.parse(
+                                                        'https://www.google.com/maps/dir/?api=1&origin=$latPickUp,$lngPickUp&destination=$latDestination,$lngDestination',
+                                                      );
+                                                      if (await canLaunchUrl(
+                                                        mapsUri,
+                                                      )) {
+                                                        await launchUrl(
+                                                          mapsUri,
+                                                          mode:
+                                                              LaunchMode
+                                                                  .externalApplication,
+                                                        );
+                                                        launched = true;
+                                                      }
+                                                    } else if (Platform.isIOS) {
+                                                      // Try Google Maps on iOS first
+                                                      mapsUri = Uri.parse(
+                                                        'comgooglemaps://?saddr=$latPickUp,$lngPickUp&daddr=$latDestination,$lngDestination&directionsmode=driving',
+                                                      );
+                                                      if (await canLaunchUrl(
+                                                        mapsUri,
+                                                      )) {
+                                                        await launchUrl(
+                                                          mapsUri,
+                                                          mode:
+                                                              LaunchMode
+                                                                  .externalApplication,
+                                                        );
+                                                        launched = true;
+                                                      } else {
+                                                        // Fall back to Apple Maps
+                                                        mapsUri = Uri.parse(
+                                                          'https://maps.apple.com/?saddr=$latPickUp,$lngPickUp&daddr=$latDestination,$lngDestination&dirflg=d',
+                                                        );
+                                                        if (await canLaunchUrl(
+                                                          mapsUri,
+                                                        )) {
+                                                          await launchUrl(
+                                                            mapsUri,
+                                                            mode:
+                                                                LaunchMode
+                                                                    .externalApplication,
+                                                          );
+                                                          launched = true;
+                                                        }
+                                                      }
+                                                    }
+
+                                                    // If none of the above worked, fall back to web browser
+                                                    if (!launched) {
+                                                      mapsUri = Uri.parse(
+                                                        'https://www.google.com/maps/dir/?api=1&origin=$latPickUp,$lngPickUp&destination=$latDestination,$lngDestination',
+                                                      );
+                                                      try {
+                                                        await launchUrl(
+                                                          mapsUri,
+                                                          mode:
+                                                              LaunchMode
+                                                                  .externalApplication,
+                                                        );
+                                                      } catch (e) {
+                                                        kLogger.error(
+                                                          'Error launching URL: $e',
+                                                        );
+                                                      }
                                                     }
                                                   }
                                                 }
@@ -2097,7 +4106,7 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                                             ),
                                           ),
                                         ),
-                                        // SizedBox(width: 8),
+                                        // Space.w(width: 8.w),
                                         if (lobbyData
                                                     .lobby
                                                     .filter
@@ -2110,8 +4119,10 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                                                 .otherFilterInfo
                                                 .locationInfo!
                                                 .hideLocation) &&
-                                            (lobbyData.lobby.userStatus ==
-                                                "VISITOR"))
+                                            (lobbyData.lobby.userStatus !=
+                                                    "MEMBER" ||
+                                                lobbyData.lobby.userStatus !=
+                                                    "ADMIN"))
                                           GestureDetector(
                                             onTap: () {
                                               showDialog(
@@ -2152,146 +4163,128 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                                       ],
                                     ),
                                   ],
-                                  const SizedBox(height: 4),
+                                  const Space.h(height: 4),
                                 ],
                               ],
                             ),
-                            // SizedBox(height: 8),
                             if (lobbyData
                                     .lobby
                                     .filter
                                     .otherFilterInfo
                                     .locationInfo !=
                                 null) ...[
-                              DesignText(
-                                text:
-                                    "${lobbyData.lobby.filter.otherFilterInfo.locationInfo?.title ?? 'Location'}"
-                                    "  :  ${((lobbyData.lobby.filter.otherFilterInfo.locationInfo!.hideLocation) && (lobbyData.lobby.filter.otherFilterInfo.locationInfo!.locationResponses.firstOrNull?.fuzzyAddress.isNotEmpty ?? false) && (lobbyData.lobby.userStatus != "MEMBER"))
-                                        ? lobbyData.lobby.filter.otherFilterInfo.locationInfo!.locationResponses.firstOrNull?.fuzzyAddress
-                                        : (lobbyData.lobby.filter.otherFilterInfo.locationInfo?.googleSearchResponses?.isNotEmpty == true)
-                                        ? lobbyData.lobby.filter.otherFilterInfo.locationInfo!.googleSearchResponses.first.description
-                                        : 'No location details available'}",
-                                fontSize: 12,
-                                fontWeight: FontWeight.w500,
-                                color: const Color(0xFF444444),
-                                maxLines: 10,
-                              ),
-                            ],
-                            // SizedBox(height: 8),
-                            if (lobbyData
-                                        .lobby
-                                        .filter
-                                        .otherFilterInfo
-                                        .locationInfo !=
-                                    null &&
-                                lobbyData
-                                        .lobby
-                                        .filter
-                                        .otherFilterInfo
-                                        .locationInfo
-                                        ?.locationResponses
-                                        ?.isNotEmpty ==
-                                    true) ...[
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.start,
+                                mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  Card(
-                                    elevation: 8,
-                                    shadowColor: const Color(0x143E79A1),
-                                    child: Container(
-                                      padding: EdgeInsets.all(8),
-                                      // constraints:
-                                      //     BoxConstraints(minWidth: 0.15.sw),
-                                      decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(12),
-                                        color: Colors.white,
-                                      ),
-                                      child: InfoItemWithIcon(
-                                        iconUrl: "googleMaps",
-                                        text: "Show in maps",
-                                        fontSize: 10,
-                                        iconSize: 14,
-                                        iconColor: null,
-                                        onTap: () async {
-                                          double lat = 0.0;
-                                          double lng = 0.0;
+                                  Expanded(
+                                    child: GestureDetector(
+                                      onTap: () async {
+                                        double lat = 0.0;
+                                        double lng = 0.0;
 
-                                          if (lobbyData
-                                                      .lobby
-                                                      .filter
-                                                      .otherFilterInfo
-                                                      .locationInfo !=
-                                                  null &&
-                                              lobbyData
+                                        if (lobbyData
+                                                    .lobby
+                                                    .filter
+                                                    .otherFilterInfo
+                                                    .locationInfo !=
+                                                null &&
+                                            lobbyData
+                                                .lobby
+                                                .filter
+                                                .otherFilterInfo
+                                                .locationInfo!
+                                                .locationResponses
+                                                .isNotEmpty) {
+                                          if ((lobbyData
                                                   .lobby
                                                   .filter
                                                   .otherFilterInfo
                                                   .locationInfo!
-                                                  .locationResponses
-                                                  .isNotEmpty) {
-                                            if ((lobbyData
+                                                  .hideLocation) &&
+                                              (lobbyData.lobby.userStatus !=
+                                                  "MEMBER")) {
+                                            lat =
+                                                lobbyData
                                                     .lobby
                                                     .filter
                                                     .otherFilterInfo
-                                                    .locationInfo!
-                                                    .hideLocation) &&
-                                                (lobbyData.lobby.userStatus !=
-                                                    "MEMBER")) {
-                                              lat =
-                                                  lobbyData
-                                                      .lobby
-                                                      .filter
-                                                      .otherFilterInfo
-                                                      .locationInfo
-                                                      ?.locationResponses
-                                                      .first
-                                                      .approxLocation
-                                                      ?.lat ??
-                                                  0.0;
-                                              lng =
-                                                  lobbyData
-                                                      .lobby
-                                                      .filter
-                                                      .otherFilterInfo
-                                                      .locationInfo
-                                                      ?.locationResponses
-                                                      .first
-                                                      .approxLocation
-                                                      ?.lon ??
-                                                  0.0;
-                                            } else {
-                                              lat =
-                                                  lobbyData
-                                                      .lobby
-                                                      .filter
-                                                      .otherFilterInfo
-                                                      .locationInfo
-                                                      ?.locationResponses
-                                                      .first
-                                                      .exactLocation
-                                                      ?.lat ??
-                                                  0.0;
-                                              lng =
-                                                  lobbyData
-                                                      .lobby
-                                                      .filter
-                                                      .otherFilterInfo
-                                                      .locationInfo
-                                                      ?.locationResponses
-                                                      .first
-                                                      .exactLocation
-                                                      ?.lon ??
-                                                  0.0;
-                                            }
+                                                    .locationInfo
+                                                    ?.locationResponses
+                                                    .first
+                                                    .approxLocation
+                                                    ?.lat ??
+                                                0.0;
+                                            lng =
+                                                lobbyData
+                                                    .lobby
+                                                    .filter
+                                                    .otherFilterInfo
+                                                    .locationInfo
+                                                    ?.locationResponses
+                                                    .first
+                                                    .approxLocation
+                                                    ?.lon ??
+                                                0.0;
+                                          } else {
+                                            lat =
+                                                lobbyData
+                                                    .lobby
+                                                    .filter
+                                                    .otherFilterInfo
+                                                    .locationInfo
+                                                    ?.locationResponses
+                                                    .first
+                                                    .exactLocation
+                                                    ?.lat ??
+                                                0.0;
+                                            lng =
+                                                lobbyData
+                                                    .lobby
+                                                    .filter
+                                                    .otherFilterInfo
+                                                    .locationInfo
+                                                    ?.locationResponses
+                                                    .first
+                                                    .exactLocation
+                                                    ?.lon ??
+                                                0.0;
                                           }
+                                        }
 
-                                          // Only proceed if we have valid coordinates
-                                          if (lat != 0.0 || lng != 0.0) {
-                                            Uri? mapsUri;
-                                            bool launched = false;
-                                            kLogger.trace(
-                                              "lat : $lat \n lng : $lng",
+                                        // Only proceed if we have valid coordinates
+                                        if (lat != 0.0 || lng != 0.0) {
+                                          Uri? mapsUri;
+                                          bool launched = false;
+
+                                          kLogger.trace(
+                                            "lat : $lat \n lng : $lng",
+                                          );
+
+                                          // Check if running on web
+                                          if (kIsWeb) {
+                                            // For web, always use Google Maps web interface
+                                            mapsUri = Uri.parse(
+                                              'https://www.google.com/maps/search/?api=1&query=$lat,$lng',
                                             );
+
+                                            try {
+                                              await launchUrl(
+                                                mapsUri,
+                                                mode:
+                                                    LaunchMode
+                                                        .platformDefault, // Use platformDefault for web
+                                                webOnlyWindowName:
+                                                    '_blank', // Open in new tab
+                                              );
+                                              launched = true;
+                                            } catch (e) {
+                                              kLogger.error(
+                                                'Error launching maps URL on web: $e',
+                                              );
+                                            }
+                                          } else {
+                                            // Mobile platform handling (your existing code)
                                             if (Platform.isAndroid) {
                                               // Try Android's native maps app first
                                               mapsUri = Uri.parse(
@@ -2357,11 +4350,23 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                                               }
                                             }
                                           }
-                                        },
+                                        }
+                                      },
+                                      child: DesignText(
+                                        text:
+                                            "📍 ${((lobbyData.lobby.filter.otherFilterInfo.locationInfo!.hideLocation) && (lobbyData.lobby.filter.otherFilterInfo.locationInfo!.locationResponses.firstOrNull?.fuzzyAddress.isNotEmpty ?? false) && (lobbyData.lobby.userStatus != "MEMBER") && (lobbyData.lobby.userStatus != "ADMIN"))
+                                                ? lobbyData.lobby.filter.otherFilterInfo.locationInfo!.locationResponses.firstOrNull?.fuzzyAddress
+                                                : (lobbyData.lobby.filter.otherFilterInfo.locationInfo?.googleSearchResponses?.isNotEmpty == true)
+                                                ? lobbyData.lobby.filter.otherFilterInfo.locationInfo!.googleSearchResponses.first.description
+                                                : 'No location details available'}",
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w500,
+                                        color: const Color(0xFF3E79A1),
+                                        maxLines: 10,
                                       ),
                                     ),
                                   ),
-                                  // SizedBox(width: 8),
+                                  // Space.w(width: 8.w),
                                   if (lobbyData
                                               .lobby
                                               .filter
@@ -2374,7 +4379,9 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                                           .otherFilterInfo
                                           .locationInfo!
                                           .hideLocation) &&
-                                      (lobbyData.lobby.userStatus == "VISITOR"))
+                                      (lobbyData.lobby.userStatus != "MEMBER" ||
+                                          lobbyData.lobby.userStatus !=
+                                              "ADMIN"))
                                     GestureDetector(
                                       onTap: () {
                                         showDialog(
@@ -2402,18 +4409,19 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                                           },
                                         );
                                       },
-                                      child: Icon(Icons.info_outline, size: 18),
+                                      child: Icon(Icons.info_outline, size: 20),
                                     ),
                                 ],
                               ),
                             ],
+
                             if (lobbyData
                                     .lobby
                                     .filter
                                     .otherFilterInfo
                                     .multipleLocations !=
                                 null) ...[
-                              SizedBox(height: 16),
+                              Space.h(height: 16),
                               DesignText(
                                 text:
                                     lobbyData
@@ -2423,1209 +4431,96 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                                         .multipleLocations
                                         ?.title ??
                                     'Multiple Location',
-                                fontSize: 12,
+                                fontSize: 14,
                                 fontWeight: FontWeight.w500,
                                 color: const Color(0xFF444444),
                                 maxLines: 10,
                               ),
-                              SizedBox(height: 8),
+                              Space.h(height: 8),
                               _buildLocationSection(lobby: lobbyData.lobby),
                             ],
-                            // if (lobbyData.lobby.lobbyStatus == 'PAST') ...[
-                            //   SizedBox(height: 8),
-                            //   LobbyMoments(lobbyId: lobbyData.lobby.id),
-                            // ],
-                            SizedBox(height: 16),
-                            if ((lobbyData.lobby.lobbyStatus == 'PAST' ||
-                                    lobbyData.lobby.lobbyStatus == 'CLOSED') &&
-                                lobbyData.lobby.userStatus == 'MEMBER') ...[
-                              Container(
-                                padding: EdgeInsets.symmetric(
-                                  horizontal: 16,
-                                  vertical: 12,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: const Color(0x143E79A1),
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                child: Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Expanded(
-                                      child: DesignText(
-                                        text:
-                                            "Tell us about your experience, so we can improve further in future.",
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.w400,
-                                        maxLines: 3,
-                                        color: const Color(0xFF444444),
-                                      ),
-                                    ),
-                                    SizedBox(width: 24),
-                                    OutlinedButton(
-                                      onPressed: () {
-                                        showDialog(
-                                          context: context,
-                                          builder:
-                                              (context) => FeedbackWidget(
-                                                onSubmit: (emoji, rating) {
-                                                  print(
-                                                    "Selected Emoji: $emoji",
-                                                  );
-                                                  print(
-                                                    "Selected Rating: $rating",
-                                                  );
-                                                },
-                                                lobbyId: lobbyData.lobby.id,
-                                              ),
-                                        );
-                                      },
-                                      style: OutlinedButton.styleFrom(
-                                        side: const BorderSide(
-                                          color: Color(0xFFEC4B5D),
-                                        ),
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(
-                                            24,
-                                          ),
-                                        ),
-                                        padding: EdgeInsets.symmetric(
-                                          vertical: 12,
-                                          horizontal: 24,
-                                        ),
-                                      ),
-                                      child: DesignText(
-                                        text: "Feedback",
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.w500,
-                                        color: Color(0xFFEC4B5D),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              SizedBox(height: 24),
-                            ],
-
-                            DesignText(
-                              text: "Overview",
-                              fontSize: 12,
-                              fontWeight: FontWeight.w600,
-                              maxLines: 2,
-                              color: const Color(0xFF323232),
-                            ),
-
-                            // SizedBox(height: 12),
-                            // DesignText(
-                            //   text: lobbyData.lobby.description,
-                            //   fontSize: 12,
-                            //   fontWeight: FontWeight.w300,
-                            //   maxLines: 10,
-                            //   color: const Color(0xFF323232),
-                            // ),
-
-                            // ExpandableText(
-                            //   id: "lobby-description-${lobbyData.lobby.id}",
-                            //   text: lobbyData.lobby.description,
-                            //   fontSize: 12,
-                            //   fontWeight: FontWeight.w300,
-                            //   collapsedMaxLines:
-                            //       2, // Show only 2 lines when collapsed
-                            //   color: const Color(0xFF323232),
-                            // ),
-                            RichTextDisplay(
-                              controller: TextEditingController(
-                                text: lobbyData.lobby.description,
-                              ),
-                              hintText: '',
-                            ),
-
-                            // SizedBox(height: 8),
-                            ScrollableInfoCards(
-                              cards: [
-                                InfoCard(
-                                  icon: Icons.payment,
-                                  title: "Refund Policies :",
-                                  subtitle:
-                                      (lobbyData
-                                              .lobby
-                                              .priceDetails
-                                              .isRefundAllowed)
-                                          ? "Up to 2 days before the lobby."
-                                          : "refund not allowed for this lobby",
-                                ),
-                                InfoCard(
-                                  icon: Icons.groups,
-                                  title: "Lobby Size",
-                                  subtitle:
-                                      "Max no. of attendees ${lobbyData.lobby.totalMembers}",
-                                ),
-                                if (lobbyData
-                                        .lobby
-                                        .filter
-                                        .otherFilterInfo
-                                        .range !=
-                                    null)
-                                  InfoCard(
-                                    icon: Icons.cake,
-                                    title:
-                                        lobbyData
-                                            .lobby
-                                            .filter
-                                            .otherFilterInfo
-                                            .range
-                                            ?.title ??
-                                        "Age Limit",
-                                    subtitle:
-                                        "${lobbyData.lobby.filter.otherFilterInfo.range?.min ?? 0} to ${lobbyData.lobby.filter.otherFilterInfo.range?.max ?? 0} years",
-                                  ),
-                              ],
-                            ),
-
-                            if (lobbyData.lobby.userStatus != "MEMBER" ||
-                                (lobbyData.lobby.houseDetail != null)) ...[
-                              SizedBox(height: 8),
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Expanded(
-                                    // Wrap the GestureDetector in Expanded
-                                    child: GestureDetector(
-                                      onTap: () async {
-                                        if (lobbyData.lobby.houseDetail !=
-                                            null) {
-                                          if (lobbyData
-                                                  .lobby
-                                                  .houseDetail!
-                                                  .houseId !=
-                                              "") {
-                                            // TODO : add house detail view redirection
-                                            // Get.to(
-                                            //   () => HouseDetailPage(
-                                            //     houseId:
-                                            //         lobbyData
-                                            //             .lobby
-                                            //             .houseDetail!
-                                            //             .houseId,
-                                            //   ),
-                                            // );
-                                            Get.to(() => HouseDetailsView());
-                                          }
-                                        } else {
-                                          if (lobbyData
-                                                  .lobby
-                                                  .adminSummary
-                                                  .userId !=
-                                              "") {
-                                            final uid =
-                                                await GetStorage().read(
-                                                  "userUID",
-                                                ) ??
-                                                '';
-                                            // TODO : add profile erdirection
-                                            // Get.to(
-                                            //   () =>
-                                            //       (uid ==
-                                            //               lobbyData
-                                            //                   .lobby
-                                            //                   .adminSummary
-                                            //                   .userId)
-                                            //           ? ProfileDetailsFollowedScreen()
-                                            //           : ProfileDetailsScreen(
-                                            //             userId:
-                                            //                 lobbyData
-                                            //                     .lobby
-                                            //                     .adminSummary
-                                            //                     .userId,
-                                            //           ),
-                                            // );
-                                          }
-                                        }
-                                      },
-                                      child: Row(
-                                        children: [
-                                          CircleAvatar(
-                                            radius: 16,
-                                            backgroundColor: const Color(
-                                              0xFFEAEFF2,
-                                            ),
-                                            child: ClipOval(
-                                              child: Image.network(
-                                                (lobbyData.lobby.houseDetail !=
-                                                        null)
-                                                    ? lobbyData
-                                                        .lobby
-                                                        .houseDetail!
-                                                        .profilePhoto
-                                                    : lobbyData
-                                                        .lobby
-                                                        .adminSummary
-                                                        .profilePictureUrl,
-                                                fit: BoxFit.cover,
-                                                width: 32,
-                                                height: 32,
-                                                errorBuilder: (
-                                                  context,
-                                                  error,
-                                                  stackTrace,
-                                                ) {
-                                                  return Icon(
-                                                    Icons.person,
-                                                    size: 16,
-                                                  );
-                                                },
-                                                loadingBuilder: (
-                                                  context,
-                                                  child,
-                                                  loadingProgress,
-                                                ) {
-                                                  if (loadingProgress == null)
-                                                    return child;
-                                                  return Center(
-                                                    child: SizedBox(
-                                                      width: 32,
-                                                      height: 32,
-                                                      child: CircularProgressIndicator(
-                                                        strokeWidth: 2,
-                                                        value:
-                                                            loadingProgress
-                                                                        .expectedTotalBytes !=
-                                                                    null
-                                                                ? loadingProgress
-                                                                        .cumulativeBytesLoaded /
-                                                                    loadingProgress
-                                                                        .expectedTotalBytes!
-                                                                : null,
-                                                      ),
-                                                    ),
-                                                  );
-                                                },
-                                              ),
-                                            ),
-                                          ),
-                                          SizedBox(width: 8),
-                                          Flexible(
-                                            // Wrap RichText with Flexible
-                                            child: RichText(
-                                              maxLines: 2,
-                                              overflow: TextOverflow.ellipsis,
-                                              text: TextSpan(
-                                                children: [
-                                                  TextSpan(
-                                                    text: 'Hosted by ',
-                                                    style: TextStyle(
-                                                      fontSize: 12,
-                                                      fontWeight:
-                                                          FontWeight.w600,
-                                                      fontFamily: 'Poppins',
-                                                      color: const Color(
-                                                        0xFF444444,
-                                                      ),
-                                                    ),
-                                                  ),
-                                                  TextSpan(
-                                                    text:
-                                                        (lobbyData
-                                                                    .lobby
-                                                                    .houseDetail !=
-                                                                null)
-                                                            ? lobbyData
-                                                                .lobby
-                                                                .houseDetail!
-                                                                .name
-                                                            : lobbyData
-                                                                .lobby
-                                                                .adminSummary
-                                                                .name,
-                                                    style: TextStyle(
-                                                      fontSize: 12,
-                                                      fontWeight:
-                                                          FontWeight.w400,
-                                                      fontFamily: 'Poppins',
-                                                      color: const Color(
-                                                        0xFF444444,
-                                                      ),
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                  if (lobbyData.lobby.userStatus == "ADMIN")
-                                    SizedBox(
-                                      width: 124,
-                                      child: DesignButton(
-                                        padding: EdgeInsets.all(12),
-                                        onPress:
-                                            () => Get.to(
-                                              () => CoHostSelectionView(
-                                                lobbyDetails: lobbyData,
-                                              ),
-                                            ),
-                                        bgColor: const Color(0x143E79A1),
-                                        child: Row(
-                                          children: [
-                                            DesignIcon.icon(
-                                              icon: Icons.person_add_outlined,
-                                              color: const Color(0xFF3E79A1),
-                                              size: 16,
-                                            ),
-                                            SizedBox(width: 4),
-                                            DesignText(
-                                              text: "Invite Co-host",
-                                              fontSize: 10,
-                                              fontWeight: FontWeight.w500,
-                                              color: const Color(0xFF3E79A1),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ),
-                                ],
-                              ),
-                            ],
-
-                            SizedBox(height: 24),
-                            if (userInfos.isEmpty)
-                              DesignText(
-                                text: "Attendee",
-                                fontSize: 14,
-                                fontWeight: FontWeight.w600,
-                                color: const Color(0xFF323232),
-                              ),
-                            lobbyData.lobby.userStatus == "MEMBER"
-                                ? SizedBox(
-                                  height: 70,
-                                  child: Row(
-                                    children: [
-                                      // Host section - Taking up 40% of space
-                                      Expanded(
-                                        flex: 40,
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            DesignText(
-                                              text: "Host",
-                                              fontSize: 14,
-                                              fontWeight: FontWeight.w600,
-                                              color: const Color(0xFF323232),
-                                            ),
-                                            SizedBox(height: 4),
-                                            GestureDetector(
-                                              onTap: () async {
-                                                if (lobbyData
-                                                        .lobby
-                                                        .houseDetail !=
-                                                    null) {
-                                                  if (lobbyData
-                                                          .lobby
-                                                          .houseDetail!
-                                                          .houseId !=
-                                                      "") {
-                                                    // TODO : add house detail view redirection
-                                                    Get.to(
-                                                      () => HouseDetailsView(),
-                                                    );
-                                                    // Get.to(
-                                                    //   () => HouseDetailPage(
-                                                    //     houseId:
-                                                    //         lobbyData
-                                                    //             .lobby
-                                                    //             .houseDetail!
-                                                    //             .houseId,
-                                                    //   ),
-                                                    // );
-                                                  }
-                                                } else {
-                                                  if (lobbyData
-                                                          .lobby
-                                                          .adminSummary
-                                                          .userId !=
-                                                      "") {
-                                                    final uid =
-                                                        await GetStorage().read(
-                                                          "userUID",
-                                                        ) ??
-                                                        '';
-                                                    // TODO : add profile erdirection
-
-                                                    // Get.to(
-                                                    //   () =>
-                                                    //       (uid ==
-                                                    //               lobbyData
-                                                    //                   .lobby
-                                                    //                   .adminSummary
-                                                    //                   .userId)
-                                                    //           ? ProfileDetailsFollowedScreen()
-                                                    //           : ProfileDetailsScreen(
-                                                    //             userId:
-                                                    //                 lobbyData
-                                                    //                     .lobby
-                                                    //                     .adminSummary
-                                                    //                     .userId,
-                                                    //           ),
-                                                    // );
-                                                  }
-                                                }
-                                              },
-                                              child: Row(
-                                                mainAxisSize: MainAxisSize.min,
-                                                children: [
-                                                  CircleAvatar(
-                                                    radius: 20,
-                                                    backgroundColor:
-                                                        const Color(0xFFEAEFF2),
-                                                    child: ClipOval(
-                                                      child: Image.network(
-                                                        (lobbyData
-                                                                    .lobby
-                                                                    .houseDetail !=
-                                                                null)
-                                                            ? lobbyData
-                                                                .lobby
-                                                                .houseDetail!
-                                                                .profilePhoto
-                                                            : lobbyData
-                                                                .lobby
-                                                                .adminSummary
-                                                                .profilePictureUrl,
-                                                        fit: BoxFit.cover,
-                                                        width: 40,
-                                                        height: 40,
-                                                        errorBuilder: (
-                                                          context,
-                                                          error,
-                                                          stackTrace,
-                                                        ) {
-                                                          return Icon(
-                                                            Icons.person,
-                                                            size: 18,
-                                                          );
-                                                        },
-                                                        loadingBuilder: (
-                                                          context,
-                                                          child,
-                                                          loadingProgress,
-                                                        ) {
-                                                          if (loadingProgress ==
-                                                              null) {
-                                                            return child;
-                                                          }
-                                                          return Center(
-                                                            child: SizedBox(
-                                                              width: 24,
-                                                              height: 24,
-                                                              child: CircularProgressIndicator(
-                                                                strokeWidth: 2,
-                                                                value:
-                                                                    loadingProgress.expectedTotalBytes !=
-                                                                            null
-                                                                        ? loadingProgress.cumulativeBytesLoaded /
-                                                                            loadingProgress.expectedTotalBytes!
-                                                                        : null,
-                                                              ),
-                                                            ),
-                                                          );
-                                                        },
-                                                      ),
-                                                    ),
-                                                  ),
-                                                  SizedBox(width: 16),
-                                                  Flexible(
-                                                    // Wrapped in Flexible to handle overflow
-                                                    child: Column(
-                                                      mainAxisSize:
-                                                          MainAxisSize.min,
-                                                      mainAxisAlignment:
-                                                          MainAxisAlignment
-                                                              .center,
-                                                      crossAxisAlignment:
-                                                          CrossAxisAlignment
-                                                              .start,
-                                                      children: [
-                                                        DesignText(
-                                                          text:
-                                                              (lobbyData
-                                                                          .lobby
-                                                                          .houseDetail !=
-                                                                      null)
-                                                                  ? lobbyData
-                                                                      .lobby
-                                                                      .houseDetail!
-                                                                      .name
-                                                                  : lobbyData
-                                                                      .lobby
-                                                                      .adminSummary
-                                                                      .userName,
-                                                          fontSize: 12,
-                                                          fontWeight:
-                                                              FontWeight.w400,
-                                                          color: const Color(
-                                                            0xFF323232,
-                                                          ),
-                                                          maxLines: 1,
-                                                        ),
-                                                        SizedBox(height: 2),
-                                                        DesignText(
-                                                          text:
-                                                              "Joined | ${DateFormat('MMMM yyyy').format(DateTime.fromMillisecondsSinceEpoch(lobbyData.lobby.createdDate))}",
-                                                          fontSize: 8,
-                                                          fontWeight:
-                                                              FontWeight.w400,
-                                                          maxLines: 2,
-                                                          color: const Color(
-                                                            0xFF444444,
-                                                          ),
-                                                        ),
-                                                      ],
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-
-                                      if (lobbyData
-                                                  .lobby
-                                                  .settings
-                                                  ?.showLobbyMembers !=
-                                              false ||
-                                          lobbyData.lobby.userStatus ==
-                                              "ADMIN") ...[
-                                        // Vertical Divider - Taking up 20% of space
-                                        const Expanded(
-                                          flex: 20,
-                                          child: Center(
-                                            child: VerticalDivider(
-                                              color: Color(0xFFBBBCBD),
-                                              thickness: 1,
-                                            ),
-                                          ),
-                                        ),
-
-                                        // Attendee section - Taking up 40% of space
-                                        Expanded(
-                                          flex: 40,
-                                          child: GestureDetector(
-                                            onTap:
-                                                () => Get.to(
-                                                  () => AttendeeScreen(
-                                                    lobbyDetails: lobbyData,
-                                                  ),
-                                                ),
-                                            child: Column(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                              children: [
-                                                Row(
-                                                  children: [
-                                                    DesignText(
-                                                      text: "Attendee ",
-                                                      fontSize: 14,
-                                                      fontWeight:
-                                                          FontWeight.w600,
-                                                      color: const Color(
-                                                        0xFF323232,
-                                                      ),
-                                                    ),
-                                                    DesignText(
-                                                      text:
-                                                          "(${lobbyData.lobby.currentMembers})",
-                                                      fontSize: 8,
-                                                      fontWeight:
-                                                          FontWeight.w400,
-                                                      color: const Color(
-                                                        0xFF444444,
-                                                      ),
-                                                    ),
-                                                  ],
-                                                ),
-                                                SizedBox(height: 4),
-                                                Expanded(
-                                                  child: SizedBox(
-                                                    width:
-                                                        userInfos.length >= 4
-                                                            ? sw(0.3)
-                                                            : userInfos
-                                                                    .length ==
-                                                                3
-                                                            ? 0.24
-                                                            : userInfos
-                                                                    .length ==
-                                                                2
-                                                            ? sw(0.18)
-                                                            : userInfos
-                                                                    .length ==
-                                                                1
-                                                            ? sw(0.2)
-                                                            : sw(0.1),
-                                                    child: Stack(
-                                                      clipBehavior: Clip.none,
-                                                      alignment:
-                                                          AlignmentDirectional
-                                                              .center,
-                                                      children: List.generate(
-                                                        remainingCount > 0
-                                                            ? displayAvatars
-                                                                    .length +
-                                                                1
-                                                            : displayAvatars
-                                                                .length,
-                                                        (index) {
-                                                          print(
-                                                            "remainingCount `$remainingCount",
-                                                          );
-                                                          final positionIndex =
-                                                              displayAvatars
-                                                                  .length -
-                                                              1 -
-                                                              index;
-
-                                                          if (index ==
-                                                                  displayAvatars
-                                                                      .length &&
-                                                              remainingCount >
-                                                                  0) {
-                                                            return Positioned(
-                                                              left: index * 20,
-                                                              child: CircleAvatar(
-                                                                radius: 20,
-                                                                backgroundColor:
-                                                                    Colors
-                                                                        .teal[200],
-                                                                child: Text(
-                                                                  '+$remainingCount',
-                                                                  style: const TextStyle(
-                                                                    color:
-                                                                        Colors
-                                                                            .white,
-                                                                    fontSize:
-                                                                        16,
-                                                                  ),
-                                                                ),
-                                                              ),
-                                                            );
-                                                          }
-                                                          final url =
-                                                              displayAvatars[index]
-                                                                  .profilePictureUrl;
-                                                          return Positioned(
-                                                            left: index * 20,
-                                                            child: CircleAvatar(
-                                                              radius: 20,
-                                                              backgroundColor:
-                                                                  avatarColors[index],
-                                                              child:
-                                                                  url!.isEmpty
-                                                                      ? const Icon(
-                                                                        Icons
-                                                                            .person,
-                                                                        color:
-                                                                            Colors.white,
-                                                                      )
-                                                                      : ClipRRect(
-                                                                        borderRadius:
-                                                                            BorderRadius.circular(
-                                                                              20,
-                                                                            ),
-                                                                        child: Image.network(
-                                                                          url,
-                                                                          fit:
-                                                                              BoxFit.cover,
-                                                                        ),
-                                                                      ),
-                                                            ),
-                                                          );
-                                                        },
-                                                      ),
-                                                    ),
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    ],
-                                  ),
-                                )
-                                : SizedBox(
-                                  height: 56,
-                                  child: Row(
-                                    mainAxisAlignment:
-                                        (userInfos.length == 1)
-                                            ? MainAxisAlignment.start
-                                            : MainAxisAlignment
-                                                .spaceAround, // This will add space around the elements
-                                    children:
-                                        (lobbyData
-                                                        .lobby
-                                                        .settings
-                                                        ?.showLobbyMembers !=
-                                                    false ||
-                                                lobbyData.lobby.userStatus ==
-                                                    "ADMIN")
-                                            ? [
-                                              // Combined stack and column in a Row
-                                              userInfos.isNotEmpty
-                                                  ? InkWell(
-                                                    onTap:
-                                                        () => Get.to(
-                                                          () => AttendeeScreen(
-                                                            lobbyDetails:
-                                                                lobbyData,
-                                                          ),
-                                                        ),
-                                                    child: Row(
-                                                      children: [
-                                                        // Stack of avatars
-                                                        SizedBox(
-                                                          width:
-                                                              userInfos.length >=
-                                                                      4
-                                                                  ? sw(0.3)
-                                                                  : userInfos
-                                                                          .length ==
-                                                                      3
-                                                                  ? sw(0.24)
-                                                                  : userInfos
-                                                                          .length ==
-                                                                      2
-                                                                  ? sw(0.18)
-                                                                  : userInfos
-                                                                          .length ==
-                                                                      1
-                                                                  ? sw(0.12)
-                                                                  : sw(
-                                                                    0.1,
-                                                                  ), // Adjust width as needed
-                                                          child: Stack(
-                                                            clipBehavior:
-                                                                Clip.none,
-                                                            alignment:
-                                                                AlignmentDirectional
-                                                                    .centerEnd,
-                                                            children: List.generate(
-                                                              remainingCount > 0
-                                                                  ? displayAvatars
-                                                                          .length +
-                                                                      1
-                                                                  : displayAvatars
-                                                                      .length,
-                                                              (index) {
-                                                                final positionIndex =
-                                                                    displayAvatars
-                                                                        .length -
-                                                                    1 -
-                                                                    index;
-
-                                                                // Show the '+remainingCount' for more avatars
-                                                                if (index ==
-                                                                        displayAvatars
-                                                                            .length &&
-                                                                    remainingCount >
-                                                                        0) {
-                                                                  return Positioned(
-                                                                    left:
-                                                                        index *
-                                                                        24,
-                                                                    child: CircleAvatar(
-                                                                      radius:
-                                                                          24,
-                                                                      backgroundColor:
-                                                                          Colors
-                                                                              .teal[200],
-                                                                      child: Text(
-                                                                        '+$remainingCount',
-                                                                        style: const TextStyle(
-                                                                          color:
-                                                                              Colors.white,
-                                                                          fontSize:
-                                                                              16,
-                                                                        ),
-                                                                      ),
-                                                                    ),
-                                                                  );
-                                                                }
-                                                                final url =
-                                                                    displayAvatars[index]
-                                                                        .profilePictureUrl;
-                                                                // Regular avatar logic
-                                                                return Positioned(
-                                                                  left:
-                                                                      index *
-                                                                      24,
-                                                                  child: CircleAvatar(
-                                                                    radius: 24,
-                                                                    backgroundColor:
-                                                                        avatarColors[index],
-                                                                    child:
-                                                                        url == null ||
-                                                                                url.isEmpty
-                                                                            ? const Icon(
-                                                                              Icons.person,
-                                                                              color:
-                                                                                  Colors.white,
-                                                                            )
-                                                                            : ClipRRect(
-                                                                              borderRadius: BorderRadius.circular(
-                                                                                24,
-                                                                              ),
-                                                                              child: Image.network(
-                                                                                url,
-                                                                                width:
-                                                                                    48,
-                                                                                height:
-                                                                                    48,
-                                                                                fit:
-                                                                                    BoxFit.cover,
-                                                                                errorBuilder: (
-                                                                                  context,
-                                                                                  error,
-                                                                                  stackTrace,
-                                                                                ) {
-                                                                                  return const Icon(
-                                                                                    Icons.person,
-                                                                                    color:
-                                                                                        Colors.white,
-                                                                                  );
-                                                                                },
-                                                                                loadingBuilder: (
-                                                                                  context,
-                                                                                  child,
-                                                                                  loadingProgress,
-                                                                                ) {
-                                                                                  if (loadingProgress ==
-                                                                                      null) {
-                                                                                    return child;
-                                                                                  }
-                                                                                  return const Center(
-                                                                                    child: CircularProgressIndicator(
-                                                                                      color:
-                                                                                          Colors.white,
-                                                                                    ),
-                                                                                  );
-                                                                                },
-                                                                              ),
-                                                                            ),
-                                                                  ),
-                                                                );
-                                                              },
-                                                            ),
-                                                          ),
-                                                        ),
-
-                                                        SizedBox(width: 32),
-
-                                                        // Column for the text
-                                                        Column(
-                                                          mainAxisAlignment:
-                                                              MainAxisAlignment
-                                                                  .center,
-                                                          crossAxisAlignment:
-                                                              CrossAxisAlignment
-                                                                  .start,
-                                                          children: [
-                                                            DesignText(
-                                                              text: "Attendee",
-                                                              fontSize: 14,
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .w600,
-                                                              color:
-                                                                  const Color(
-                                                                    0xFF323232,
-                                                                  ),
-                                                            ),
-                                                            SizedBox(height: 4),
-                                                            DesignText(
-                                                              text:
-                                                                  "${lobbyData.lobby.currentMembers} ${lobbyData.lobby.currentMembers == 1 ? "person is" : "people are"} joining this lobby ",
-                                                              fontSize: 12,
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .w400,
-                                                              color:
-                                                                  const Color(
-                                                                    0xFF444444,
-                                                                  ),
-                                                            ),
-                                                          ],
-                                                        ),
-                                                      ],
-                                                    ),
-                                                  )
-                                                  : DesignText(
-                                                    text: "No Attendee",
-                                                    fontSize: 12,
-                                                    fontWeight: FontWeight.w400,
-                                                    color: const Color(
-                                                      0xFF444444,
-                                                    ),
-                                                  ),
-                                              if (userInfos.length == 1 &&
-                                                  (((lobbyData
-                                                                  .lobby
-                                                                  .lobbyStatus !=
-                                                              'PAST') &&
-                                                          (lobbyData
-                                                                  .lobby
-                                                                  .lobbyStatus !=
-                                                              'CLOSED')) ||
-                                                      (lobbyData
-                                                              .lobby
-                                                              .userStatus ==
-                                                          'MEMBER'))) ...[
-                                                const Spacer(),
-                                                InkWell(
-                                                  onTap:
-                                                      () => Get.to(
-                                                        () => AttendeeScreen(
-                                                          lobbyDetails:
-                                                              lobbyData,
-                                                        ),
-                                                      ),
-                                                  child: DesignText(
-                                                    text: "View All",
-                                                    fontSize: 12,
-                                                    fontWeight: FontWeight.w500,
-                                                    color: const Color(
-                                                      0xFF3E79A1,
-                                                    ),
-                                                  ),
-                                                ),
-                                              ],
-                                            ]
-                                            : [],
-                                  ),
-                                ),
-                            SizedBox(height: 34),
-                            Padding(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 0.0,
-                                vertical: 5,
-                              ),
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(16.0),
-                                  border: Border.all(
-                                    color: Colors.grey.shade300,
-                                    width: 1,
-                                  ),
-                                ),
-                                child: Column(
-                                  crossAxisAlignment:
-                                      CrossAxisAlignment.stretch,
-                                  children: List.generate(
-                                    lobbyData
-                                        .lobby
-                                        .filter
-                                        .filterInfoList
-                                        .length,
-                                    (index) {
-                                      final item =
-                                          lobbyData
-                                              .lobby
-                                              .filter
-                                              .filterInfoList[index];
-
-                                      // Format the options list as a string
-                                      String formattedOptions = item.options
-                                          .take(3)
-                                          .join(', ');
-                                      if (item.options.length > 3) {
-                                        formattedOptions += '...';
-                                      }
-
-                                      return Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.stretch,
-                                        children: [
-                                          buildDetailCard(
-                                            context,
-                                            icon: item.iconUrl ?? "",
-                                            title: item.title,
-                                            subtitle: formattedOptions,
-                                          ),
-                                          if (index !=
-                                              (lobbyData
-                                                      .lobby
-                                                      .filter
-                                                      .filterInfoList
-                                                      .length -
-                                                  1))
-                                            Divider(
-                                              color: Colors.grey.shade300,
-                                              height: 2.0,
-                                            ),
-                                        ],
-                                      );
-                                    },
-                                  ),
-                                ),
-                              ),
-                            ),
-                            SizedBox(height: 34),
-                            FeaturedConversation(
-                              lobby: lobbyData.lobby,
-                              lobbyDetail: lobbyData,
-                            ),
-
-                            // SizedBox(height: 34),
-                            // // Lobby Rules Section
-                            // LobbyRulesSection(
-                            //   lobby: lobbyData.lobby,
-                            //   isAdmin: lobbyData.lobby.userStatus == "ADMIN",
-                            // ),
-                            SizedBox(height: 16),
-                            Row(
-                              children: [
-                                DesignText(
-                                  text:
-                                      lobbyData.lobby.content?.title ??
-                                      "Add Guidelines",
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                                const Spacer(),
-                                if (lobbyData.lobby.userStatus == "ADMIN")
-                                  InkWell(
-                                    onTap: () {
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder:
-                                              (_) => NewMarkdownEditorPage(
-                                                lobbyId: lobbyData.lobby.id,
-                                                initialTitle:
-                                                    lobbyData
-                                                        .lobby
-                                                        .content
-                                                        ?.title ??
-                                                    '',
-                                                initialBody:
-                                                    lobbyData
-                                                        .lobby
-                                                        .content
-                                                        ?.body ??
-                                                    '',
-                                                isHost:
-                                                    true, // set false for viewers
-                                              ),
-                                        ),
-                                      );
-                                    },
-                                    child: DesignText(
-                                      text:
-                                          (lobbyData.lobby.content != null)
-                                              ? "Edit"
-                                              : "Add",
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w500,
-                                      color: const Color(0xFF3E79A1),
-                                    ),
-                                  ),
-                              ],
-                            ),
-                            if (lobbyData.lobby.content != null) ...[
-                              SizedBox(height: 16),
-                              NewLobbyContentSection(
-                                content: lobbyData.lobby.content!,
-                              ),
-                            ],
-
-                            SizedBox(height: 16),
                           ],
                         ),
                       ),
-                      const LobbiesList(
-                        lobbyType: LobbyType.recommendations,
-                        title: "Recommended Lobbies",
+                      ScrollableInfoCards(
+                        cards: [
+                          InfoCard(
+                            icon: Icons.payment,
+                            title:
+                                (lobbyData.lobby.priceDetails.originalPrice >
+                                        0.0)
+                                    ? "Refund Policies :"
+                                    : "Pricing ",
+                            subtitle:
+                                (lobbyData.lobby.priceDetails.isRefundAllowed)
+                                    ? "Up to 2 days before the lobby."
+                                    : (lobbyData
+                                            .lobby
+                                            .priceDetails
+                                            .originalPrice >
+                                        0.0)
+                                    ? "refund not allowed for this lobby"
+                                    : "This Lobby is Free",
+                          ),
+                          InfoCard(
+                            icon: Icons.groups,
+                            title: "Lobby Size",
+                            subtitle:
+                                "Maximum: ${lobbyData.lobby.totalMembers}",
+                          ),
+                          if (lobbyData.lobby.filter.otherFilterInfo.range !=
+                              null)
+                            InfoCard(
+                              icon: Icons.cake,
+                              title:
+                                  lobbyData
+                                      .lobby
+                                      .filter
+                                      .otherFilterInfo
+                                      .range
+                                      ?.title ??
+                                  "Age Limit",
+                              subtitle:
+                                  "${lobbyData.lobby.filter.otherFilterInfo.range?.min ?? 0} to ${lobbyData.lobby.filter.otherFilterInfo.range?.max ?? 0} ",
+                            ),
+                        ],
                       ),
-                      SizedBox(height: 34),
-                      // LobbyHousesList(lobbyId: lobbyData.lobby.id),
-                      // SizedBox(height: 16),
+                      ResponsiveAppDownloadCard(
+                        appStoreUrl:
+                            "https://apps.apple.com/in/app/aroundu/id6744299663",
+                        playStoreUrl:
+                            "https://play.google.com/store/apps/details?id=com.polar.aroundu",
+                        onClose: () {
+                          FancyAppDownloadDialog.show(
+                            context,
+                            title: "Unlock Premium Features",
+                            message:
+                                "Get the full AroundU experience with exclusive features, enhanced performance, and more!",
+                            appStoreUrl:
+                                "https://apps.apple.com/in/app/aroundu/id6744299663",
+                            playStoreUrl:
+                                "https://play.google.com/store/apps/details?id=com.polar.aroundu",
+                            // cancelButtonText: "Maybe Later",
+                            onCancel: () {
+                              print("User chose to skip download");
+                            },
+                          );
+                          // Get.to(()=> AppLandingPage());
+                        },
+                      ),
                     ],
                   ),
                 ),
               ),
-            );
-      },
-      error:
-          (error, stack) => Scaffold(
-            appBar: AppBar(
-              leading: IconButton(
-                style: IconButton.styleFrom(backgroundColor: Colors.white70),
-                onPressed: () {
-                  Get.back();
-                },
-                icon: DesignIcon.icon(
-                  icon: Icons.arrow_back_ios_sharp,
-                  size: 20,
-                ),
-              ),
-              backgroundColor: Colors.transparent,
-              scrolledUnderElevation: 0,
-            ),
-            body: RefreshIndicator(
-              key: Key("errorStateRefreshIndicator"),
-              onRefresh: () async {
-                ref.read(lobbyDetailsProvider(widget.lobbyId).notifier).reset();
-                await ref
-                    .read(lobbyDetailsProvider(widget.lobbyId).notifier)
-                    .fetchLobbyDetails(widget.lobbyId);
-              },
-              child: SingleChildScrollView(
-                child: SizedBox(
-                  height: sh(0.85),
-                  child: Center(
-                    child: DesignText(
-                      text: "Something went wrong \n Please try again !!!",
-                      fontSize: 18,
-                      fontWeight: FontWeight.w500,
-                      color: Color(0xFF444444),
-                      maxLines: 10,
-                    ),
-                  ),
-                ),
-              ),
-            ),
+            ],
           ),
-      loading:
-          () => Scaffold(
-            appBar: AppBar(
-              leading: IconButton(
-                style: IconButton.styleFrom(backgroundColor: Colors.white70),
-                onPressed: () {
-                  Get.back();
-                },
-                icon: DesignIcon.icon(
-                  icon: Icons.arrow_back_ios_sharp,
-                  size: 20,
-                ),
-              ),
-              backgroundColor: Colors.transparent,
-              scrolledUnderElevation: 0,
-            ),
-            body: SingleChildScrollView(
-              child: SizedBox(
-                height: sh(0.85),
-                child: Center(
-                  child: CircularProgressIndicator(color: DesignColors.accent),
-                ),
-              ),
-            ),
+          const LobbiesList(
+            lobbyType: LobbyType.recommendations,
+            title: "Recommended Lobbies",
           ),
+          Space.h(height: 34),
+        ],
+      ),
     );
   }
 
@@ -3635,117 +4530,6 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
     final lobbyStatus = lobbyDetail.lobby.lobbyStatus;
     final userStatus = lobbyDetail.lobby.userStatus;
     final isPrivilegedUser = userStatus == "MEMBER" || userStatus == "ADMIN";
-
-    // For PAST lobbies with MEMBER or ADMIN
-    // if (lobbyStatus == "PAST") {
-    //   if (isPrivilegedUser) {
-    //     return GestureDetector(
-    //       onTap: () {
-    //         //TODO: Add create moment functionality
-    //         Get.to(() => CreateMomentsTabView(
-    //               lobbyId: lobbyDetail.lobby.id,
-    //               lobbyTitle: lobbyDetail.lobby.title,
-    //             ));
-    //       },
-    //       child: Column(
-    //         crossAxisAlignment: CrossAxisAlignment.start,
-    //         mainAxisAlignment: MainAxisAlignment.center,
-    //         children: [
-    //           DesignText(
-    //             text: "Create Moment",
-    //             fontSize: 14,
-    //             fontWeight: FontWeight.w600,
-    //           ),
-    //         ],
-    //       ),
-    //     );
-    //   } else {
-    //     return Card(
-    //       color: Colors.white,
-    //       shadowColor: const Color(0x6C3E79A1),
-    //       elevation: 0,
-    //       shape: RoundedRectangleBorder(
-    //         borderRadius: BorderRadius.circular(12),
-    //       ),
-    //       child: Padding(
-    //         padding: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-    //         child: Column(
-    //           crossAxisAlignment: CrossAxisAlignment.start,
-    //           mainAxisAlignment: MainAxisAlignment.center,
-    //           children: [
-    //             DesignText(
-    //               text: "Lobby is Closed",
-    //               fontSize: 14,
-    //               fontWeight: FontWeight.w600,
-    //             ),
-    //           ],
-    //         ),
-    //       ),
-    //     );
-    //   }
-    // }
-
-    // For FULL or CLOSED lobbies
-    // if (lobbyStatus == "FULL" || lobbyStatus == "CLOSED") {
-    //   if (isPrivilegedUser) {
-    //     // Normal view for MEMBER/ADMIN
-    //     return Column(
-    //       crossAxisAlignment: CrossAxisAlignment.start,
-    //       mainAxisAlignment: MainAxisAlignment.center,
-    //       children: [
-    //         DesignText(
-    //           text: "Get ready !!",
-    //           fontSize: 14,
-    //           fontWeight: FontWeight.w600,
-    //         ),
-    //         SizedBox(height: 2),
-    //         GestureDetector(
-    //           onTap: () {
-    //             showModalBottomSheet(
-    //               context: context,
-    //               backgroundColor: Colors.white,
-    //               elevation: 4,
-    //               builder: (context) =>
-    //                   LobbyAttendingStatusBottomSheet(lobby: lobbyDetail.lobby),
-    //             );
-    //           },
-    //           child: DesignText(
-    //             text: "Change of plans?",
-    //             fontSize: 12,
-    //             fontWeight: FontWeight.w400,
-    //             color: const Color(0xFF3E79A1),
-    //           ),
-    //         ),
-    //       ],
-    //     );
-    //   } else {
-    //     // View for non-privileged users
-    //     return Card(
-    //       color: Colors.white,
-    //       shadowColor: const Color(0x6C3E79A1),
-    //       elevation: 0,
-    //       shape: RoundedRectangleBorder(
-    //         borderRadius: BorderRadius.circular(12),
-    //       ),
-    //       child: Padding(
-    //         padding: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-    //         child: Column(
-    //           crossAxisAlignment: CrossAxisAlignment.start,
-    //           mainAxisAlignment: MainAxisAlignment.center,
-    //           children: [
-    //             DesignText(
-    //               text: lobbyStatus == "FULL"
-    //                   ? "Lobby is Full"
-    //                   : "Lobby is Closed",
-    //               fontSize: 14,
-    //               fontWeight: FontWeight.w600,
-    //             ),
-    //           ],
-    //         ),
-    //       ),
-    //     );
-    //   }
-    // }
 
     // For ACTIVE lobby, keep the existing price/slots card
     return (userStatus == "VISITOR")
@@ -3757,24 +4541,20 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
             borderRadius: BorderRadius.circular(12),
           ),
           child: Padding(
-            padding: EdgeInsets.only(top: 8, left: 0, right: 8),
+            padding: EdgeInsets.only(top: 0, left: 0, right: 8),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Row(
-                  children: [
-                    DesignText(
-                      text:
-                          (lobbyDetail.lobby.priceDetails?.price != 0.0)
-                              ? "₹${lobbyDetail.lobby.priceDetails?.price ?? 0.0}/person"
-                              : "Free",
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ],
+                DesignText(
+                  text:
+                      (lobbyDetail.lobby.priceDetails?.price != 0.0)
+                          ? "₹${lobbyDetail.lobby.priceDetails?.price ?? 0.0}/person"
+                          : "Free",
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
                 ),
-                // SizedBox(height: 2),
+                // Space.h(height: 2.h),
                 DesignText(
                   text: "${lobbyDetail.lobby.membersRequired} slots available",
                   fontSize: 10,
@@ -3785,36 +4565,6 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
             ),
           ),
         )
-        // ? Column(
-        //     crossAxisAlignment: CrossAxisAlignment.start,
-        //     mainAxisAlignment: MainAxisAlignment.center,
-        //     children: [
-        //       DesignText(
-        //         text: "Get ready !!",
-        //         fontSize: 14,
-        //         fontWeight: FontWeight.w600,
-        //       ),
-        //       SizedBox(height: 2),
-        //       GestureDetector(
-        //         onTap: () {
-        //           showModalBottomSheet(
-        //               context: context,
-        //               backgroundColor: Colors.white,
-        //               elevation: 4,
-        //               builder: (context) {
-        //                 return LobbyAttendingStatusBottomSheet(
-        //                     lobby: lobbyDetail.lobby);
-        //               });
-        //         },
-        //         child: DesignText(
-        //           text: "Edit Status",
-        //           fontSize: 12,
-        //           fontWeight: FontWeight.w400,
-        //           color: const Color(0xFF3E79A1),
-        //         ),
-        //       ),
-        //     ],
-        //   )
         : SizedBox.shrink();
   }
 
@@ -3822,12 +4572,8 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
   Widget _buildBottomNavigationBarRightSideWidget({
     required LobbyDetails lobbyDetail,
   }) {
-    double screenWidth = MediaQuery.of(context).size.width;
-    double screenHeight = MediaQuery.of(context).size.height;
-
-    double sw(double size) => screenWidth * size;
-
-    double sh(double size) => screenHeight * size;
+    double sw = MediaQuery.of(context).size.width;
+    double sh = MediaQuery.of(context).size.height;
     final lobbyStatus = lobbyDetail.lobby.lobbyStatus;
     final userStatus = lobbyDetail.lobby.userStatus;
     final isPrivilegedUser = userStatus == "MEMBER" || userStatus == "ADMIN";
@@ -3837,9 +4583,21 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
       if (isPrivilegedUser) {
         return DesignButton(
           onPress: () {
-            HapticFeedback.selectionClick();
-// TODO: Add create moment functionality
+            FancyAppDownloadDialog.show(
+              context,
+              title: "Unlock Premium Features",
+              message:
+                  "Get the full AroundU experience with exclusive features, enhanced performance, and more!",
+              appStoreUrl: "https://apps.apple.com/in/app/aroundu/id6744299663",
+              playStoreUrl:
+                  "https://play.google.com/store/apps/details?id=com.polar.aroundu",
+              // cancelButtonText: "Maybe Later",
+              onCancel: () {
+                print("User chose to skip download");
+              },
+            );
 
+            // HapticFeedback.selectionClick();
             // Get.to(
             //   () => CreateMomentsTabView(
             //     lobbyId: lobbyDetail.lobby.id,
@@ -3848,7 +4606,7 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
             // );
           },
           bgColor: DesignColors.accent,
-          // padding: EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+          // padding: EdgeInsets.symmetric(vertical: 12.h, horizontal: 16.w),
           child: Center(
             child: DesignText(
               text: "Create Moment",
@@ -4005,7 +4763,7 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
     // For other cases, keep your existing conditional widget
     return (userStatus != "MEMBER")
         ? SizedBox(
-          width: sw(0.4),
+          width: 0.4 * sw,
           child: Row(
             children: [
               Expanded(
@@ -4025,6 +4783,37 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                         CustomSnackBar.show(
                           context: context,
                           message: "Your request was denied by Admin",
+                          type: SnackBarType.info,
+                        );
+                        return;
+                      case "INTERNAL_ACCESS_REQUEST":
+                        if (lobbyDetail.lobby.accessRequestData != null &&
+                            (lobbyDetail
+                                    .lobby
+                                    .accessRequestData
+                                    ?.accessId
+                                    .isNotEmpty ??
+                                false)) {
+                          Get.to(
+                            () => SharedAccessRequestCardExtendedView(
+                              accessReqId:
+                                  lobbyDetail
+                                      .lobby
+                                      .accessRequestData
+                                      ?.accessId ??
+                                  "",
+                            ),
+                          );
+                        } else {
+                          Fluttertoast.showToast(
+                            msg: "Something went wrong \n Please try again!!!",
+                          );
+                        }
+                      case "REMOVED":
+                        CustomSnackBar.show(
+                          context: context,
+                          message:
+                              "You’ve been removed by the admin. This lobby is no longer accessible to you and you won’t be able to rejoin",
                           type: SnackBarType.info,
                         );
                         return;
@@ -4063,7 +4852,10 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                                       lobbyDetail.lobby.id,
                                     ).notifier,
                                   )
-                                  .fetchPricing(lobbyDetail.lobby.id);
+                                  .fetchPricing(
+                                    lobbyDetail.lobby.id,
+                                    groupSize: 1,
+                                  );
 
                               // Close the loading dialog
                               Navigator.of(context, rootNavigator: true).pop();
@@ -4123,7 +4915,10 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                                     lobbyDetail.lobby.id,
                                   ).notifier,
                                 )
-                                .fetchPricing(lobbyDetail.lobby.id);
+                                .fetchPricing(
+                                  lobbyDetail.lobby.id,
+                                  groupSize: 1,
+                                );
 
                             // Close the loading dialog
                             Navigator.of(context, rootNavigator: true).pop();
@@ -4168,6 +4963,10 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                         return const Color(0xFF989898);
                       case "REQUEST_DENIED":
                         return const Color(0xFF323232);
+                      case "REMOVED":
+                        return const Color(0xFF323232);
+                      case "INTERNAL_ACCESS_REQUEST":
+                        return const Color(0xFF3E79A1);
                       case "PAYMENT_PENDING":
                         if (lobbyDetail.lobby.accessRequestData != null) {
                           if (lobbyDetail.lobby.accessRequestData!.isAdmin) {
@@ -4201,8 +5000,12 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                             return "Request Pending";
                           case "REQUEST_DENIED":
                             return "Request Denied";
+                          case "REMOVED":
+                            return "Removed";
+                          case "INTERNAL_ACCESS_REQUEST":
+                            return "Finalize Request";
                           case "PAYMENT_PENDING":
-                            return "Payment Pending ${(lobbyDetail.lobby.priceDetails?.price != null && lobbyDetail.lobby.priceDetails!.price > 0.0) ? "(${lobbyDetail.lobby.priceDetails?.price} Rs.)" : "(Free)"}";
+                            return "Payment Pending ${(lobbyDetail.lobby.priceDetails?.price != null && lobbyDetail.lobby.priceDetails!.price > 0.0) ? "- Rs.${lobbyDetail.lobby.priceDetails?.price} per slot" : "(Free)"}";
                           default:
                             return "Join Lobby"; // Default case if userStatus is unexpected
                         }
@@ -4321,21 +5124,6 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
       }
     }
 
-    // // Add locations from googleSearchResponses
-    // if (lobby.filter.otherFilterInfo.multipleLocations!.googleSearchResponses != null) {
-    //   for (var location in lobby
-    //       .filter.otherFilterInfo.multipleLocations!.googleSearchResponses!) {
-    //     if (location.structuredFormatting != null &&
-    //         location.structuredFormatting!.mainText != null &&
-    //         location.structuredFormatting!.mainText!.isNotEmpty) {
-    //       locations.add(location.structuredFormatting!.mainText!);
-    //     } else if (location.description != null &&
-    //         location.description!.isNotEmpty) {
-    //       locations.add(location.description!);
-    //     }
-    //   }
-    // }
-
     // Remove duplicates
     locations = locations.toSet().toList();
 
@@ -4355,7 +5143,7 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 8),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Colors.transparent,
         // borderRadius: BorderRadius.circular(12),
         // border: Border.all(color: Colors.grey.shade100),
       ),
@@ -4392,7 +5180,7 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                           location,
                           style: DesignFonts.poppins.merge(
                             TextStyle(
-                              fontSize: 12,
+                              fontSize: 14,
                               fontWeight: FontWeight.w400,
                               color: Colors.black87,
                             ),
@@ -4641,8 +5429,6 @@ class _ExpandableTextState extends ConsumerState<ExpandableText> {
   }
 }
 
-
-
 class JoinOptionsModal extends StatelessWidget {
   final VoidCallback onJoinWithFriends;
   final VoidCallback onJoinAsIndividual;
@@ -4831,7 +5617,6 @@ class InviteOptionsModal extends StatelessWidget {
   }
 }
 
-
 class InfoItemWithIcon extends StatelessWidget {
   final String? iconUrl;
   final String text;
@@ -4845,8 +5630,8 @@ class InfoItemWithIcon extends StatelessWidget {
     this.iconUrl,
     required this.text,
     this.onTap,
-    this.fontSize = 12,
-    this.iconSize = 12,
+    this.fontSize = 14,
+    this.iconSize = 14,
     this.iconColor = DesignColors.accent,
   });
 
@@ -4854,14 +5639,10 @@ class InfoItemWithIcon extends StatelessWidget {
   Widget build(BuildContext context) {
     final convertedIcon =
         iconUrl != null ? DesignIcons.getIconFromString(iconUrl!) : null;
-double screenWidth = MediaQuery.of(context).size.width;
-    double screenHeight = MediaQuery.of(context).size.height;
-
-    double sw(double size) => screenWidth * size;
-
-    double sh(double size) => screenHeight * size;
+    double sw = MediaQuery.of(context).size.width;
+    double sh = MediaQuery.of(context).size.height;
     return SizedBox(
-      width: sw(0.25),
+      width: 0.25 * sw,
       child: InkWell(
         onTap: onTap,
         child:
@@ -4911,27 +5692,23 @@ class InfoItemWithTitle extends StatelessWidget {
     required this.title,
     required this.subTitle,
     this.onTap,
-    this.fontSize = 12,
-    this.iconSize = 12,
+    this.fontSize = 14,
+    this.iconSize = 14,
     this.iconColor = DesignColors.accent,
   });
 
   @override
   Widget build(BuildContext context) {
-    final convertedIcon =
-        iconUrl != null ? DesignIcons.getIconFromString(iconUrl!) : null;
-double screenWidth = MediaQuery.of(context).size.width;
-    double screenHeight = MediaQuery.of(context).size.height;
-
-    double sw(double size) => screenWidth * size;
-
-    double sh(double size) => screenHeight * size;
+    // final convertedIcon =
+    //     iconUrl != null ? DesignIcons.getIconFromString(iconUrl!) : null;
+    double sw = MediaQuery.of(context).size.width;
+    double sh = MediaQuery.of(context).size.height;
     return SizedBox(
-      width: sw(1),
+      width: 1 * sw,
       child: InkWell(
         onTap: onTap,
         child:
-            convertedIcon != null
+            iconUrl == null
                 ? Row(
                   children: [
                     // DesignIcon.custom(
@@ -4939,7 +5716,7 @@ double screenWidth = MediaQuery.of(context).size.width;
                     //   color: iconColor,
                     //   size: iconSize,
                     // ),
-                    // SizedBox(width: 10),
+                    // SizedBox(width: 10.w),
                     DesignText(
                       text: "$title  :  ",
                       fontSize: fontSize,
@@ -4948,7 +5725,7 @@ double screenWidth = MediaQuery.of(context).size.width;
                       maxLines: 10,
                       textAlign: TextAlign.left,
                     ),
-                    // SizedBox(width: 10),
+                    // SizedBox(width: 10.w),
                     Expanded(
                       child: DesignText(
                         text: subTitle,
@@ -4962,10 +5739,7 @@ double screenWidth = MediaQuery.of(context).size.width;
                   ],
                 )
                 : DesignText(
-                  text:
-                      iconUrl != null
-                          ? "$title  :  $subTitle"
-                          : "$title  :  $subTitle",
+                  text: "$iconUrl $subTitle",
                   fontSize: fontSize,
                   fontWeight: FontWeight.w500,
                   color: const Color(0xFF444444),
@@ -4974,156 +5748,3 @@ double screenWidth = MediaQuery.of(context).size.width;
     );
   }
 }
-
-///======================================================
-///
-/// BOTTOM BAR CODE
-/// (widget.lobbyDetail.lobby.userStatus == "MEMBER")
-//                 ? Column(
-//                     crossAxisAlignment: CrossAxisAlignment.start,
-//                     mainAxisAlignment: MainAxisAlignment.center,
-//                     children: [
-//                       DesignText(
-//                         text: "Get ready !!",
-//                         fontSize: 14,
-//                         fontWeight: FontWeight.w600,
-//                       ),
-//                       SizedBox(height: 2),
-//                       GestureDetector(
-//                         onTap: () {
-//                           showModalBottomSheet(
-//                               context: context,
-//                               builder: (context) {
-//                                 return LobbyAttendingStatusBottomSheet(
-//                                     lobby: lobbyDetails.lobby);
-//                               });
-//                         },
-//                         child: DesignText(
-//                           text: "Edit Status",
-//                           fontSize: 12,
-//                           fontWeight: FontWeight.w400,
-//                           color: const Color(0xFF3E79A1),
-//                         ),
-//                       ),
-//                     ],
-//                   )
-//                 : GestureDetector(
-//                     onTap: () => (lobbyDetails.lobby.userStatus == "ADMIN")
-//                         ? showModalBottomSheet(
-//                             backgroundColor: Colors.white,
-//                             context: context,
-//                             builder: (BuildContext context) {
-//                               return LobbySmallEditSheet(
-//                                   lobby: lobbyDetails.lobby);
-//                             },
-//                           )
-//                         : null,
-//                     child: Card(
-//                       color: Colors.white,
-//                       shadowColor: const Color(0x6C3E79A1),
-//                       elevation:
-//                           (lobbyDetails.lobby.userStatus == "ADMIN") ? 4 : 0,
-//                       shape: RoundedRectangleBorder(
-//                         borderRadius: BorderRadius.circular(12),
-//                       ),
-//                       child: Padding(
-//                         padding: EdgeInsets.symmetric(
-//                             vertical: 8, horizontal: 16),
-//                         child: Column(
-//                           crossAxisAlignment: CrossAxisAlignment.start,
-//                           mainAxisAlignment: MainAxisAlignment.center,
-//                           children: [
-//                             Row(
-//                               children: [
-//                                 DesignText(
-//                                   text: (widget.lobbyDetail.lobby.price != 0.0)
-//                                       ? "₹${widget.lobbyDetail.lobby.price}/person"
-//                                       : "Free",
-//                                   fontSize: 14,
-//                                   fontWeight: FontWeight.w600,
-//                                 ),
-//                                 if (lobbyDetails.lobby.userStatus ==
-//                                     "ADMIN") ...[
-//                                   SizedBox(width: 4),
-//                                   DesignIcon.icon(
-//                                     icon: Icons.arrow_drop_up_rounded,
-//                                     color: const Color(0xFF323232),
-//                                     size: 24,
-//                                   ),
-//                                 ],
-//                               ],
-//                             ),
-//                             SizedBox(height: 2),
-//                             DesignText(
-//                               text:
-//                                   "${widget.lobbyDetail.lobby.membersRequired} slots available",
-//                               fontSize: 12,
-//                               fontWeight: FontWeight.w500,
-//                               color: Colors.green,
-//                             ),
-//                           ],
-//                         ),
-//                       ),
-//                     ),
-//                   ),
-//             (widget.lobbyDetail.lobby.userStatus != "MEMBER")
-//                 ? SizedBox(
-//                     width: 0.45.sw,
-//                     child: Row(
-//                       children: [
-//                         Expanded(
-//                           flex: 4,
-//                           child: DesignButton(
-//                             onPress: () async {
-//                               switch (widget.lobbyDetail.lobby.userStatus) {
-//                                 case "REQUESTED":
-//                                   return;
-//                                 case "REQUEST_DENIED":
-//                                   return;
-//                                 default:
-//                                   return _onJoinOrRequest(
-//                                       context); // Default case if userStatus is unexpected
-//                               }
-//                             },
-//                             bgColor: () {
-//                               switch (widget.lobbyDetail.lobby.userStatus) {
-//                                 case "REQUESTED":
-//                                   return const Color(0xFF989898);
-//                                 case "REQUEST_DENIED":
-//                                   return const Color(0xFF323232);
-//                                 default:
-//                                   return DesignColors
-//                                       .accent; // Default case if userStatus is unexpected
-//                               }
-//                             }(),
-//                             title: () {
-//                               switch (widget.lobbyDetail.lobby.userStatus) {
-//                                 case "ADMIN":
-//                                   return "Invite People";
-//                                 case "VISITOR":
-//                                   return widget.lobbyDetail.lobby.isPrivate
-//                                       ? "Request"
-//                                       : (widget.lobbyDetail.lobby.price !=
-//                                                   0.0 &&
-//                                               widget.lobbyDetail.lobby
-//                                                       .lobbyType ==
-//                                                   "PUBLIC")
-//                                           ? "Checkout"
-//                                           : "Join"; // Show based on whether the visitor has joined or not
-//                                 case "REQUESTED":
-//                                   return "Request Pending ";
-//                                 case "REQUEST_DENIED":
-//                                   return "Request Denied";
-//                                 default:
-//                                   return "Join Lobby"; // Default case if userStatus is unexpected
-//                               }
-//                             }(),
-//                           ),
-//                         ),
-//                       ],
-//                     ),
-//                   )
-//                 : DigitalCountdownButton(
-//                     endTimestamp: lobbyDetails.lobby.dateRange['startDate'],
-//                     onPressed: () {},
-//                   ),
