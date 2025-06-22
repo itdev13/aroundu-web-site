@@ -492,9 +492,9 @@ class _AppLandingPageState extends State<AppLandingPage>
 
   Widget _buildAppDownloadSection({required bool isMobile}) {
     // App store URLs - replace with actual URLs
-    final String appStoreUrl = 'https://apps.apple.com/app/aroundu/id123456789';
+    final String appStoreUrl = 'https://apps.apple.com/in/app/aroundu/id6744299663';
     final String playStoreUrl =
-        'https://play.google.com/store/apps/details?id=com.aroundu.app';
+        'https://play.google.com/store/apps/details?id=com.polar.aroundu';
 
     return SlideTransition(
       position: _slideAnimation,
