@@ -1,6 +1,14 @@
 {
   "version": 2,
   "public": true,
+  "functions": {
+    ".well-known/assetlinks.json": {
+      "includeFiles": ".well-known/assetlinks.json"
+    },
+    ".well-known/apple-app-site-association": {
+      "includeFiles": ".well-known/apple-app-site-association"
+    }
+  },
   "builds": [
     {
       "src": "build/web/**",
@@ -8,6 +16,20 @@
     }
   ],
   "routes": [
+    {
+      "src": "/.well-known/assetlinks.json",
+      "dest": "/.well-known/assetlinks.json",
+      "headers": {
+        "Content-Type": "application/json"
+      }
+    },
+    {
+      "src": "/.well-known/apple-app-site-association",
+      "dest": "/.well-known/apple-app-site-association",
+      "headers": {
+        "Content-Type": "application/json"
+      }
+    },
     {
       "src": "/(.*)",
       "dest": "/index.html"
