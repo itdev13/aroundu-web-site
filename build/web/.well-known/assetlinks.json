@@ -1,0 +1,10 @@
+[
+    {
+      "relation": ["delegate_permission/common.handle_all_urls"],
+      "target": {
+        "namespace": "android_app",
+        "package_name": "com.polar.aroundu",
+        "sha256_cert_fingerprints": ["58:18:75:CF:3D:0A:F0:B0:97:51:81:76:FB:1A:2B:9E:94:27:E6:31:41:88:BC:B7:36:A9:4E:B9:B2:17:91:B0"]
+      }
+    }
+  ]

@@ -58,7 +58,7 @@ class RouteService {
   }
 
   /// Navigates to a named route and removes all previous routes from the stack
-  ///
+  /// 
   /// @param routeName The name of the route to navigate to
   /// @param parameters Optional parameters to pass to the route
   void navigateOffAllTo(String routeName, {Map<String, String>? parameters}) {
