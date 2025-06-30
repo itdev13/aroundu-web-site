@@ -1,7 +1,7 @@
 name: aroundu
 description: "AroundU Web FE"
 publish_to: 'none' 
-version: 1.0.0+1
+version: 2.0.1+4
 
 environment:
   sdk: ^3.7.0
