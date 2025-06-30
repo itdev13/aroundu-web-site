@@ -1,32 +1,14 @@
 {
   "version": 2,
+  "cleanUrls": true,
+  "trailingSlash": false,
   "builds": [
     {
       "src": "build/web",
       "use": "@vercel/static"
     }
   ],
-  "redirects": [
-    {
-      "source": "/privacy.html",
-      "destination": "/privacy",
-      "permanent": true
-    },
-    {
-      "source": "/terms.html", 
-      "destination": "/terms",
-      "permanent": true
-    }
-  ],
   "rewrites": [
-    {
-      "source": "/privacy",
-      "destination": "/privacy.html"
-    },
-    {
-      "source": "/terms",
-      "destination": "/terms.html"
-    },
     {
       "source": "/(.*)",
       "destination": "/index.html"
@@ -36,13 +18,19 @@
     {
       "source": "/.well-known/assetlinks.json",
       "headers": [
-        { "key": "Content-Type", "value": "application/json" }
+        {
+          "key": "Content-Type",
+          "value": "application/json"
+        }
       ]
     },
     {
       "source": "/.well-known/apple-app-site-association",
       "headers": [
-        { "key": "Content-Type", "value": "application/json" }
+        {
+          "key": "Content-Type",
+          "value": "application/json"
+        }
       ]
     }
   ]
