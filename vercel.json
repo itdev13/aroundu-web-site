@@ -23,6 +23,20 @@
       }
     },
     {
+      "src": "/privacy",
+      "dest": "/privacy.html",
+      "headers": {
+        "Content-Type": "text/html"
+      }
+    },
+    {
+      "src": "/terms",
+      "dest": "/terms.html",
+      "headers": {
+        "Content-Type": "text/html"
+      }
+    },
+    {
       "src": "/(.*)",
       "dest": "/index.html"
     }
