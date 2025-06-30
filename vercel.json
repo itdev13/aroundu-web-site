@@ -1,38 +1,49 @@
 {
   "version": 2,
-  "public": true,
   "builds": [
     {
-      "src": "build/web/**",
+      "src": "build/web",
       "use": "@vercel/static"
     }
   ],
-  "routes": [
+  "redirects": [
     {
-      "src": "/.well-known/assetlinks.json",
-      "dest": "/.well-known/assetlinks.json",
-      "headers": {
-        "Content-Type": "application/json"
-      }
+      "source": "/privacy.html",
+      "destination": "/privacy",
+      "permanent": true
     },
     {
-      "src": "/.well-known/apple-app-site-association",
-      "dest": "/.well-known/apple-app-site-association",
-      "headers": {
-        "Content-Type": "application/json"
-      }
+      "source": "/terms.html", 
+      "destination": "/terms",
+      "permanent": true
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/privacy",
+      "destination": "/privacy.html"
     },
     {
-      "src": "/privacy/?",
-      "dest": "/privacy.html"
+      "source": "/terms",
+      "destination": "/terms.html"
     },
     {
-      "src": "/terms/?",
-      "dest": "/terms.html"
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/.well-known/assetlinks.json",
+      "headers": [
+        { "key": "Content-Type", "value": "application/json" }
+      ]
     },
     {
-      "src": "/(.*)",
-      "dest": "/index.html"
+      "source": "/.well-known/apple-app-site-association",
+      "headers": [
+        { "key": "Content-Type", "value": "application/json" }
+      ]
     }
   ]
 }
