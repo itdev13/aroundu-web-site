@@ -1,5 +1,5 @@
 {
-  "version": 2,
+  "version": 3,
   "public": true,
   "builds": [
     {
@@ -23,18 +23,12 @@
       }
     },
     {
-      "src": "/privacy",
-      "dest": "/privacy.html",
-      "headers": {
-        "Content-Type": "text/html"
-      }
+      "src": "/privacy/?",
+      "dest": "/privacy.html"
     },
     {
-      "src": "/terms",
-      "dest": "/terms.html",
-      "headers": {
-        "Content-Type": "text/html"
-      }
+      "src": "/terms/?",
+      "dest": "/terms.html"
     },
     {
       "src": "/(.*)",
