@@ -58,7 +58,7 @@
       };
 
       // Initialize Flutter engine
-      _flutter.loader.load({
+      _flutter.loader.loadEntrypoint({
         serviceWorker: null,
         onEntrypointLoaded: function (engineInitializer) {
           engineInitializer.initializeEngine({
@@ -70,6 +70,7 @@
       });
     });
   </script>
+  <!-- <script src="flutter_bootstrap.js" async></script> -->
 </body>
 
 </html>
