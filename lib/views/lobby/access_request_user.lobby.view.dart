@@ -1,3 +1,4 @@
+import 'package:aroundu/constants/appRoutes.dart';
 import 'package:aroundu/designs/widgets/rounded.rectangle.tab.indicator.dart';
 import 'package:aroundu/designs/widgets/textfield.widget.designs.dart';
 import 'package:aroundu/utils/custome_snackbar.dart';
@@ -191,16 +192,17 @@ class _UserLobbyAccessRequestState
               Get.back();
               dashboardController.updateTabIndex(2);
             } else {
-              Get.to(
-                () => UserLobbyAccessRequestShare(
-                  friends: profileController.friendsList,
-                  squads: groupController.groups,
-                  lobbyId: widget.lobby.id,
-                  lobbyHasForm: widget.lobby.hasForm,
-                  lobbyIsPrivate: widget.lobby.isPrivate,
-                  requestText: requestText,
-                  formModel: formModel,
-                ),
+              Get.toNamed(
+                AppRoutes.lobbyAccessRequestShare,
+                arguments: {
+                  'friends': profileController.friendsList,
+                  'squads': groupController.groups,
+                  'lobbyId': widget.lobby.id,
+                  'lobbyHasForm': widget.lobby.hasForm,
+                  'lobbyIsPrivate': widget.lobby.isPrivate,
+                  'requestText': requestText,
+                  'formModel': formModel,
+                },
               );
               requestedTextEditingController.clear();
             }
@@ -254,15 +256,16 @@ class _UserLobbyAccessRequestState
               );
             }
           } else {
-            Get.to(
-              () => UserLobbyAccessRequestShare(
-                friends: profileController.friendsList,
-                squads: groupController.groups,
-                lobbyId: widget.lobby.id,
-                lobbyHasForm: widget.lobby.hasForm,
-                lobbyIsPrivate: widget.lobby.isPrivate,
-                requestText: requestText,
-              ),
+            Get.toNamed(
+              AppRoutes.lobbyAccessRequestShare,
+              arguments: {
+                'friends': profileController.friendsList,
+                'squads': groupController.groups,
+                'lobbyId': widget.lobby.id,
+                'lobbyHasForm': widget.lobby.hasForm,
+                'lobbyIsPrivate': widget.lobby.isPrivate,
+                'requestText': requestText,
+              },
             );
             requestedTextEditingController.clear();
           }

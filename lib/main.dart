@@ -11,10 +11,12 @@ import 'package:flutter_quill/flutter_quill.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_web_plugins/url_strategy.dart';
 import 'package:get/get_navigation/src/root/get_material_app.dart';
+import 'package:get_storage/get_storage.dart';
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 void main() async {
+  await GetStorage.init();
   WidgetsFlutterBinding.ensureInitialized();
   usePathUrlStrategy();
   await DesignUtils.lockPortraitOrientation();
@@ -55,6 +57,9 @@ class MyApp extends ConsumerWidget {
       ),
       initialRoute: AppRoutes.landing,
       getPages: RouteService().configureRoutes(),
+      routingCallback: RouteService().handleRouteChange,
+      onGenerateInitialRoutes: RouteService().generateInitialRoutes,
+      onGenerateRoute: RouteService().generateRoute,
       // home: SplashView(),
     );
     // ScreenUtilInit(

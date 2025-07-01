@@ -13,10 +13,26 @@ import '../../designs/widgets/button.widget.designs.dart';
 import '../../designs/widgets/space.widget.designs.dart';
 
 class PhoneNumberScreen extends GetView<PhoneNumberController> {
-  final Function(String) onContinue;
+  final Function(String)? onContinue;
 
-  PhoneNumberScreen({super.key, required this.onContinue}) {
+  PhoneNumberScreen({super.key, this.onContinue}) {
     Get.put(PhoneNumberController());
+  }
+  
+  // Get the callback from arguments if not provided directly
+  Function(String) get _getOnContinueCallback {
+    if(onContinue != null) {
+      return onContinue!;
+    }
+    else if (Get.arguments != null && Get.arguments['onContinue'] != null) {
+      return Get.arguments['onContinue'];
+    } else {
+      // Fallback function if no callback is provided
+      return (String phoneNumber) async {
+        print('No callback provided for phone number: $phoneNumber');
+        return false;
+      };
+    }
   }
 
   Future<void> _launchURL(BuildContext context, String url) async {
@@ -461,7 +477,7 @@ class PhoneNumberScreen extends GetView<PhoneNumberController> {
                   return;
                 }
                 controller.isLoading.value = true;
-                onContinue(controller.getFullPhoneNumber());
+                _getOnContinueCallback(controller.getFullPhoneNumber());
               },
               isLoading: controller.isLoading.value,
               bgColor: DesignColors.accent,

@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:aroundu/constants/appRoutes.dart';
 import 'package:aroundu/designs/widgets/button.widget.designs.dart';
 import 'package:aroundu/designs/widgets/icon.widget.designs.dart';
 import 'package:aroundu/designs/widgets/space.widget.designs.dart';
@@ -263,9 +264,11 @@ class _AuthViewState extends State<AuthView>
           );
           return;
         }
-        Get.to(
-          () => PhoneNumberScreen(
-            onContinue: (phoneNumber) async {
+        // Use named route with parameters
+        Get.toNamed(
+          AppRoutes.phoneNumber,
+          arguments: {
+            'onContinue': (String phoneNumber) async {
               try {
                 await _verifyPhone(phoneNumber);
                 return true; // Return success status
@@ -279,7 +282,7 @@ class _AuthViewState extends State<AuthView>
                 return false; // Return failure status
               }
             },
-          ),
+          },
         );
       },
       child: Row(
@@ -927,10 +930,11 @@ class _AuthViewState extends State<AuthView>
 
       if (response.isSuccess) {
         // Navigate to OTP screen
-        Get.to(
-          () => OtpScreen(
-            phoneNumber: phoneNumber,
-            onVerify: (String otp) async {
+        Get.toNamed(
+          AppRoutes.otp,
+          arguments: {
+            'phoneNumber': phoneNumber,
+            'onVerify': (String otp) async {
               final GlobalKey<State> dialogKey = GlobalKey<State>();
 
               // Show loading dialog
@@ -999,8 +1003,8 @@ class _AuthViewState extends State<AuthView>
                 );
               }
             },
-            onResendOtp: () => _resendOTP(phoneNumber),
-          ),
+            'onResendOtp': () => _resendOTP(phoneNumber),
+          },
         );
         return true;
       } else {

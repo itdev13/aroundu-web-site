@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:aroundu/constants/appRoutes.dart';
 import 'package:aroundu/designs/widgets/space.widget.designs.dart';
 import 'package:aroundu/designs/widgets/text.widget.designs.dart';
 import 'package:aroundu/models/lobby.dart';
@@ -355,12 +356,13 @@ class AccessRequestsView extends ConsumerWidget {
                                         .contains(request.accessRequestId);
                                     return GestureDetector(
                                       onTap:
-                                          () => Get.to(
-                                            () => AccessRequestPage(
-                                              request: request,
-                                              lobbyId: lobbyId,
-                                              isGroup: isGroup,
-                                            ),
+                                          () => Get.toNamed(
+                                            AppRoutes.detailAccessRequest,
+                                            arguments: {
+                                              'request': request,
+                                              'lobbyId': lobbyId,
+                                              'isGroup': isGroup,
+                                            },
                                           ),
                                       child: Padding(
                                         padding: EdgeInsets.only(
@@ -759,16 +761,17 @@ class AccessRequestsView extends ConsumerWidget {
                                                               ), // Button padding
                                                         ),
                                                         onPressed: () {
-                                                          Get.to(
-                                                            () =>
-                                                                AccessRequestPage(
-                                                                  request:
-                                                                      request,
-                                                                  lobbyId:
-                                                                      lobbyId,
-                                                                  isGroup:
-                                                                      isGroup,
-                                                                ),
+                                                          Get.toNamed(
+                                                            AppRoutes
+                                                                .detailAccessRequest,
+                                                            arguments: {
+                                                              'request':
+                                                                  request,
+                                                              'lobbyId':
+                                                                  lobbyId,
+                                                              'isGroup':
+                                                                  isGroup,
+                                                            },
                                                           );
                                                         },
                                                         child: DesignText(
@@ -1040,7 +1043,10 @@ class AccessRequestsView extends ConsumerWidget {
 
         // Show the FileOptionsDialog as a separate route
 
-        Get.to(() => FileOptionsDialog(fileUrl: fileUrl));
+        Get.toNamed(
+          AppRoutes.downloadAccessRequestData,
+          arguments: {"fileUrl": fileUrl},
+        );
       } else {
         throw Exception('Failed to download: ${response.statusCode}');
       }

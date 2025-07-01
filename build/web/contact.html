@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AroundU - Contact Us</title>
+    <link rel="icon" href="/favicon.png" />
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: white;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 700px;
+            width: 100%;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+            animation: slideInUp 0.8s ease-out;
+        }
+
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .header {
+            background: linear-gradient(135deg, #EC4B5D, #d63547);
+            color: white;
+            padding: 50px 40px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+            animation: rotate 20s linear infinite;
+        }
+
+        @keyframes rotate {
+            from {
+                transform: rotate(0deg);
+            }
+
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .header h2 {
+            font-size: 3em;
+            font-weight: 700;
+            margin-bottom: 15px;
+            position: relative;
+            z-index: 1;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .last-updated {
+            font-size: 1em;
+            opacity: 0.9;
+            position: relative;
+            z-index: 1;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 8px 16px;
+            border-radius: 20px;
+            display: inline-block;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .intro {
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            padding: 25px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            border-left: 4px solid #EC4B5D;
+            font-size: 1.1em;
+            line-height: 1.7;
+            color: #555;
+        }
+
+        .contact-grid {
+            display: grid;
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        .contact-item {
+            background: #fafbfc;
+            padding: 25px;
+            border-radius: 12px;
+            border: 1px solid #e1e5e9;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .contact-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: linear-gradient(135deg, #EC4B5D, #d63547);
+            transform: scaleY(0);
+            transition: transform 0.3s ease;
+        }
+
+        .contact-item:hover::before {
+            transform: scaleY(1);
+        }
+
+        .contact-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(236, 75, 93, 0.15);
+            border-color: #EC4B5D;
+        }
+
+        .contact-icon {
+            font-size: 2em;
+            margin-right: 15px;
+            display: inline-block;
+            vertical-align: middle;
+            filter: grayscale(1);
+            transition: filter 0.3s ease;
+        }
+
+        .contact-item:hover .contact-icon {
+            filter: grayscale(0);
+        }
+
+        .contact-text {
+            display: inline-block;
+            vertical-align: middle;
+            width: calc(100% - 60px);
+        }
+
+        .contact-label {
+            font-weight: 600;
+            color: #EC4B5D;
+            font-size: 1.1em;
+            margin-bottom: 5px;
+        }
+
+        .contact-value {
+            color: #666;
+            font-size: 1em;
+            line-height: 1.5;
+        }
+
+        .contact-value a {
+            color: #EC4B5D;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .contact-value a:hover {
+            color: #d63547;
+            text-decoration: underline;
+        }
+
+        .floating-shapes {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        .shape {
+            position: absolute;
+            background: rgba(236, 75, 93, 0.1);
+            border-radius: 50%;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .shape:nth-child(1) {
+            width: 80px;
+            height: 80px;
+            top: 20%;
+            left: 10%;
+            animation-delay: 0s;
+        }
+
+        .shape:nth-child(2) {
+            width: 60px;
+            height: 60px;
+            top: 60%;
+            right: 10%;
+            animation-delay: 2s;
+        }
+
+        .shape:nth-child(3) {
+            width: 40px;
+            height: 40px;
+            bottom: 20%;
+            left: 15%;
+            animation-delay: 4s;
+        }
+
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translateY(0px);
+            }
+
+            50% {
+                transform: translateY(-20px);
+            }
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            .header {
+                padding: 40px 20px;
+            }
+
+            .header h2 {
+                font-size: 2.5em;
+            }
+
+            .content {
+                padding: 25px;
+            }
+
+            .contact-item {
+                padding: 20px;
+            }
+
+            .contact-icon {
+                font-size: 1.5em;
+                margin-right: 10px;
+            }
+
+            .contact-text {
+                width: calc(100% - 45px);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="floating-shapes">
+            <div class="shape"></div>
+            <div class="shape"></div>
+            <div class="shape"></div>
+        </div>
+
+        <div class="header">
+            <h2>Contact Us</h2>
+            <figcaption class="last-updated">Last Updated: 08/08/2024</figcaption>
+        </div>
+
+        <div class="content">
+            <div class="intro">
+                For any inquiries, support, or assistance, please reach out to us:
+            </div>
+
+            <div class="contact-grid">
+                <div class="contact-item">
+                    <div class="contact-icon">🏢</div>
+                    <div class="contact-text">
+                        <div class="contact-label">Support Team</div>
+                        <div class="contact-value">AroundU Support</div>
+                    </div>
+                </div>
+
+                <div class="contact-item">
+                    <div class="contact-icon">📧</div>
+                    <div class="contact-text">
+                        <div class="contact-label">Email</div>
+                        <div class="contact-value">
+                            <a href="mailto:info@aroundu.in">info@aroundu.in</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="contact-item">
+                    <div class="contact-icon">📞</div>
+                    <div class="contact-text">
+                        <div class="contact-label">Phone</div>
+                        <div class="contact-value">
+                            <a href="tel:+919502803691">+91 9502803691</a> |
+                            <a href="tel:+917530007667">+91 7530007667</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="contact-item">
+                    <div class="contact-icon">📍</div>
+                    <div class="contact-text">
+                        <div class="contact-label">Address</div>
+                        <div class="contact-value">
+                            2861, 1st Main Rd, HAL 2nd Stage, Kodihalli, Bengaluru, Karnataka 560008
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

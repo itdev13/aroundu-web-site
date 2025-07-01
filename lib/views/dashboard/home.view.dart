@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:aroundu/constants/appRoutes.dart';
 import 'package:aroundu/designs/widgets/category_list.dart';
 import 'package:aroundu/models/category.dart';
 import 'package:aroundu/models/house.model.dart';
@@ -175,7 +176,7 @@ class SearchAndFilterInfo extends ConsumerWidget {
                               canRequestFocus: false,
                               onTap: () {
                                 HapticFeedback.lightImpact();
-                                Get.to(() => const SearchView());
+                                Get.toNamed(AppRoutes.search);
                               },
                               decoration: InputDecoration(
                                 border: InputBorder.none,
@@ -205,7 +206,7 @@ class SearchAndFilterInfo extends ConsumerWidget {
                   GestureDetector(
                     onTap: () {
                       HapticFeedback.selectionClick();
-                      Get.to(() => const LobbyFilterView());
+                      Get.toNamed(AppRoutes.filter);
                     },
                     child: Container(
                       padding: EdgeInsets.all(12),
@@ -536,11 +537,12 @@ class LobbiesList extends ConsumerWidget {
                           TextButton(
                             onPressed: () {
                               HapticFeedback.selectionClick();
-                              Get.to(
-                                () => ViewAllLobbiesExplore(
-                                  title: title,
-                                  lobbies: value,
-                                ),
+                              Get.toNamed(
+                                AppRoutes.viewAllLobbies,
+                                arguments: {
+                                  'title': title,
+                                  'lobbies': value,
+                                },
                               );
                             },
                             child: DesignText(
@@ -779,11 +781,12 @@ class HousesList extends ConsumerWidget {
                         TextButton(
                           onPressed: () {
                             HapticFeedback.lightImpact();
-                            Get.to(
-                              () => ViewAllHousesExplore(
-                                title: title,
-                                houses: value,
-                              ),
+                            Get.toNamed(
+                              AppRoutes.viewAllHouses,
+                              arguments: {
+                                'title': title,
+                                'houses': value,
+                              },
                             );
                           },
                           child: DesignText(
