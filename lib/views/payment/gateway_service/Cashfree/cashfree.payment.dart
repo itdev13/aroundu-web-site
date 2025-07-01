@@ -1,4 +1,5 @@
 
+import 'package:aroundu/constants/urls.dart';
 import 'package:aroundu/designs/colors.designs.dart';
 import 'package:aroundu/designs/widgets/text.widget.designs.dart';
 import 'package:aroundu/models/lobby.dart';
@@ -63,7 +64,7 @@ class _CashFreePaymentViewState extends ConsumerState<CashFreePaymentView> {
 
     // Initialize Cashfree service
     _cashFeeService = CashFreeService(
-      isProduction: false, // Set to true for production
+      isProduction: ApiConstants.cashfreeProduction, // Set to true for production
     );
 
     // Set up callback handlers
