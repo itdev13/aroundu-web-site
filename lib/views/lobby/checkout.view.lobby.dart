@@ -1,3 +1,4 @@
+import 'package:aroundu/constants/appRoutes.dart';
 import 'package:aroundu/designs/widgets/textfield.widget.designs.dart';
 import 'package:aroundu/models/lobby.dart';
 import 'package:aroundu/models/offers_model.dart';
@@ -1034,7 +1035,7 @@ class _CheckOutPublicLobbyViewState
                 Space.h(height: 24),
                 GestureDetector(
                   onTap:
-                      () => Get.to(() => ApplyOffers(lobbyId: widget.lobby.id)),
+                      () => Get.toNamed(AppRoutes.applyOffers, arguments: {"lobbyId": widget.lobby.id}),
                   child: Card(
                     elevation: 4,
                     shadowColor: const Color(0x143E79A1),

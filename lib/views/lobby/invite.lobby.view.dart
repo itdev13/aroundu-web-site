@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:aroundu/constants/appRoutes.dart';
 import 'package:aroundu/designs/widgets/button.widget.designs.dart';
 import 'package:aroundu/designs/widgets/text.widget.designs.dart';
 import 'package:aroundu/models/profile.model.dart';
@@ -502,10 +503,11 @@ double screenWidth = MediaQuery.of(context).size.width;
                       children: [
                         DesignButton(
                           onPress: () async {
-                            await Get.to(
-                              () => ExternalAttendeesScreen(
-                                lobbyId: widget.lobby.id,
-                              ),
+                            await Get.toNamed(
+                              AppRoutes.inviteExternalAttendees,
+                              arguments: {
+                                'lobbyId': widget.lobby.id,
+                              },
                             );
                             ref
                                 .read(

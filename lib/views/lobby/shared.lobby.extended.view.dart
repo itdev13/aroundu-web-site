@@ -1,3 +1,4 @@
+import 'package:aroundu/constants/appRoutes.dart';
 import 'package:aroundu/designs/colors.designs.dart';
 import 'package:aroundu/designs/widgets/icon.widget.designs.dart';
 import 'package:aroundu/designs/widgets/space.widget.designs.dart';
@@ -134,10 +135,9 @@ class SharedAccessRequestCardExtendedView extends ConsumerWidget {
                   children: [
                     // Lobby Information
                     GestureDetector(
-                      onTap:
-                          () => Get.to(
-                            () => LobbyView(lobbyId: accessRequest.lobbyId),
-                          ),
+                      onTap: () => Get.toNamed(
+                        AppRoutes.lobby.replaceAll(':lobbyId', accessRequest.lobbyId),
+                      ),
                       child: Card(
                         color: Colors.white,
                         elevation: 1,

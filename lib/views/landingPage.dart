@@ -1,3 +1,4 @@
+import 'package:aroundu/constants/appRoutes.dart';
 import 'package:aroundu/designs/colors.designs.dart';
 import 'package:aroundu/designs/widgets/text.widget.designs.dart';
 import 'package:aroundu/views/splash.view.dart';
@@ -56,11 +57,11 @@ class _AppLandingPageState extends State<AppLandingPage>
   }
 
   void _navigateToLogin() {
-    Get.to(() => const AuthView());
+    Get.toNamed(AppRoutes.auth);
   }
 
   void _navigateToSignUp() {
-    Get.to(() => const AuthView());
+    Get.toNamed(AppRoutes.auth);
   }
 
   @override
@@ -162,7 +163,7 @@ class _AppLandingPageState extends State<AppLandingPage>
             ),
             ElevatedButton(
               onPressed: () {
-                Get.to(() => SplashView());
+                Get.toNamed(AppRoutes.splash);
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.white,
@@ -259,7 +260,7 @@ class _AppLandingPageState extends State<AppLandingPage>
                 ),
                 ElevatedButton(
                   onPressed: () {
-                    Get.to(() => SplashView());
+                    Get.toNamed(AppRoutes.splash);
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.white,

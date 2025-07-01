@@ -194,12 +194,13 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
           // await groupController.fetchGroups();
           // await profileController.getFriends();
           Navigator.of(context, rootNavigator: true).pop();
-          await Get.to(
-            () => InviteFriendsView(
-              lobby: lobby,
-              // friends: profileController.friendsList,
-              // squads: groupController.groups,
-            ),
+          await Get.toNamed(
+            AppRoutes.inviteFriends,
+            arguments: {
+              'lobby': lobby,
+              // 'friends': profileController.friendsList,
+              // 'squads': groupController.groups,
+            },
           );
           ref.read(lobbyDetailsProvider(lobby.id).notifier).reset();
           await ref
@@ -265,8 +266,9 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                 Navigator.pop(dialogKey.currentContext!);
               }
             }
-            await Get.to(
-              () => UserLobbyAccessRequest(lobby: lobby, isIndividual: false),
+            await Get.toNamed(
+              AppRoutes.lobbyAccessRequest,
+              arguments: {'lobby': lobby, 'isIndividual': false},
             );
             ref.read(lobbyDetailsProvider(lobby.id).notifier).reset();
             await ref
@@ -274,7 +276,10 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                 .fetchLobbyDetails(lobby.id);
           },
           onJoinAsIndividual: () async {
-            await Get.to(() => UserLobbyAccessRequest(lobby: lobby));
+            await Get.toNamed(
+              AppRoutes.lobbyAccessRequest,
+              arguments: {'lobby': lobby},
+            );
             ref.read(lobbyDetailsProvider(lobby.id).notifier).reset();
             await ref
                 .read(lobbyDetailsProvider(lobby.id).notifier)
@@ -283,7 +288,10 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
         );
       } else {
         if (lobby.hasForm) {
-          await Get.to(() => UserLobbyAccessRequest(lobby: lobby));
+          await Get.toNamed(
+            AppRoutes.lobbyAccessRequest,
+            arguments: {'lobby': lobby},
+          );
           ref.read(lobbyDetailsProvider(lobby.id).notifier).reset();
           await ref
               .read(lobbyDetailsProvider(lobby.id).notifier)
@@ -321,7 +329,10 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
             final pricingData = pricingState.pricingData;
 
             if (pricingData != null && pricingData.status == 'SUCCESS') {
-              await Get.to(() => CheckOutPublicLobbyView(lobby: lobby));
+              await Get.toNamed(
+                AppRoutes.checkOutPublicLobbyView,
+                arguments: {'lobby': lobby},
+              );
               ref.read(lobbyDetailsProvider(lobby.id).notifier).reset();
               await ref
                   .read(lobbyDetailsProvider(lobby.id).notifier)
@@ -599,11 +610,12 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                         backgroundColor: Colors.white70,
                       ),
                       onPressed: () {
-                        Get.to(
-                          () => ScanQrScreen(
-                            lobbyId: lobbyData.lobby.id,
-                            lobby: lobbyData.lobby,
-                          ),
+                        Get.toNamed(
+                          AppRoutes.scanQrScreen,
+                          arguments: {
+                            'lobbyId': lobbyData.lobby.id,
+                            'lobby': lobbyData.lobby,
+                          },
                         );
                       },
                       icon: DesignIcon.icon(
@@ -754,14 +766,15 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                         color: const Color(0xFF323232),
                       ),
                       onTap: () {
-                        Get.to(
-                          () => AccessRequestsView(
-                            lobbyId: lobbyData.lobby.id,
-                            pageTitle:
+                        Get.toNamed(
+                          AppRoutes.lobbyRequests,
+                          arguments: {
+                            'lobbyId': lobbyData.lobby.id,
+                            'pageTitle':
                                 (lobbyData.lobby.lobbyType == 'PUBLIC')
                                     ? 'Form Submissions'
                                     : 'Access Requests',
-                          ),
+                          },
                         );
                         // Get.to(() => const AccessRequestPage());
                       },
@@ -814,8 +827,9 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                         color: const Color(0xFF323232),
                       ),
                       onTap: () {
-                        Get.to(
-                          () => LobbySettingsScreen(lobby: lobbyData.lobby),
+                        Get.toNamed(
+                          AppRoutes.lobbySettings,
+                          arguments: {'lobby': lobbyData.lobby},
                         );
                       },
                     ),
@@ -2032,7 +2046,7 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                       // Wrap the GestureDetector in Expanded
                       child: GestureDetector(
                         onTap: () async {
-                         FancyAppDownloadDialog.show(
+                          FancyAppDownloadDialog.show(
                             context,
                             title: "Unlock Premium Features",
                             message:
@@ -2192,14 +2206,13 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                         width: 124,
                         child: DesignButton(
                           padding: EdgeInsets.all(12),
-                          onPress:
-                              () {
-                              //   Get.to(
-                              //   () => CoHostSelectionView(
-                              //     lobbyDetails: lobbyData,
-                              //   ),
-                              // );
-                              FancyAppDownloadDialog.show(
+                          onPress: () {
+                            //   Get.to(
+                            //   () => CoHostSelectionView(
+                            //     lobbyDetails: lobbyData,
+                            //   ),
+                            // );
+                            FancyAppDownloadDialog.show(
                               context,
                               title: "Unlock Premium Features",
                               message:
@@ -2213,7 +2226,7 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                                 print("User chose to skip download");
                               },
                             );
-                              },
+                          },
                           bgColor: const Color(0x143E79A1),
                           child: Row(
                             children: [
@@ -2788,9 +2801,8 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                                 (lobbyData.lobby.userStatus == 'MEMBER'))) ...[
                           const Spacer(),
                           InkWell(
-                            onTap:
-                                () {
-                                  FancyAppDownloadDialog.show(
+                            onTap: () {
+                              FancyAppDownloadDialog.show(
                                 context,
                                 title: "Unlock Premium Features",
                                 message:
@@ -2804,10 +2816,10 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                                   print("User chose to skip download");
                                 },
                               );
-                                //   Get.to(
-                                //   () => AttendeeScreen(lobbyDetails: lobbyData),
-                                // );
-                                },
+                              //   Get.to(
+                              //   () => AttendeeScreen(lobbyDetails: lobbyData),
+                              // );
+                            },
                             child: DesignText(
                               text: "View All",
                               fontSize: 12,
@@ -2946,7 +2958,6 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
               //   lobbyDetail: lobbyData,
               // ),
 
-              
               // Space.h(height: 16),
             ],
           ),
@@ -2999,7 +3010,7 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                 // Wrap the GestureDetector in Expanded
                 child: GestureDetector(
                   onTap: () async {
-                   FancyAppDownloadDialog.show(
+                    FancyAppDownloadDialog.show(
                       context,
                       title: "Unlock Premium Features",
                       message:
@@ -3367,7 +3378,7 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                       ),
                       SizedBox(height: 16),
                       GestureDetector(
-                        onTap: (){
+                        onTap: () {
                           FancyAppDownloadDialog.show(
                             context,
                             title: "Unlock Premium Features",
@@ -3393,7 +3404,8 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                             mainAxisAlignment: MainAxisAlignment.start,
                             children: [
                               Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                 children: [
                                   DesignText(
                                     text:
@@ -3458,10 +3470,13 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                                                 SizedBox(height: 4),
                                                 Text(
                                                   user.name,
-                                                  style: TextStyle(fontSize: 12),
+                                                  style: TextStyle(
+                                                    fontSize: 12,
+                                                  ),
                                                   textAlign: TextAlign.center,
                                                   maxLines: 2,
-                                                  overflow: TextOverflow.ellipsis,
+                                                  overflow:
+                                                      TextOverflow.ellipsis,
                                                 ),
                                               ],
                                             ),
@@ -3694,7 +3709,6 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                                       //     .fetchLobbyDetails(
                                       //       lobbyData.lobby.id,
                                       //     );
-                                      
                                     },
                                     child: const CustomOfferCard(
                                       boldText: "Add tier pricing ",
@@ -4794,15 +4808,16 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                                     ?.accessId
                                     .isNotEmpty ??
                                 false)) {
-                          Get.to(
-                            () => SharedAccessRequestCardExtendedView(
-                              accessReqId:
+                          Get.toNamed(
+                            AppRoutes.sharedAccessRequestCardExtendedView,
+                            arguments: {
+                              'accessReqId':
                                   lobbyDetail
                                       .lobby
                                       .accessRequestData
                                       ?.accessId ??
                                   "",
-                            ),
+                            },
                           );
                         } else {
                           Fluttertoast.showToast(
@@ -4867,10 +4882,11 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
 
                               if (pricingData != null &&
                                   pricingData.status == 'SUCCESS') {
-                                await Get.to(
-                                  () => CheckOutPublicLobbyView(
-                                    lobby: lobbyDetail.lobby,
-                                  ),
+                                await Get.toNamed(
+                                  AppRoutes.checkOutPublicLobbyView,
+                                  arguments: {
+                                    'lobby': lobbyDetail.lobby,
+                                  },
                                 );
                               } else {
                                 // Show error message if pricing data couldn't be fetched
@@ -4930,10 +4946,11 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
 
                             if (pricingData != null &&
                                 pricingData.status == 'SUCCESS') {
-                              await Get.to(
-                                () => CheckOutPublicLobbyView(
-                                  lobby: lobbyDetail.lobby,
-                                ),
+                              await Get.toNamed(
+                                AppRoutes.checkOutPublicLobbyView,
+                                arguments: {
+                                  'lobby': lobbyDetail.lobby,
+                                },
                               );
                             } else {
                               // Show error message if pricing data couldn't be fetched

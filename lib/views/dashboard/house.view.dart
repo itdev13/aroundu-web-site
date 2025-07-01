@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:math';
 
+import 'package:aroundu/constants/appRoutes.dart';
 import 'package:aroundu/designs/widgets/chip.widgets.designs.dart';
 import 'package:aroundu/designs/widgets/icon.widget.designs.dart';
 import 'package:aroundu/designs/widgets/lobby_card.widgets.designs.dart';
@@ -256,7 +257,7 @@ class _HouseViewState extends ConsumerState<HouseView> {
                                       canRequestFocus: false,
                                       onTap: () {
                                         HapticFeedback.selectionClick();
-                                        Get.to(() => const SearchView());
+                                        Get.toNamed(AppRoutes.search);
                                       },
                                       decoration: InputDecoration(
                                         border: InputBorder.none,
@@ -285,7 +286,8 @@ class _HouseViewState extends ConsumerState<HouseView> {
                           GestureDetector(
                             onTap: () {
                               HapticFeedback.selectionClick();
-                              Get.to(() => const LobbyFilterView());
+                              Get.toNamed(AppRoutes.filter);
+
                             },
                             child: Container(
                               padding: EdgeInsets.all(12),
@@ -1310,11 +1312,12 @@ class _FollowedHousesState extends ConsumerState<FollowedHouses> {
                         TextButton(
                           onPressed: () {
                             HapticFeedback.lightImpact();
-                            Get.to(
-                              () => ViewAllHousesExplore(
-                                title: "Followed Houses",
-                                houses: value,
-                              ),
+                            Get.toNamed(
+                              AppRoutes.viewAllHouses,
+                              arguments: {
+                                'title': "Followed Houses",
+                                'houses': value,
+                              },
                             );
                           },
                           child: DesignText(
@@ -1808,11 +1811,12 @@ class _YourCreatedHousesState extends ConsumerState<YourCreatedHouses> {
                         TextButton(
                           onPressed: () {
                             HapticFeedback.lightImpact();
-                            Get.to(
-                              () => ViewAllHousesExplore(
-                                title: "Followed Houses",
-                                houses: value,
-                              ),
+                            Get.toNamed(
+                              AppRoutes.viewAllHouses,
+                              arguments: {
+                                'title': "Followed Houses",
+                                'houses': value,
+                              },
                             );
                           },
                           child: DesignText(

@@ -1,7 +1,7 @@
 import 'dart:math';
 
+import 'package:aroundu/constants/appRoutes.dart';
 import 'package:aroundu/models/lobby.dart';
-import 'package:aroundu/views/lobby/lobby.view.dart';
 import 'package:aroundu/views/lobby/provider/save_lobby_provider.dart';
 import 'package:aroundu/views/profile/controllers/controller.groups.profiledart.dart';
 import 'package:aroundu/views/profile/controllers/controller.profile.dart';
@@ -93,9 +93,9 @@ class _DesignLobbyWidgetState extends ConsumerState<DesignLobbyWidget> {
     return GestureDetector(
       onTap: () async {
         HapticFeedback.selectionClick();
-        await Navigator.push(
+        await Navigator.pushNamed(
           context,
-          MaterialPageRoute(builder: (context) => LobbyView(lobbyId: lobby.id)),
+          AppRoutes.lobby.replaceAll(':lobbyId', lobby.id),
         );
       },
       onLongPress: () {
@@ -630,7 +630,7 @@ class _DesignLobbyWidgetState extends ConsumerState<DesignLobbyWidget> {
                                 final uid =
                                     await GetStorage().read("userUID") ?? '';
                                 if (lobby.adminSummary.userId != "") {
-                                  Get.to(() => ProfileDetailsFollowedScreen());
+                                  Get.toNamed(AppRoutes.myProfile);
                                   //TODO : add profilescreen
 
                                   // Get.to(

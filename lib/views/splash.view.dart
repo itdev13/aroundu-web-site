@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:aroundu/constants/appRoutes.dart';
 import 'package:aroundu/constants/urls.dart';
 import 'package:aroundu/designs/colors.designs.dart';
 import 'package:aroundu/designs/fonts.designs.dart';
@@ -27,7 +28,7 @@ class SplashView extends StatelessWidget {
   Future<void> customWait(BuildContext context) async {
     kLogger.trace("Fetching User Info");
     // await Future.delayed(const Duration(seconds: 1));
-    await GetStorage.init();
+    
 
     final apiService = ApiService();
     // final ChatsController chatsController = Get.put(ChatsController());
@@ -45,7 +46,7 @@ class SplashView extends StatelessWidget {
       await _forceSignOut();
 
       kLogger.trace("User is not logged in! Going to `AuthView`");
-      Get.off(() => const AuthView());
+      Get.offNamed(AppRoutes.auth);
       return;
     }
 
@@ -98,13 +99,13 @@ class SplashView extends StatelessWidget {
         // If we get API errors, force sign out as the token might be invalid
         kLogger.error("Error fetching user profile: $e");
         await _forceSignOut();
-        Get.off(() => const AuthView());
+        Get.offNamed(AppRoutes.auth);
         return;
       }
     }
 
     kLogger.trace("User is not logged in! Going to `AuthView`");
-    Get.off(() => const AuthView());
+    Get.offNamed(AppRoutes.auth);
   }
 
   // Force sign out from all providers
