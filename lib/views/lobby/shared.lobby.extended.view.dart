@@ -135,9 +135,13 @@ class SharedAccessRequestCardExtendedView extends ConsumerWidget {
                   children: [
                     // Lobby Information
                     GestureDetector(
-                      onTap: () => Get.toNamed(
-                        AppRoutes.lobby.replaceAll(':lobbyId', accessRequest.lobbyId),
-                      ),
+                      onTap:
+                          () => Get.toNamed(
+                            AppRoutes.lobby.replaceAll(
+                              ':lobbyId',
+                              accessRequest.lobbyId,
+                            ),
+                          ),
                       child: Card(
                         color: Colors.white,
                         elevation: 1,
@@ -335,15 +339,16 @@ class SharedAccessRequestCardExtendedView extends ConsumerWidget {
 
                                 //TODO: add profile page
                                 if (admin.userId != "") {
-                                  Get.to(
-                                    () =>
-                                        // (admin.userId == uid)
-                                        //     ?
-                                        ProfileDetailsFollowedScreen(),
-                                    // : ProfileDetailsScreen(
-                                    //     userId: admin.userId,
-                                    //   ),
-                                  );
+                                  Get.toNamed(AppRoutes.myProfile);
+                                  // Get.to(
+                                  // () =>
+                                  // (admin.userId == uid)
+                                  //     ?
+                                  // ProfileDetailsFollowedScreen(),
+                                  // : ProfileDetailsScreen(
+                                  //     userId: admin.userId,
+                                  //   ),
+                                  // );
                                 }
                               },
                               child: Card(
@@ -447,16 +452,17 @@ class SharedAccessRequestCardExtendedView extends ConsumerWidget {
                               await groupController.fetchGroups();
                               await profileController.getFriends();
 
-                              Get.to(
-                                () => UserLobbyAccessRequestShare(
-                                  friends: profileController.friendsList,
-                                  squads: groupController.groups,
-                                  lobbyId: accessRequest.lobbyId,
-                                  lobbyHasForm: accessRequest.hasForm,
-                                  lobbyIsPrivate:
+                              Get.toNamed(
+                                AppRoutes.lobbyAccessRequestShare,
+                                arguments: {
+                                  'friends': profileController.friendsList,
+                                  'squads': groupController.groups,
+                                  'lobbyId': accessRequest.lobbyId,
+                                  'lobbyHasForm': accessRequest.hasForm,
+                                  'lobbyIsPrivate':
                                       accessRequest.lobbyType == 'PRIVATE',
-                                  requestText: "",
-                                ),
+                                  'requestText': "",
+                                },
                               );
                             },
                             child: Container(
@@ -537,15 +543,19 @@ class SharedAccessRequestCardExtendedView extends ConsumerWidget {
                                                     '';
                                                 if (attendee.userId != "") {
                                                   //TODO: add profile
-                                                  Get.to(
-                                                    () =>
-                                                        // (attendee.userId == uid)
-                                                        //     ?
-                                                        ProfileDetailsFollowedScreen(),
-                                                    // : ProfileDetailsScreen(
-                                                    //     userId: attendee.userId,
-                                                    //   ),
+
+                                                  Get.toNamed(
+                                                    AppRoutes.myProfile,
                                                   );
+                                                  // Get.to(
+                                                  // () =>
+                                                  // (attendee.userId == uid)
+                                                  //     ?
+                                                  // ProfileDetailsFollowedScreen(),
+                                                  // : ProfileDetailsScreen(
+                                                  //     userId: attendee.userId,
+                                                  //   ),
+                                                  // );
                                                 }
                                               },
                                               child: ListTile(

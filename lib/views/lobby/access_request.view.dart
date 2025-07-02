@@ -1045,7 +1045,9 @@ class AccessRequestsView extends ConsumerWidget {
 
         Get.toNamed(
           AppRoutes.downloadAccessRequestData,
-          arguments: {"fileUrl": fileUrl},
+          arguments: {
+            'fileUrl': fileUrl,
+          },
         );
       } else {
         throw Exception('Failed to download: ${response.statusCode}');

@@ -1035,7 +1035,12 @@ class _CheckOutPublicLobbyViewState
                 Space.h(height: 24),
                 GestureDetector(
                   onTap:
-                      () => Get.toNamed(AppRoutes.applyOffers, arguments: {"lobbyId": widget.lobby.id}),
+                      () => Get.toNamed(
+                        AppRoutes.applyOffers.replaceAll(
+                          ':lobbyId',
+                          widget.lobby.id,
+                        ),
+                      ),
                   child: Card(
                     elevation: 4,
                     shadowColor: const Color(0x143E79A1),
