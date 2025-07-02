@@ -80,6 +80,7 @@ class _CheckOutPublicLobbyViewState
     // || (widget.lobby.lobbyType=='PUBLIC' && widget.lobby.priceDetails?.price!= 0.0)
 
     Future.microtask(() {
+       ref.read(selectedOfferProvider.notifier).state = null;
       ref.read(formsListProvider.notifier).resetFormsList();
       if (widget.formModel != null) {
         if (ref.read(formsListProvider).isEmpty) {
@@ -119,7 +120,7 @@ class _CheckOutPublicLobbyViewState
   void dispose() {
     super.dispose();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      // ref.read(selectedOfferProvider.notifier).state = null;
+     
       ref.read(formsListProvider.notifier).resetFormsList();
       ref.read(counterProvider.notifier).setValue(0);
     });

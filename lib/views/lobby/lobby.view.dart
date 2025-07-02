@@ -704,6 +704,9 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
               ),
               bottomNavigationBar: Container(
                 height: 0.09 * sh,
+                constraints: BoxConstraints(
+                  minHeight: 64,
+                ),
                 // color: DesignColors.accent.withValues(alpha: 0.5),
                 // padding: EdgeInsets.only(
                 //   left: 0.05 * sw,
@@ -721,9 +724,14 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                     ),
 
                     // Right side button (expanded to fill remaining space)
-                    Expanded(
-                      child: _buildBottomNavigationBarRightSideWidget(
-                        lobbyDetail: lobbyData,
+                    ConstrainedBox(
+                      constraints: BoxConstraints(
+                        maxWidth: sw*0.5
+                      ),
+                      child: Expanded(
+                        child: _buildBottomNavigationBarRightSideWidget(
+                          lobbyDetail: lobbyData,
+                        ),
                       ),
                     ),
                   ],
