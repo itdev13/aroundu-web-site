@@ -14,6 +14,7 @@ import 'package:aroundu/views/lobby/invite.lobby.view.dart';
 import 'package:aroundu/views/lobby/lobby.view.dart';
 import 'package:aroundu/views/lobby/lobby_settings_screen.dart';
 import 'package:aroundu/views/lobby/shared.lobby.extended.view.dart';
+import 'package:aroundu/views/lobby/widgets/featured_Conversation.dart';
 import 'package:aroundu/views/lobby/widgets/view_all_explore.dart';
 import 'package:aroundu/views/notifications/notifications.view.dart';
 import 'package:aroundu/views/offer/apply.offer.dart';
@@ -39,7 +40,8 @@ class AppRoutes {
   static const String scanQrScreen = '/qr';
   static const String lobbySettings = '/lobby/settings';
   static const String sharedAccessRequestCardExtendedView =
-      '/lobby/access-request-extended';
+      '/lobby/access-request-extended/:accessReqId';
+  static const String featuredConversations = '/lobby/featured-conversations';
 
   //notifications
   static const String notifications = '/notifications';
@@ -56,13 +58,13 @@ class AppRoutes {
 
   //lobby
   static const String lobby = '/lobby/:lobbyId';
-  static const String lobbyRequests = '/lobby/requests';
+  static const String lobbyRequests = '/lobby/requests/:lobbyId/:title';
   static const String lobbyAccessRequest = '/lobby/access-request';
   static const String lobbyAccessRequestShare = '/lobby/access-request-share';
   static const String detailAccessRequest = '/lobby/access-request-detail';
   static const String downloadAccessRequestData =
       '/lobby/access-request-download';
-  static const String applyOffers = '/lobby/offers';
+  static const String applyOffers = '/lobby/offers/:lobbyId';
   static const String inviteExternalAttendees = '/lobby/external-attendees';
   static const String inviteFriends = '/invite/friends';
 
@@ -199,7 +201,7 @@ class AppRoutes {
       name: downloadAccessRequestData,
       page:
           () => FileOptionsDialog(
-            fileUrl: Get.arguments != null ? Get.arguments['fileUrl'] : "",
+            fileUrl: Get.arguments != null ? Get.arguments['fileUrl'] ?? "" : "",
           ),
       transition: Transition.rightToLeftWithFade,
     ),
@@ -207,7 +209,7 @@ class AppRoutes {
       name: applyOffers,
       page:
           () => ApplyOffers(
-            lobbyId: Get.arguments != null ? Get.arguments['lobbyId'] : "",
+            lobbyId: Get.parameters['lobbyId'] ?? "",
           ),
       transition: Transition.rightToLeftWithFade,
     ),
@@ -237,8 +239,8 @@ class AppRoutes {
       name: lobbyRequests,
       page:
           () => AccessRequestsView(
-            lobbyId: Get.arguments != null ? Get.arguments['lobbyId'] : "",
-            pageTitle: Get.arguments != null ? Get.arguments['pageTitle'] : "",
+            lobbyId: Get.parameters['lobbyId'] ?? "",
+            pageTitle: Get.parameters['title'] ?? "",
           ),
     ),
     GetPage(
@@ -252,8 +254,14 @@ class AppRoutes {
       name: sharedAccessRequestCardExtendedView,
       page:
           () => SharedAccessRequestCardExtendedView(
-            accessReqId: Get.arguments != null ? Get.arguments['accessReqId'] : null,
+            accessReqId: Get.parameters['accessReqId'] ?? "",
           ),
+    ),
+    GetPage(
+      name: featuredConversations,
+      page: () => DetailedViewOfFeaturedConversation(
+        lobby: Get.arguments != null ? Get.arguments['lobby'] : null,
+      ),
     ),
     // GetPage(
     //   name: otherProfile,

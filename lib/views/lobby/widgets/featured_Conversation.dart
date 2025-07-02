@@ -1,3 +1,4 @@
+import 'package:aroundu/constants/appRoutes.dart';
 import 'package:aroundu/designs/widgets/button.widget.designs.dart';
 import 'package:aroundu/designs/widgets/icon.widget.designs.dart';
 import 'package:aroundu/designs/widgets/text.widget.designs.dart';
@@ -87,9 +88,11 @@ class _FeaturedConversationState extends ConsumerState<FeaturedConversation> {
               //   );
               // },
               onTap:
-                  () => Get.to(
-                    () =>
-                        DetailedViewOfFeaturedConversation(lobby: widget.lobby),
+                  () => Get.toNamed(
+                    AppRoutes.featuredConversations,
+                    arguments: {
+                      'lobby': widget.lobby,
+                    },
                   ),
               child: DesignText(
                 text: "View all",

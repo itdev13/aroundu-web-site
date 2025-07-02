@@ -766,16 +766,16 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                         color: const Color(0xFF323232),
                       ),
                       onTap: () {
-                        Get.toNamed(
-                          AppRoutes.lobbyRequests,
-                          arguments: {
-                            'lobbyId': lobbyData.lobby.id,
-                            'pageTitle':
-                                (lobbyData.lobby.lobbyType == 'PUBLIC')
-                                    ? 'Form Submissions'
-                                    : 'Access Requests',
-                          },
-                        );
+                        
+
+                        Get.toNamed(AppRoutes.lobbyRequests
+                            .replaceAll(':lobbyId', lobbyData.lobby.id)
+                            .replaceAll(
+                              ':title',
+                              (lobbyData.lobby.lobbyType == 'PUBLIC')
+                                  ? 'Forms'
+                                  : 'Requests',
+                            ),);
                         // Get.to(() => const AccessRequestPage());
                       },
                     ),
@@ -4809,15 +4809,14 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                                     .isNotEmpty ??
                                 false)) {
                           Get.toNamed(
-                            AppRoutes.sharedAccessRequestCardExtendedView,
-                            arguments: {
-                              'accessReqId':
-                                  lobbyDetail
+                            AppRoutes.sharedAccessRequestCardExtendedView.replaceAll(
+                              ':accessReqId',
+                              lobbyDetail
                                       .lobby
                                       .accessRequestData
                                       ?.accessId ??
                                   "",
-                            },
+                            ),
                           );
                         } else {
                           Fluttertoast.showToast(
@@ -4884,9 +4883,7 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                                   pricingData.status == 'SUCCESS') {
                                 await Get.toNamed(
                                   AppRoutes.checkOutPublicLobbyView,
-                                  arguments: {
-                                    'lobby': lobbyDetail.lobby,
-                                  },
+                                  arguments: {'lobby': lobbyDetail.lobby},
                                 );
                               } else {
                                 // Show error message if pricing data couldn't be fetched
@@ -4948,9 +4945,7 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                                 pricingData.status == 'SUCCESS') {
                               await Get.toNamed(
                                 AppRoutes.checkOutPublicLobbyView,
-                                arguments: {
-                                  'lobby': lobbyDetail.lobby,
-                                },
+                                arguments: {'lobby': lobbyDetail.lobby},
                               );
                             } else {
                               // Show error message if pricing data couldn't be fetched
