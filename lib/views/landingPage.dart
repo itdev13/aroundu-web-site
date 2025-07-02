@@ -114,6 +114,20 @@ class _AppLandingPageState extends State<AppLandingPage>
         const SizedBox(height: 40),
         _buildAppDownloadSection(isMobile: true),
         const SizedBox(height: 40),
+        // Copyright text
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(vertical: 10),
+          child: const Text(
+            "© 2025 AroundU. All rights reserved.\nProperty of NextGen Tech © 2025",
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 12,
+              fontWeight: FontWeight.w400,
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ),
         // _buildLoginCard(),
         // const SizedBox(height: 30),
       ],
@@ -121,96 +135,116 @@ class _AppLandingPageState extends State<AppLandingPage>
   }
 
   Widget _buildTabletLayout() {
-    return Column(
-      children: [
-        const SizedBox(height: 64),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Row(
-              children: [
-                Container(
-                  width: 40,
-                  height: 40,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(12),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.1),
-                        blurRadius: 10,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
-                  ),
-                  child: Image.asset(
-                    'assets/icons/aroundu.png',
-                    width: 24,
-                    height: 24,
-                    // color: const Color(0xFFEC4B5D),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                DesignText(
-                  text: 'AroundU',
-                  fontSize:
-                      Theme.of(context).textTheme.headlineSmall?.fontSize ??
-                      24.0,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
-              ],
-            ),
-            ElevatedButton(
-              onPressed: () {
-                Get.toNamed(AppRoutes.splash);
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.white,
-                foregroundColor: Color(0xFFEC4B5D),
-                padding: EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                elevation: 10,
-                shadowColor: Colors.white.withValues(alpha: 1),
-              ),
-              child: const DesignText(
-                text: 'Get Started',
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                color: DesignColors.accent,
-              ),
-            ),
-          ],
-        ),
-
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Expanded(
-              flex: 6,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+    return SingleChildScrollView(
+      physics: NeverScrollableScrollPhysics(),
+      child: Column(
+        children: [
+          const SizedBox(height: 64),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
                 children: [
-                  _buildHeader(isMobile: false),
-                  const SizedBox(height: 60),
-                  ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 450),
-                    child: 
-                    _buildAppDownloadSection(isMobile: false),
+                  Container(
+                    width: 40,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(12),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.1),
+                          blurRadius: 10,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: Image.asset(
+                      'assets/icons/aroundu.png',
+                      width: 24,
+                      height: 24,
+                      // color: const Color(0xFFEC4B5D),
+                    ),
                   ),
-
-                  // const SizedBox(height: 60),
-                  // _buildAppDownloadSection(isMobile: false),
+                  const SizedBox(width: 12),
+                  DesignText(
+                    text: 'AroundU',
+                    fontSize:
+                        Theme.of(context).textTheme.headlineSmall?.fontSize ??
+                        24.0,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
                 ],
               ),
+              ElevatedButton(
+                onPressed: () {
+                  Get.toNamed(AppRoutes.splash);
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.white,
+                  foregroundColor: Color(0xFFEC4B5D),
+                  padding: EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  elevation: 10,
+                  shadowColor: Colors.white.withValues(alpha: 1),
+                ),
+                child: const DesignText(
+                  text: 'Get Started',
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: DesignColors.accent,
+                ),
+              ),
+            ],
+          ),
+      
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Expanded(
+                flex: 6,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildHeader(isMobile: false),
+                    const SizedBox(height: 60),
+                    ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 450),
+                      child: 
+                      _buildAppDownloadSection(isMobile: false),
+                    ),
+      
+                    // const SizedBox(height: 60),
+                    // _buildAppDownloadSection(isMobile: false),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 60),
+              Expanded(flex: 4, child: _buildMockupSection()),
+            ],
+          ),
+          
+          // Copyright text
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(vertical: 20),
+            margin: const EdgeInsets.only(top: 40),
+            child: const Text(
+              "© 2025 AroundU. All rights reserved.\nProperty of NextGen Tech © 2025",
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 12,
+                fontWeight: FontWeight.w400,
+              ),
+              textAlign: TextAlign.center,
             ),
-            const SizedBox(width: 60),
-            Expanded(flex: 4, child: _buildMockupSection()),
-          ],
-        ),
-      ],
+          ),
+       SizedBox(height: 64),
+        ],
+      ),
     );
   }
 

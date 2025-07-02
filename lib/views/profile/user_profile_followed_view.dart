@@ -440,6 +440,24 @@ class _ProfileDetailsFollowedScreenState
                 // Always show settings section when settings button is pressed
                 if (_showSettings) _buildSettingsSection(data),
 
+                SizedBox(height: 24),
+
+                 // Copyright text
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(vertical: 16),
+            margin: const EdgeInsets.only(top: 16),
+            child: const Text(
+              "© 2025 AroundU. All rights reserved.\nProperty of NextGen Tech © 2025",
+              style: TextStyle(
+                color: Colors.grey,
+                fontSize: 12,
+                fontWeight: FontWeight.w400,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ),
+
                 SizedBox(height: sh(0.15)),
               ],
             ),
@@ -2089,6 +2107,8 @@ class _ProfileDetailsFollowedScreenState
               Get.to(() => const TermsConditionsPage());
             },
           ),
+          
+         
         ],
       ),
     );
