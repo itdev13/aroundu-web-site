@@ -2252,8 +2252,22 @@ class _ProfileDetailsFollowedScreenState
 class PrivacyPolicyPage extends StatelessWidget {
   const PrivacyPolicyPage({super.key});
 
+  Future<void> _launchUrl() async {
+    final Uri url = Uri.parse('https://www.aroundu.in/privacy');
+    if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
+      throw Exception('Could not launch $url');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    // Launch URL immediately when page is built
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _launchUrl();
+      // Return to previous screen after launching URL
+      Navigator.of(context).pop();
+    });
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Privacy Policy'),
@@ -2261,89 +2275,15 @@ class PrivacyPolicyPage extends StatelessWidget {
         scrolledUnderElevation: 0,
         backgroundColor: Colors.white,
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
+      body: const Center(
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Text(
-              'Privacy Policy',
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Last Updated: 08/08/2024',
-              style: TextStyle(
-                color: Colors.grey[600],
-                fontSize: 14,
-              ),
-            ),
-            const SizedBox(height: 16),
-            const Text(
-              'At AroundU, we value your privacy and are committed to protecting your personal information. This Privacy Policy outlines how we collect, use, and safeguard your data when you use our services.',
-              style: TextStyle(fontSize: 16),
-            ),
-            _buildSection(
-              '1. Information We Collect:',
-              'Personal Information: Name, email address, phone number, and other contact details.\n\n'
-                  'Usage Data: Information on how you use our website and app, including pages visited, features used, and the time spent on the platform.\n\n'
-                  'Location Data: With your consent, we may collect and process information about your location to provide location-based services.',
-            ),
-            _buildSection(
-              '2. How We Use Your Information:',
-              '• To provide and improve our services.\n'
-                  '• To personalize your experience.\n'
-                  '• To communicate with you about updates, promotions, and other information.\n'
-                  '• To ensure the security and integrity of our platform.',
-            ),
-            _buildSection(
-              '3. Sharing Your Information:',
-              'We do not sell your personal information. We may share your information with trusted third-party service providers who assist us in operating our platform, conducting our business, or servicing you, as long as those parties agree to keep this information confidential. We may also disclose your information when required by law or to protect our rights, property, or safety.',
-            ),
-            _buildSection(
-              '4. Data Security:',
-              'We implement a variety of security measures to maintain the safety of your personal information. However, no method of transmission over the Internet or electronic storage is 100% secure. Therefore, we cannot guarantee its absolute security.',
-            ),
-            _buildSection(
-              '5. Your Choices:',
-              'You can update or delete your personal information through your account settings. You can opt-out of receiving promotional communications from us by following the unsubscribe instructions provided in those communications.',
-            ),
-            _buildSection(
-              '6. Changes to Our Privacy Policy:',
-              'We may update our Privacy Policy from time to time. We will notify you of any changes by posting the new Privacy Policy on this page. You are advised to review this Privacy Policy periodically for any changes.',
-            ),
-            _buildSection(
-              '7. Contact Us:',
-              'If you have any questions about these Terms, please contact us at info@aroundu.in.',
-            ),
+            CircularProgressIndicator(),
+            SizedBox(height: 20),
+            Text('Opening Privacy Policy...'),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _buildSection(String title, String content) {
-    return Padding(
-      padding: const EdgeInsets.only(top: 24.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            title,
-            style: const TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            content,
-            style: const TextStyle(fontSize: 16),
-          ),
-        ],
       ),
     );
   }
@@ -2352,8 +2292,22 @@ class PrivacyPolicyPage extends StatelessWidget {
 class TermsConditionsPage extends StatelessWidget {
   const TermsConditionsPage({Key? key}) : super(key: key);
 
+  Future<void> _launchUrl() async {
+    final Uri url = Uri.parse('https://www.aroundu.in/terms');
+    if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
+      throw Exception('Could not launch $url');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    // Launch URL immediately when page is built
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _launchUrl();
+      // Return to previous screen after launching URL
+      Navigator.of(context).pop();
+    });
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Terms of Service'),
@@ -2361,104 +2315,21 @@ class TermsConditionsPage extends StatelessWidget {
         scrolledUnderElevation: 0,
         backgroundColor: Colors.white,
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
+      body: const Center(
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Text(
-              'Terms of Service',
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Last Updated: 08/08/2024',
-              style: TextStyle(
-                color: Colors.grey[600],
-                fontSize: 14,
-              ),
-            ),
-            const SizedBox(height: 16),
-            const Text(
-              'Welcome to AroundU! By using our services, you agree to these Terms of Service. Please read them carefully.',
-              style: TextStyle(fontSize: 16),
-            ),
-            _buildSection(
-              '1. Acceptance of Terms:',
-              'By accessing or using AroundU, you agree to be bound by these terms and our Privacy Policy.',
-            ),
-            _buildSection(
-              '2. User Accounts:',
-              'You must create an account to use certain features of our platform. You are responsible for maintaining the confidentiality of your account information and for all activities that occur under your account.',
-            ),
-            _buildSection(
-              '3. Use of Our Services:',
-              'You agree to use our services only for lawful purposes and in accordance with these Terms. You agree not to use our services in any way that could damage, disable, overburden, or impair our platform.',
-            ),
-            _buildSection(
-              '4. Content:',
-              'You are responsible for the content you post on AroundU. You must ensure that your content does not violate any laws or infringe on the rights of others. We reserve the right to remove any content that we deem inappropriate or in violation of these Terms.',
-            ),
-            _buildSection(
-              '5. Intellectual Property:',
-              'All intellectual property rights in our platform and services are owned by us or our licensors. You may not use our intellectual property without our prior written consent.',
-            ),
-            _buildSection(
-              '6. Termination:',
-              'We may terminate or suspend your account and access to our services at any time, without prior notice or liability, for any reason, including if you breach these Terms.',
-            ),
-            _buildSection(
-              '7. Limitation of Liability:',
-              'To the maximum extent permitted by law, AroundU shall not be liable for any indirect, incidental, special, consequential, or punitive damages, or any loss of profits or revenues, whether incurred directly or indirectly.',
-            ),
-            _buildSection(
-              '8. Governing Law:',
-              'These Terms shall be governed and construed in accordance with the laws of Bengaluru, Karnataka, India, without regard to its conflict of law provisions.',
-            ),
-            _buildSection(
-              '9. Refund Policy:',
-              'Refunds depend on the policies of our partners, including merchants and event organizers. We will make sure you are fully informed about these policies before you make any payment. If an event is canceled, we will process your refund promptly once the event organizer requests it.',
-            ),
-            _buildSection(
-              '10. Changes to Terms:',
-              'We may modify these Terms from time to time. If we make changes, we will provide notice through our services or by other means, to provide you the opportunity to review the changes before they become effective.',
-            ),
-            _buildSection(
-              '11. Contact Us:',
-              'If you have any questions about these Terms, please contact us at info@aroundu.in.',
-            ),
+            CircularProgressIndicator(),
+            SizedBox(height: 20),
+            Text('Opening Terms of Service...'),
           ],
         ),
       ),
     );
   }
-
-  Widget _buildSection(String title, String content) {
-    return Padding(
-      padding: const EdgeInsets.only(top: 24.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            title,
-            style: const TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            content,
-            style: const TextStyle(fontSize: 16),
-          ),
-        ],
-      ),
-    );
-  }
 }
+
+
 class ImageViewer extends StatelessWidget {
   final ImageProvider<Object> image;
   final String? title;
