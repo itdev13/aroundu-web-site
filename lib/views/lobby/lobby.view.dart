@@ -724,16 +724,13 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                     ),
 
                     // Right side button (expanded to fill remaining space)
-                    ConstrainedBox(
-                      constraints: BoxConstraints(
-                        maxWidth: sw*0.5
-                      ),
-                      child: Expanded(
+                
+                      
+                      Expanded(
                         child: _buildBottomNavigationBarRightSideWidget(
                           lobbyDetail: lobbyData,
                         ),
                       ),
-                    ),
                   ],
                 ),
               ),
