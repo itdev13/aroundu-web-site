@@ -798,15 +798,16 @@ class SharedAccessRequestCardExtendedView extends ConsumerWidget {
                               child: ElevatedButton(
                                 onPressed: () async {
                                   if (accessRequest.hasForm) {
-                                    Get.off(
-                                      () => AccessRequestFormFillView(
-                                        lobbyId: accessRequest.lobbyId,
-                                        groupId:
+                                    Get.offNamed(
+                                      AppRoutes.accessRequestFormFillView,
+                                      arguments: {
+                                        'lobbyId': accessRequest.lobbyId,
+                                        'groupId':
                                             accessRequest.groupData.groupId,
-                                        isPrivate:
+                                        'isPrivate':
                                             accessRequest.lobbyType ==
                                             'PRIVATE',
-                                      ),
+                                      },
                                     );
                                   } else {
                                     await ref.read(

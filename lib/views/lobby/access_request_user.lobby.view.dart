@@ -318,12 +318,13 @@ class _UserLobbyAccessRequestState
 
             kLogger.trace(formModel.toJson().toString());
 
-            await Get.off(
-              () => CheckOutPublicLobbyView(
-                lobby: widget.lobby,
-                formModel: formModel,
-                requestText: requestText,
-              ),
+            await Get.offNamed(
+              AppRoutes.checkOutPublicLobbyView,
+              arguments: {
+                'lobby': widget.lobby,
+                'formModel': formModel,
+                'requestText': requestText,
+              },
             );
 
             // Reset state and navigate

@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:aroundu/constants/appRoutes.dart';
 import 'package:aroundu/designs/widgets/chip.widgets.designs.dart';
 import 'package:aroundu/designs/widgets/icon.widget.designs.dart';
 import 'package:aroundu/designs/widgets/range_slider.dart';
@@ -302,7 +303,7 @@ class _LobbyFilterViewState extends ConsumerState<LobbyFilterView> {
 
                   // Process the response
                   final results = FilterResponse.fromJson(response);
-                  Get.off(() => LobbyFilterResultView(results: results));
+                  Get.offNamed(AppRoutes.filterResult, arguments: {'results': results});
                 } catch (error, stackTrace) {
                   // Dismiss loading dialog if it's open
                   if (Get.isDialogOpen == true) {

@@ -127,14 +127,15 @@ class FormsListNotifier extends StateNotifier<List<FormModel>> {
   }
 
   /// Check if all mandatory questions are answered in all forms
-  bool validateAllForms() {
-    if (state.isEmpty) return false; // Handle empty forms case
+ bool validateAllForms() {
+    if (state.isEmpty) return true; // Handle empty forms case
     print(state.length.toString());
     for (var form in state) {
       kLogger.info(form.questions.length.toString());
       if (form.questions.any((question) {
         kLogger.info(
-            "${question.toJson()} \n isMandatory ${question.isMandatory} \n answer empty :${question.answer.isEmpty} \n ${question.isMandatory && question.answer.isEmpty} ${form.questions.indexOf(question)}");
+          "${question.toJson()} \n isMandatory ${question.isMandatory} \n answer empty :${question.answer.isEmpty} \n ${question.isMandatory && question.answer.isEmpty} ${form.questions.indexOf(question)}",
+        );
         return question.isMandatory &&
             question.answer.trim().isEmpty; // Add trim()
       })) {

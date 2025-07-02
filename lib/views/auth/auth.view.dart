@@ -28,7 +28,8 @@ import '../../designs/utils.designs.dart';
 import 'auth.controller.dart';
 
 class AuthView extends StatefulWidget {
-  const AuthView({super.key});
+  const AuthView({super.key, required this.destination});
+  final String destination;
 
   @override
   State<AuthView> createState() => _AuthViewState();
@@ -964,7 +965,9 @@ class _AuthViewState extends State<AuthView>
                   // await _updateFCMToken();
                   await GetStorage().write('isFirstRun', false);
                   await GetStorage().write('isLoggedOut', false);
-                  await authController.checkUserOnboardingStatus();
+                  await authController.checkUserOnboardingStatus(
+                    destination: widget.destination ,
+                  );
                 } else {
                   // Show error message
                   CustomSnackBar.show(

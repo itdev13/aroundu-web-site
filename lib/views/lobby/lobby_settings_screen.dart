@@ -1,3 +1,4 @@
+import 'package:aroundu/constants/appRoutes.dart';
 import 'package:aroundu/designs/colors.designs.dart';
 import 'package:aroundu/designs/icons.designs.dart';
 import 'package:aroundu/designs/widgets/icon.widget.designs.dart';
@@ -374,8 +375,8 @@ class _LobbySettingsScreenState extends ConsumerState<LobbySettingsScreen> {
                                                             widget.lobby.id,
                                                           ).future,
                                                         );
-                                                    Get.offAll(
-                                                      const DashboardView(),
+                                                    Get.offAllNamed(
+                                                      AppRoutes.dashboard,
                                                     );
                                                     if (isDeleteSuccess) {
                                                       Fluttertoast.showToast(

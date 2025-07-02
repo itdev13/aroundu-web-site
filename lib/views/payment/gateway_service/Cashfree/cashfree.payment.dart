@@ -1,4 +1,5 @@
 
+import 'package:aroundu/constants/appRoutes.dart';
 import 'package:aroundu/constants/urls.dart';
 import 'package:aroundu/designs/colors.designs.dart';
 import 'package:aroundu/designs/widgets/text.widget.designs.dart';
@@ -99,13 +100,13 @@ class _CashFreePaymentViewState extends ConsumerState<CashFreePaymentView> {
         _orderId = orderId;
       });
       // Navigate to response screen
-      Get.off(() => CashFreeResponseView(
-            orderId: orderId,
-            lobby: widget.lobby,
-            formModel: widget.formModel,
-            formList: widget.formList,
-            requestText: widget.requestText,
-          ));
+      Get.offNamed(AppRoutes.cashfree,arguments: {
+            'orderId': orderId,
+            'lobby': widget.lobby,
+            'formModel': widget.formModel,
+            'formList': widget.formList,
+            'requestText': widget.requestText,
+          });
     } else {
       setState(() {
         _isLoading = false;

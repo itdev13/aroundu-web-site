@@ -1,6 +1,7 @@
 import 'dart:async';
 
 
+import 'package:aroundu/constants/appRoutes.dart';
 import 'package:aroundu/utils/api_service/api.service.dart';
 import 'package:aroundu/views/filters/lobbyFilterResult.view.dart';
 import 'package:flutter/material.dart';
@@ -70,7 +71,9 @@ class RecommendationsNotifier extends AsyncNotifier<List<String>> {
       final cleanedData = _cleanResponseData(response.data);
       final results = FilterResponse.fromJson(cleanedData);
 
-      Get.off(() => LobbyFilterResultView(results: results));
+      Get.offNamed(AppRoutes.filterResult,arguments: {
+        'results': results,
+      });
     } catch (error, stack) {
       print('Error performing search: $error \n $stack');
     }

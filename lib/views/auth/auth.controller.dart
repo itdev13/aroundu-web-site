@@ -1,4 +1,4 @@
-
+import 'package:aroundu/constants/appRoutes.dart';
 import 'package:aroundu/models/profile.model.dart';
 import 'package:aroundu/utils/api_service/api.service.dart';
 import 'package:aroundu/utils/logger.utils.dart';
@@ -28,7 +28,7 @@ class AuthController extends GetxController {
     authService = AuthService();
     authApiService = AuthApiService();
     // chatsController = Get.put(ChatsController());
-    
+
     // Refresh token on app start if user is logged in
     if (authService.isLoggedIn) {
       refreshTokenOnStart();
@@ -49,7 +49,9 @@ class AuthController extends GetxController {
     isLoading.value = !isLoading.value;
   }
 
-  Future<void> checkUserOnboardingStatus() async {
+  Future<void> checkUserOnboardingStatus({
+    String destination = "new",
+  }) async {
     final profile = await userApiService.getUserProfileData();
 
     // Store user ID from profile
@@ -88,20 +90,19 @@ class AuthController extends GetxController {
 
       kLogger.trace("auth Going to `DashboardView`");
 
-      Get.offAll(const DashboardView());
+       Get.offAllNamed(AppRoutes.dashboard);
+      if(destination!='new') {
+        Get.toNamed(AppRoutes.lobby.replaceAll(':lobbyId', destination));
+      }
 
       //📝 NOTE: early return to avoid running code below
       return;
     }
 
-    kLogger.trace(
-      "User's profile is not completed! Going to `OnboardingView`",
-    );
-    
+    kLogger.trace("User's profile is not completed! Going to `OnboardingView`");
 
-
-    Get.off(
-      const OnboardingView(),
+    Get.offNamed(
+      AppRoutes.onboarding.replaceAll(':startingPageIndex', '0').replaceAll(':destination', destination),
       arguments: [
         true,
         profile["status"] ?? "",
@@ -113,7 +114,7 @@ class AuthController extends GetxController {
         <UserInterest>[],
         <String>[],
         <Prompts>[],
-        "MALE"
+        "MALE",
       ],
     );
 
