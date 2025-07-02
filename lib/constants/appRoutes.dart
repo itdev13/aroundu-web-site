@@ -183,7 +183,7 @@ class AppRoutes {
           () => UserLobbyAccessRequest(
             lobby: Get.arguments != null ? Get.arguments['lobby'] : null,
             isIndividual:
-                Get.arguments != null ? Get.arguments['isIndividual'] : null,
+                Get.arguments != null ? Get.arguments['isIndividual']?? true : true,
           ),
     ),
     GetPage(
