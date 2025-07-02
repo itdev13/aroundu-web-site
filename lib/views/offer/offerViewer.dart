@@ -35,7 +35,7 @@ class OfferSwiper extends ConsumerWidget {
       },
       loading: () => SizedBox.shrink(),
       error: (error, stack) {
-        Fluttertoast.showToast(msg: 'Error loading offers');
+        // Fluttertoast.showToast(msg: 'Error loading offers');
         print('$error \n $stack');
         return SizedBox.shrink();
       },
