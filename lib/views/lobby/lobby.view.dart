@@ -13,6 +13,7 @@ import 'package:aroundu/utils/appDownloadCard.dart';
 import 'package:aroundu/utils/custome_snackbar.dart';
 import 'package:aroundu/utils/logger.utils.dart';
 import 'package:aroundu/utils/share_util.dart';
+import 'package:aroundu/views/auth/auth.service.dart';
 import 'package:aroundu/views/dashboard/home.view.dart';
 import 'package:aroundu/views/landingPage.dart';
 import 'package:aroundu/views/ledger/lobby_ledger.dart';
@@ -40,6 +41,7 @@ import 'package:aroundu/views/scanner/scanner_view.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import '../../../utils/login_required_dialog.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -100,6 +102,10 @@ final isLocationsExpandedProvider = StateProvider.family<bool, String>(
   (ref, houseId) => false,
 );
 
+final isAuthProvider = StateProvider.family<bool, String>(
+  (ref, lobbyId) => false,
+);
+
 class LobbyView extends ConsumerStatefulWidget {
   const LobbyView({super.key, required this.lobbyId});
   final String lobbyId;
@@ -119,8 +125,9 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
     Colors.teal[200]!,
   ];
 
-  final groupController = Get.put(GroupController());
-  final profileController = Get.put(ProfileController());
+  late GroupController groupController;
+  late ProfileController profileController;
+  final AuthService authService = AuthService();
 
   @override
   void initState() {
@@ -131,6 +138,7 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
       kLogger.error('Flutter Error: ${details.exception}');
       kLogger.error('Stack trace: ${details.stack}');
     };
+
     Future.microtask(() {
       ref
           .read(lobbyDetailsProvider(widget.lobbyId).notifier)
@@ -480,6 +488,23 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
 
     final lobbyDetailsAsync = ref.watch(lobbyDetailsProvider(widget.lobbyId));
 
+    final isauth =
+        ((authService.getToken() != null &&
+                authService.getToken().isNotEmpty) &&
+            (authService.getRefreshToken() != null &&
+                authService.getRefreshToken().isNotEmpty));
+
+    Future.microtask(() {
+      print("isAuth in init : $isauth");
+      if (isauth) {
+        groupController = Get.put(GroupController());
+        profileController = Get.put(ProfileController());
+        ref.read(isAuthProvider(widget.lobbyId).notifier).state = true;
+      } else {
+        ref.read(isAuthProvider(widget.lobbyId).notifier).state = false;
+      }
+    });
+
     return lobbyDetailsAsync.when(
       data: (lobbyData) {
         List<UserSummary> userInfos = <UserSummary>[];
@@ -766,16 +791,16 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                         color: const Color(0xFF323232),
                       ),
                       onTap: () {
-                        
-
-                        Get.toNamed(AppRoutes.lobbyRequests
-                            .replaceAll(':lobbyId', lobbyData.lobby.id)
-                            .replaceAll(
-                              ':title',
-                              (lobbyData.lobby.lobbyType == 'PUBLIC')
-                                  ? 'Forms'
-                                  : 'Requests',
-                            ),);
+                        Get.toNamed(
+                          AppRoutes.lobbyRequests
+                              .replaceAll(':lobbyId', lobbyData.lobby.id)
+                              .replaceAll(
+                                ':title',
+                                (lobbyData.lobby.lobbyType == 'PUBLIC')
+                                    ? 'Forms'
+                                    : 'Requests',
+                              ),
+                        );
                         // Get.to(() => const AccessRequestPage());
                       },
                     ),
@@ -938,6 +963,8 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
     required double sw,
     required double sh,
   }) {
+    final isAuth = ref.watch(isAuthProvider(lobbyData.lobby.id));
+
     List<UserSummary> userInfos = <UserSummary>[];
     List<UserSummary> displayAvatars = <UserSummary>[];
     int remainingCount = 0;
@@ -2962,10 +2989,11 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
             ],
           ),
         ),
-        const LobbiesList(
-          lobbyType: LobbyType.recommendations,
-          title: "Recommended Lobbies",
-        ),
+        if (isAuth)
+          const LobbiesList(
+            lobbyType: LobbyType.recommendations,
+            title: "Recommended Lobbies",
+          ),
         Space.h(height: 34),
         // LobbyHousesList(lobbyId: lobbyData.lobby.id),
         // Space.h(height: 16.h),
@@ -2978,6 +3006,7 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
     required double sw,
     required double sh,
   }) {
+    final isAuth = ref.watch(isAuthProvider(lobbyData.lobby.id));
     List<UserSummary> userInfos = <UserSummary>[];
     List<UserSummary> displayAvatars = <UserSummary>[];
     int remainingCount = 0;
@@ -3578,72 +3607,75 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      (() {
-                        String combinedStatus = lobbyData.lobby.userStatus;
+                      if (isAuth)
+                        (() {
+                          String combinedStatus = lobbyData.lobby.userStatus;
 
-                        switch (lobbyData.lobby.lobbyStatus) {
-                          case "PAST":
-                            combinedStatus =
-                                "${lobbyData.lobby.userStatus}_${lobbyData.lobby.lobbyStatus}";
-                          case "UPCOMING":
-                          case "CLOSED":
-                            combinedStatus =
-                                "${lobbyData.lobby.userStatus}_${lobbyData.lobby.lobbyStatus}";
+                          switch (lobbyData.lobby.lobbyStatus) {
+                            case "PAST":
+                              combinedStatus =
+                                  "${lobbyData.lobby.userStatus}_${lobbyData.lobby.lobbyStatus}";
+                            case "UPCOMING":
+                            case "CLOSED":
+                              combinedStatus =
+                                  "${lobbyData.lobby.userStatus}_${lobbyData.lobby.lobbyStatus}";
 
-                          default: // ACTIVE
-                        }
+                            default: // ACTIVE
+                          }
 
-                        switch (combinedStatus) {
-                          case "MEMBER":
-                            return SizedBox.shrink();
-                          case "ADMIN_PAST":
-                            return SizedBox.shrink();
-                          case "ADMIN":
-                            if (lobbyData.lobby.priceDetails.originalPrice >
-                                0.0) {
-                              return Column(
-                                children: [
-                                  GestureDetector(
-                                    onTap: () {
-                                      FancyAppDownloadDialog.show(
-                                        context,
-                                        title: "Unlock Premium Features",
-                                        message:
-                                            "Get the full AroundU experience with exclusive features, enhanced performance, and more!",
-                                        appStoreUrl:
-                                            "https://apps.apple.com/in/app/aroundu/id6744299663",
-                                        playStoreUrl:
-                                            "https://play.google.com/store/apps/details?id=com.polar.aroundu",
-                                        // cancelButtonText: "Maybe Later",
-                                        onCancel: () {
-                                          print("User chose to skip download");
-                                        },
-                                      );
-
-                                      //   Get.to(
-                                      //   () => EditOfferScreen(
-                                      //     lobbyId: lobbyData.lobby.id,
-                                      //   ),
-                                      // );
-                                    },
-                                    child: const CustomOfferCard(
-                                      boldText: "Add Custom Offers",
-                                      normalText:
-                                          "to attract more attendees to your lobby now.",
-                                    ),
-                                  ),
-                                  Space.h(height: 24),
-                                ],
-                              );
-                            } else {
+                          switch (combinedStatus) {
+                            case "MEMBER":
                               return SizedBox.shrink();
-                            }
-                          case "VISITOR_PAST":
-                            return SizedBox.shrink();
-                          default:
-                            return OfferSwiper(lobbyId: lobbyData.lobby.id);
-                        }
-                      })(),
+                            case "ADMIN_PAST":
+                              return SizedBox.shrink();
+                            case "ADMIN":
+                              if (lobbyData.lobby.priceDetails.originalPrice >
+                                  0.0) {
+                                return Column(
+                                  children: [
+                                    GestureDetector(
+                                      onTap: () {
+                                        FancyAppDownloadDialog.show(
+                                          context,
+                                          title: "Unlock Premium Features",
+                                          message:
+                                              "Get the full AroundU experience with exclusive features, enhanced performance, and more!",
+                                          appStoreUrl:
+                                              "https://apps.apple.com/in/app/aroundu/id6744299663",
+                                          playStoreUrl:
+                                              "https://play.google.com/store/apps/details?id=com.polar.aroundu",
+                                          // cancelButtonText: "Maybe Later",
+                                          onCancel: () {
+                                            print(
+                                              "User chose to skip download",
+                                            );
+                                          },
+                                        );
+
+                                        //   Get.to(
+                                        //   () => EditOfferScreen(
+                                        //     lobbyId: lobbyData.lobby.id,
+                                        //   ),
+                                        // );
+                                      },
+                                      child: const CustomOfferCard(
+                                        boldText: "Add Custom Offers",
+                                        normalText:
+                                            "to attract more attendees to your lobby now.",
+                                      ),
+                                    ),
+                                    Space.h(height: 24),
+                                  ],
+                                );
+                              } else {
+                                return SizedBox.shrink();
+                              }
+                            case "VISITOR_PAST":
+                              return SizedBox.shrink();
+                            default:
+                              return OfferSwiper(lobbyId: lobbyData.lobby.id);
+                          }
+                        })(),
 
                       (() {
                         String combinedStatus = lobbyData.lobby.userStatus;
@@ -4528,10 +4560,11 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
               ),
             ],
           ),
-          const LobbiesList(
-            lobbyType: LobbyType.recommendations,
-            title: "Recommended Lobbies",
-          ),
+          if (isAuth)
+            const LobbiesList(
+              lobbyType: LobbyType.recommendations,
+              title: "Recommended Lobbies",
+            ),
           Space.h(height: 34),
         ],
       ),
@@ -4586,6 +4619,7 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
   Widget _buildBottomNavigationBarRightSideWidget({
     required LobbyDetails lobbyDetail,
   }) {
+    final isAuth = ref.watch(isAuthProvider(lobbyDetail.lobby.id));
     double sw = MediaQuery.of(context).size.width;
     double sh = MediaQuery.of(context).size.height;
     final lobbyStatus = lobbyDetail.lobby.lobbyStatus;
@@ -4785,59 +4819,133 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                 child: DesignButton(
                   onPress: () async {
                     HapticFeedback.mediumImpact();
-                    switch (lobbyDetail.lobby.userStatus) {
-                      case "REQUESTED":
-                        CustomSnackBar.show(
-                          context: context,
-                          message: "Already Requested",
-                          type: SnackBarType.info,
-                        );
-                        return;
-                      case "REQUEST_DENIED":
-                        CustomSnackBar.show(
-                          context: context,
-                          message: "Your request was denied by Admin",
-                          type: SnackBarType.info,
-                        );
-                        return;
-                      case "INTERNAL_ACCESS_REQUEST":
-                        if (lobbyDetail.lobby.accessRequestData != null &&
-                            (lobbyDetail
-                                    .lobby
-                                    .accessRequestData
-                                    ?.accessId
-                                    .isNotEmpty ??
-                                false)) {
-                          Get.toNamed(
-                            AppRoutes.sharedAccessRequestCardExtendedView.replaceAll(
-                              ':accessReqId',
-                              lobbyDetail
+                    print("isAuth : $isAuth");
+                    if (isAuth) {
+                      switch (lobbyDetail.lobby.userStatus) {
+                        case "REQUESTED":
+                          CustomSnackBar.show(
+                            context: context,
+                            message: "Already Requested",
+                            type: SnackBarType.info,
+                          );
+                          return;
+                        case "REQUEST_DENIED":
+                          CustomSnackBar.show(
+                            context: context,
+                            message: "Your request was denied by Admin",
+                            type: SnackBarType.info,
+                          );
+                          return;
+                        case "INTERNAL_ACCESS_REQUEST":
+                          if (lobbyDetail.lobby.accessRequestData != null &&
+                              (lobbyDetail
                                       .lobby
                                       .accessRequestData
-                                      ?.accessId ??
-                                  "",
-                            ),
+                                      ?.accessId
+                                      .isNotEmpty ??
+                                  false)) {
+                            Get.toNamed(
+                              AppRoutes.sharedAccessRequestCardExtendedView
+                                  .replaceAll(
+                                    ':accessReqId',
+                                    lobbyDetail
+                                            .lobby
+                                            .accessRequestData
+                                            ?.accessId ??
+                                        "",
+                                  ),
+                            );
+                          } else {
+                            Fluttertoast.showToast(
+                              msg:
+                                  "Something went wrong \n Please try again!!!",
+                            );
+                          }
+                        case "REMOVED":
+                          CustomSnackBar.show(
+                            context: context,
+                            message:
+                                "You’ve been removed by the admin. This lobby is no longer accessible to you and you won’t be able to rejoin",
+                            type: SnackBarType.info,
                           );
-                        } else {
-                          Fluttertoast.showToast(
-                            msg: "Something went wrong \n Please try again!!!",
-                          );
-                        }
-                      case "REMOVED":
-                        CustomSnackBar.show(
-                          context: context,
-                          message:
-                              "You’ve been removed by the admin. This lobby is no longer accessible to you and you won’t be able to rejoin",
-                          type: SnackBarType.info,
-                        );
-                        return;
-                      case "PAYMENT_PENDING":
-                        if (lobbyDetail.lobby.accessRequestData != null) {
-                          if (lobbyDetail
-                              .lobby
-                              .accessRequestData!
-                              .isGroupAccess) {
-                            if (lobbyDetail.lobby.accessRequestData!.isAdmin) {
+                          return;
+                        case "PAYMENT_PENDING":
+                          if (lobbyDetail.lobby.accessRequestData != null) {
+                            if (lobbyDetail
+                                .lobby
+                                .accessRequestData!
+                                .isGroupAccess) {
+                              if (lobbyDetail
+                                  .lobby
+                                  .accessRequestData!
+                                  .isAdmin) {
+                                showDialog(
+                                  context: context,
+                                  barrierDismissible: false,
+                                  builder: (BuildContext context) {
+                                    return AlertDialog(
+                                      backgroundColor: Colors.transparent,
+                                      content: Column(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.center,
+                                        children: [
+                                          CircularProgressIndicator(
+                                            color: DesignColors.accent,
+                                          ),
+                                        ],
+                                      ),
+                                    );
+                                  },
+                                );
+
+                                // Fetch pricing data
+                                await ref
+                                    .read(
+                                      pricingProvider(
+                                        lobbyDetail.lobby.id,
+                                      ).notifier,
+                                    )
+                                    .fetchPricing(
+                                      lobbyDetail.lobby.id,
+                                      groupSize: 1,
+                                    );
+
+                                // Close the loading dialog
+                                Navigator.of(
+                                  context,
+                                  rootNavigator: true,
+                                ).pop();
+
+                                final pricingState = ref.read(
+                                  pricingProvider(lobbyDetail.lobby.id),
+                                );
+                                final pricingData = pricingState.pricingData;
+
+                                if (pricingData != null &&
+                                    pricingData.status == 'SUCCESS') {
+                                  await Get.toNamed(
+                                    AppRoutes.checkOutPublicLobbyView,
+                                    arguments: {'lobby': lobbyDetail.lobby},
+                                  );
+                                } else {
+                                  // Show error message if pricing data couldn't be fetched
+                                  CustomSnackBar.show(
+                                    context: context,
+                                    message: "Something went wrong",
+                                    type: SnackBarType.error,
+                                  );
+                                }
+                              } else {
+                                CustomSnackBar.show(
+                                  context: context,
+                                  message:
+                                      "contact your admin to finish payment",
+                                  type: SnackBarType.info,
+                                );
+                              }
+                            } else {
                               showDialog(
                                 context: context,
                                 barrierDismissible: false,
@@ -4893,80 +5001,44 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                                   type: SnackBarType.error,
                                 );
                               }
-                            } else {
-                              CustomSnackBar.show(
-                                context: context,
-                                message: "contact your admin to finish payment",
-                                type: SnackBarType.info,
-                              );
                             }
                           } else {
-                            showDialog(
-                              context: context,
-                              barrierDismissible: false,
-                              builder: (BuildContext context) {
-                                return AlertDialog(
-                                  backgroundColor: Colors.transparent,
-                                  content: Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.center,
-                                    children: [
-                                      CircularProgressIndicator(
-                                        color: DesignColors.accent,
-                                      ),
-                                    ],
-                                  ),
-                                );
-                              },
+                            Fluttertoast.showToast(
+                              msg:
+                                  "Something went wrong \n Please try again!!!",
                             );
-
-                            // Fetch pricing data
-                            await ref
-                                .read(
-                                  pricingProvider(
-                                    lobbyDetail.lobby.id,
-                                  ).notifier,
-                                )
-                                .fetchPricing(
-                                  lobbyDetail.lobby.id,
-                                  groupSize: 1,
-                                );
-
-                            // Close the loading dialog
-                            Navigator.of(context, rootNavigator: true).pop();
-
-                            final pricingState = ref.read(
-                              pricingProvider(lobbyDetail.lobby.id),
-                            );
-                            final pricingData = pricingState.pricingData;
-
-                            if (pricingData != null &&
-                                pricingData.status == 'SUCCESS') {
-                              await Get.toNamed(
-                                AppRoutes.checkOutPublicLobbyView,
-                                arguments: {'lobby': lobbyDetail.lobby},
-                              );
-                            } else {
-                              // Show error message if pricing data couldn't be fetched
-                              CustomSnackBar.show(
-                                context: context,
-                                message: "Something went wrong",
-                                type: SnackBarType.error,
-                              );
-                            }
                           }
-                        } else {
-                          Fluttertoast.showToast(
-                            msg: "Something went wrong \n Please try again!!!",
-                          );
-                        }
 
-                      default:
-                        return _onJoinOrRequest(
-                          context: context,
-                          lobby: lobbyDetail.lobby,
-                        ); // Default case if userStatus is unexpected
+                        default:
+                          return _onJoinOrRequest(
+                            context: context,
+                            lobby: lobbyDetail.lobby,
+                          ); // Default case if userStatus is unexpected
+                      }
+                    } else {
+                      LoginRequiredDialog.show(
+                        context,
+                        title: "Authentication Required",
+                        message:
+                            "Please sign in or create an account to access this exclusive lobby experience.",
+                        onLogin: () {
+                          Get.toNamed(
+                            AppRoutes.auth.replaceAll(
+                              ':destination',
+                              widget.lobbyId,
+                            ),
+                          );
+                        },
+                        onSignup: () {
+                          Get.toNamed(
+                            AppRoutes.auth.replaceAll(
+                              ':destination',
+                              widget.lobbyId,
+                            ),
+                          );
+                        },
+                        cancelButtonText: "Maybe Later",
+                      );
                     }
                   },
                   bgColor: () {

@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:aroundu/constants/appRoutes.dart';
 import 'package:aroundu/models/category.model.dart';
 import 'package:aroundu/models/profile.model.dart';
 import 'package:aroundu/utils/custome_snackbar.dart';
@@ -37,6 +38,7 @@ class HashTag {
 }
 
 class OnboardingController extends GetxController {
+  final destination = 'new'.obs;
   final onboardingIndex = 0.obs;
   final isLoading = false.obs;
   final isValidUsername = false.obs;
@@ -50,7 +52,7 @@ class OnboardingController extends GetxController {
   final service = OnboardingService();
 
   final TextEditingController usersNameController = TextEditingController();
-   final TextEditingController emailController = TextEditingController();
+  final TextEditingController emailController = TextEditingController();
   final TextEditingController userNameController = TextEditingController();
   final TextEditingController usersBioController = TextEditingController();
   final TextEditingController hashTagController = TextEditingController();
@@ -270,7 +272,10 @@ class OnboardingController extends GetxController {
 
   void increaseOnboardingIndex() {
     if (onboardingIndex.value >= (onboardingViews.length - 1)) {
-      Get.offAll(() => const DashboardView());
+       Get.offAllNamed(AppRoutes.dashboard);
+      if (destination.value != 'new' && destination.value != 'edit') {
+        Get.toNamed(AppRoutes.lobby.replaceAll(':lobbyId', destination.value));
+      }
       Get.delete<OnboardingController>();
       return;
     }
@@ -411,7 +416,7 @@ class OnboardingController extends GetxController {
       // );
       // return;
       increaseOnboardingIndex();
-       return;
+      return;
     }
 
     isLoading.value = true;
@@ -453,7 +458,7 @@ class OnboardingController extends GetxController {
       return;
     }
     if (emailController.text.isEmpty) {
-       CustomSnackBar.show(
+      CustomSnackBar.show(
         context: context,
         message: "Please fill in your Email",
         type: SnackBarType.warning,
@@ -468,7 +473,6 @@ class OnboardingController extends GetxController {
         message: "Please choose a different username",
         type: SnackBarType.warning,
       );
-      
 
       return;
     }
@@ -515,7 +519,7 @@ class OnboardingController extends GetxController {
 
   Future<void> updateUserProfilePicture(BuildContext context) async {
     if (profileImage.value == null) {
-       CustomSnackBar.show(
+      CustomSnackBar.show(
         context: context,
         message: "Please Select Image",
         type: SnackBarType.warning,

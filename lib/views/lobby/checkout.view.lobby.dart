@@ -3,8 +3,10 @@ import 'package:aroundu/designs/widgets/textfield.widget.designs.dart';
 import 'package:aroundu/models/lobby.dart';
 import 'package:aroundu/models/offers_model.dart';
 import 'package:aroundu/utils/custome_snackbar.dart';
+import 'package:aroundu/utils/logger.utils.dart';
 import 'package:aroundu/views/lobby/provider/forms_list_provider.dart';
 import 'package:aroundu/views/lobby/provider/get_price_provider.dart';
+import 'package:aroundu/views/lobby/provider/lock_pricing_provider.dart';
 import 'package:aroundu/views/offer/apply.offer.dart';
 import 'package:aroundu/views/payment/gateway_service/Cashfree/cashfree.payment.dart';
 import 'package:aroundu/views/profile/controllers/controller.profile.dart';
@@ -212,7 +214,7 @@ class _CheckOutPublicLobbyViewState
                   Expanded(
                     flex: 4,
                     child: DesignButton(
-                      onPress: () {
+                      onPress: () async {
                         HapticFeedback.mediumImpact();
                         final price =
                             count * (widget.lobby.priceDetails?.price ?? 0.0);
@@ -226,24 +228,86 @@ class _CheckOutPublicLobbyViewState
                         //   "isFormListData : ${(ref.read(formsListProvider.notifier).getAllFormsData()[1]['questions'].length)}",
                         // );
                         if (count > 0 && isFormValidated) {
+                          await ref
+                              .read(pricingProvider(widget.lobby.id).notifier)
+                              .updateGroupSize(
+                                widget.lobby.id,
+                                ref.read(counterProvider),
+                              );
+
+                          final getPricingData = ref.read(
+                            pricingProvider(widget.lobby.id),
+                          );
+                          kLogger.trace(
+                            "getPricingData : ${getPricingData.pricingData?.toJson()}",
+                          );
+                          if (getPricingData.pricingData != null &&
+                              getPricingData.pricingData?.status != 'SUCCESS') {
+                            Get.back();
+                            CustomSnackBar.show(
+                              context: context,
+                              message:
+                                  getPricingData.pricingData?.message ??
+                                  'Something went wrong!',
+                              type: SnackBarType.error,
+                            );
+                            return;
+                          }
+
+                          // Lock the pricing after updating group size
+                          await ref
+                              .read(
+                                lockPricingProvider(widget.lobby.id).notifier,
+                              )
+                              .lockPricing(
+                                widget.lobby.id,
+                                ref.read(counterProvider),
+                              );
+
+                          // Check if lock pricing failed and show toast with error message
+                          final lockPricingData = ref.read(
+                            lockPricingDataProvider(widget.lobby.id),
+                          );
+                          kLogger.trace(
+                            "lockPricingData : ${lockPricingData?.toJson()}",
+                          );
+                          if (lockPricingData != null &&
+                              lockPricingData.status != 'SUCCESS') {
+                            Get.back();
+                            CustomSnackBar.show(
+                              context: context,
+                              message:
+                                  lockPricingData.message ??
+                                  'Something went wrong!',
+                              type: SnackBarType.error,
+                            );
+
+                            return;
+                          } else if ((pricingData?.total !=
+                                  getPricingData.pricingData?.total) ||
+                              (pricingData?.total != lockPricingData?.total) ||
+                              (getPricingData.pricingData?.total !=
+                                  lockPricingData?.total)) {
+                            Get.back();
+                            CustomSnackBar.show(
+                              context: context,
+                              message:
+                                  'Please check out again as the price has been updated for your slots.',
+                              type: SnackBarType.error,
+                            );
+                            return;
+                          }
                           if (pricingData != null &&
                               pricingData.currentProvider == 'cashfree') {
-                            Get.off(
-                              () => CashFreePaymentView(
-                                userId:
-                                    profileController
-                                        .profileData
-                                        .value
-                                        ?.userId ??
-                                    "",
-                                lobby: widget.lobby,
-                                formModel:
-                                    formList.isNotEmpty
-                                        ? formList.first
-                                        : widget.formModel,
-                                formList: formList,
-                                requestText: widget.requestText,
-                              ),
+                            Get.offNamed(
+                              AppRoutes.cashfree,
+                              arguments: {
+                                'userId': profileController.profileData.value?.userId ?? "",
+                                'lobby': widget.lobby,
+                                'formModel': formList.isNotEmpty ? formList.first : widget.formModel,
+                                'formList': formList,
+                                'requestText': widget.requestText,
+                              }
                             );
                           } else {
                             CustomSnackBar.show(

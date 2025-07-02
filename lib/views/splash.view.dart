@@ -46,7 +46,7 @@ class SplashView extends StatelessWidget {
       await _forceSignOut();
 
       kLogger.trace("User is not logged in! Going to `AuthView`");
-      Get.offNamed(AppRoutes.auth);
+      Get.offNamed(AppRoutes.auth.replaceAll(':destination', 'new'));
       return;
     }
 
@@ -70,7 +70,7 @@ class SplashView extends StatelessWidget {
           await Future.delayed(const Duration(milliseconds: 500));
 
           kLogger.trace("splash Going to `DashboardView`");
-          Get.offAll(const DashboardView());
+         Get.offAllNamed(AppRoutes.dashboard);
           return;
         }
 
@@ -78,8 +78,8 @@ class SplashView extends StatelessWidget {
           "User's profile is not completed! Going to `OnboardingView`",
         );
 
-        Get.off(
-          const OnboardingView(),
+        Get.offNamed(
+          AppRoutes.onboarding.replaceAll(':startingPageIndex', '0').replaceAll(':destination', 'new'),
           arguments: [
             true,
             profile["status"] ?? "",
@@ -99,13 +99,13 @@ class SplashView extends StatelessWidget {
         // If we get API errors, force sign out as the token might be invalid
         kLogger.error("Error fetching user profile: $e");
         await _forceSignOut();
-        Get.offNamed(AppRoutes.auth);
+        Get.offNamed(AppRoutes.auth.replaceAll(':destination', 'new'));
         return;
       }
     }
 
     kLogger.trace("User is not logged in! Going to `AuthView`");
-    Get.offNamed(AppRoutes.auth);
+    Get.offNamed(AppRoutes.auth.replaceAll(':destination', 'new'));
   }
 
   // Force sign out from all providers

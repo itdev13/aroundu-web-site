@@ -57,11 +57,11 @@ class _AppLandingPageState extends State<AppLandingPage>
   }
 
   void _navigateToLogin() {
-    Get.toNamed(AppRoutes.auth);
+    Get.toNamed(AppRoutes.auth.replaceAll(':destination', 'new'));
   }
 
   void _navigateToSignUp() {
-    Get.toNamed(AppRoutes.auth);
+    Get.toNamed(AppRoutes.auth.replaceAll(':destination', 'new'));
   }
 
   @override

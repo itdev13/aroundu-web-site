@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'dart:math';
+import 'package:aroundu/constants/appRoutes.dart';
 import 'package:aroundu/constants/colors_palette.dart';
 import 'package:aroundu/constants/urls.dart';
 import 'package:aroundu/designs/icons.designs.dart';
@@ -116,8 +117,11 @@ class _ProfileDetailsFollowedScreenState
           'lobbyId': 'HOUSE_CREATION',
         };
         for (File image in selectedImages) {
-          final result = await FileUploadService()
-              .upload(ApiConstants.uploadFile, image, uploadBody);
+          final result = await FileUploadService().upload(
+            ApiConstants.uploadFile,
+            image,
+            uploadBody,
+          );
           if (result.statusCode == 200) {
             uploadedUrls.add(result.data['imageUrl']);
           }
@@ -154,7 +158,6 @@ class _ProfileDetailsFollowedScreenState
     }
   }
 
-
   bool _showSettings = false;
 
   @override
@@ -184,9 +187,7 @@ class _ProfileDetailsFollowedScreenState
 
         ProfileModel? data = controller.profileData.value;
         if (data == null) {
-          return const Center(
-            child: Text('Error loading profile data.'),
-          );
+          return const Center(child: Text('Error loading profile data.'));
         }
 
         return RefreshIndicator(
@@ -212,17 +213,22 @@ class _ProfileDetailsFollowedScreenState
                   // Personal info section
                   _buildPersonalInfoSection(data),
 
-                  if (data.currentOnboardingStep >= data.onboardingSteps) ...[
+                  if (data.currentOnboardingStep >= 2) ...[
                     // Profile interests section
-                    _buildProfileInterestsSection(data),
+                    if (data.currentOnboardingStep > 2)
+                      _buildProfileInterestsSection(data),
 
                     // Interests Section
-                    _buildInterestsSection(data),
-                  ] else
+                    if (data.currentOnboardingStep > 3)
+                      _buildInterestsSection(data),
+                  ],
+                  if (data.currentOnboardingStep < 4)
                     // Profile Completion Card
                     Container(
                       margin: EdgeInsets.symmetric(
-                          horizontal: 16, vertical: 12),
+                        horizontal: 16,
+                        vertical: 12,
+                      ),
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
                           begin: Alignment.topLeft,
@@ -235,8 +241,9 @@ class _ProfileDetailsFollowedScreenState
                         borderRadius: BorderRadius.circular(16),
                         boxShadow: [
                           BoxShadow(
-                            color: Color(0xFFEC4B5D)
-                                .withOpacity(0.3), // Updated shadow color
+                            color: Color(
+                              0xFFEC4B5D,
+                            ).withOpacity(0.3), // Updated shadow color
                             blurRadius: 12,
                             offset: Offset(0, 4),
                           ),
@@ -318,14 +325,14 @@ class _ProfileDetailsFollowedScreenState
                                       width: double.infinity,
                                       decoration: BoxDecoration(
                                         color: Colors.white.withOpacity(0.2),
-                                        borderRadius:
-                                            BorderRadius.circular(4),
+                                        borderRadius: BorderRadius.circular(4),
                                       ),
                                     ),
                                     // Progress
                                     Container(
                                       height: 8,
-                                      width: (data.currentOnboardingStep /
+                                      width:
+                                          (data.currentOnboardingStep /
                                                   data.onboardingSteps) *
                                               sw(1) -
                                           32,
@@ -338,12 +345,12 @@ class _ProfileDetailsFollowedScreenState
                                             Colors.white,
                                           ],
                                         ),
-                                        borderRadius:
-                                            BorderRadius.circular(4),
+                                        borderRadius: BorderRadius.circular(4),
                                         boxShadow: [
                                           BoxShadow(
-                                            color:
-                                                Colors.white.withOpacity(0.5),
+                                            color: Colors.white.withOpacity(
+                                              0.5,
+                                            ),
                                             blurRadius: 4,
                                             offset: Offset(0, 0),
                                           ),
@@ -371,22 +378,27 @@ class _ProfileDetailsFollowedScreenState
                                 }
 
                                 // Navigate to onboarding or profile completion
-                                Get.to(
-                                    () => OnboardingView(
-                                        startingPageIndex: startingPageIndex),
-                                    arguments: [
-                                      false,
-                                      data.status,
-                                      data.name,
-                                      data.userName,
-                                      data.dob,
-                                      data.bio,
-                                      data.profileInterests,
-                                      data.userInterests,
-                                      data.hashTags,
-                                      data.prompts,
-                                      data.gender,
-                                    ]);
+                                Get.toNamed(
+                                  AppRoutes.onboarding.replaceAll(
+                                    ':startingPageIndex',
+                                    '$startingPageIndex',
+                                  ).replaceAll(':destination', 'edit'),
+                                  arguments: [
+                                    false,
+                                    data.status,
+                                    data.name,
+                                    data.userName,
+                                    data.dob,
+                                    data.bio,
+                                    data.profileInterests,
+                                    data.userInterests,
+                                    data.hashTags,
+                                    data.prompts,
+                                    data.gender,
+                                    data.email,
+                                    data.profilePictureUrl,
+                                  ],
+                                );
                               },
                               child: Container(
                                 padding: EdgeInsets.symmetric(vertical: 12),
@@ -411,13 +423,15 @@ class _ProfileDetailsFollowedScreenState
                                         fontSize: 14,
                                         fontWeight: FontWeight.w600,
                                         color: Color(
-                                            0xFFEC4B5D), // Updated to app's primary color
+                                          0xFFEC4B5D,
+                                        ), // Updated to app's primary color
                                       ),
                                       SizedBox(width: 8),
                                       Icon(
                                         Icons.arrow_forward_rounded,
                                         color: Color(
-                                            0xFFEC4B5D), // Updated to app's primary color
+                                          0xFFEC4B5D,
+                                        ), // Updated to app's primary color
                                         size: 18,
                                       ),
                                     ],
@@ -442,21 +456,21 @@ class _ProfileDetailsFollowedScreenState
 
                 SizedBox(height: 24),
 
-                 // Copyright text
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.symmetric(vertical: 16),
-            margin: const EdgeInsets.only(top: 16),
-            child: const Text(
-              "© 2025 AroundU. All rights reserved.\nProperty of NextGen Tech © 2025",
-              style: TextStyle(
-                color: Colors.grey,
-                fontSize: 12,
-                fontWeight: FontWeight.w400,
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ),
+                // Copyright text
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  margin: const EdgeInsets.only(top: 16),
+                  child: const Text(
+                    "© 2025 AroundU. All rights reserved.\nProperty of NextGen Tech © 2025",
+                    style: TextStyle(
+                      color: Colors.grey,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w400,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
 
                 SizedBox(height: sh(0.15)),
               ],
@@ -485,8 +499,7 @@ class _ProfileDetailsFollowedScreenState
               children: [
                 CircularProgressIndicator(color: DesignColors.accent),
                 SizedBox(height: 16),
-                Text('Opening image picker...',
-                    style: TextStyle(fontSize: 14)),
+                Text('Opening image picker...', style: TextStyle(fontSize: 14)),
               ],
             ),
           ),
@@ -520,15 +533,19 @@ class _ProfileDetailsFollowedScreenState
         'lobbyId': 'USER_PFP',
       };
 
-      final result = await FileUploadService()
-          .upload(ApiConstants.uploadFile, imageFile, uploadBody);
+      final result = await FileUploadService().upload(
+        ApiConstants.uploadFile,
+        imageFile,
+        uploadBody,
+      );
 
       if (result.statusCode == 200) {
         uploadedUrl = result.data['imageUrl'];
 
         // Get the controller instance
-        final OnboardingController onboardingController =
-            Get.put(OnboardingController());
+        final OnboardingController onboardingController = Get.put(
+          OnboardingController(),
+        );
 
         // Set the profile image URL
         onboardingController.profileImage.value = uploadedUrl;
@@ -601,8 +618,10 @@ class _ProfileDetailsFollowedScreenState
                       if (selectedImages.isNotEmpty ||
                           data.coverPictureUrl.isNotEmpty)
                         ListTile(
-                          leading:
-                              Icon(Icons.image, color: DesignColors.accent),
+                          leading: Icon(
+                            Icons.image,
+                            color: DesignColors.accent,
+                          ),
                           title: DesignText(
                             text: "View Cover Image",
                             fontSize: 14,
@@ -610,17 +629,22 @@ class _ProfileDetailsFollowedScreenState
                           onTap: () async {
                             Navigator.pop(context);
                             // Show full screen image view
-                            Get.to(() => ImageViewer(
-                                  image: selectedImages.isNotEmpty
-                                      ? FileImage(selectedImages[0])
-                                          as ImageProvider
-                                      : NetworkImage(data.coverPictureUrl),
-                                ));
+                            Get.to(
+                              () => ImageViewer(
+                                image:
+                                    selectedImages.isNotEmpty
+                                        ? FileImage(selectedImages[0])
+                                            as ImageProvider
+                                        : NetworkImage(data.coverPictureUrl),
+                              ),
+                            );
                           },
                         ),
                       ListTile(
-                        leading: Icon(Icons.add_photo_alternate,
-                            color: DesignColors.accent),
+                        leading: Icon(
+                          Icons.add_photo_alternate,
+                          color: DesignColors.accent,
+                        ),
                         title: DesignText(
                           text: "Select Cover Image",
                           fontSize: 14,
@@ -648,11 +672,12 @@ class _ProfileDetailsFollowedScreenState
               image:
                   (selectedImages.isNotEmpty || data.coverPictureUrl.isNotEmpty)
                       ? DecorationImage(
-                          image: selectedImages.isNotEmpty
-                              ? FileImage(selectedImages[0]) as ImageProvider
-                              : NetworkImage(data.coverPictureUrl),
-                          fit: BoxFit.cover,
-                        )
+                        image:
+                            selectedImages.isNotEmpty
+                                ? FileImage(selectedImages[0]) as ImageProvider
+                                : NetworkImage(data.coverPictureUrl),
+                        fit: BoxFit.cover,
+                      )
                       : null,
               boxShadow: [
                 BoxShadow(
@@ -674,12 +699,16 @@ class _ProfileDetailsFollowedScreenState
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Icons.add_photo_alternate_outlined,
-                            size: 40, color: Colors.white),
+                        Icon(
+                          Icons.add_photo_alternate_outlined,
+                          size: 40,
+                          color: Colors.white,
+                        ),
                         SizedBox(height: 8),
-                        Text("Tap to upload cover image",
-                            style: TextStyle(
-                                color: Colors.white, fontSize: 14)),
+                        Text(
+                          "Tap to upload cover image",
+                          style: TextStyle(color: Colors.white, fontSize: 14),
+                        ),
                       ],
                     ),
                   ),
@@ -707,8 +736,11 @@ class _ProfileDetailsFollowedScreenState
                 ],
               ),
               child: IconButton(
-                icon: Icon(Icons.arrow_back_ios_new_rounded,
-                    color: Colors.black, size: 20),
+                icon: Icon(
+                  Icons.arrow_back_ios_new_rounded,
+                  color: Colors.black,
+                  size: 20,
+                ),
                 onPressed: () {
                   HapticFeedback.selectionClick();
                   Get.back();
@@ -821,7 +853,6 @@ class _ProfileDetailsFollowedScreenState
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 // Profile Picture
-
                 GestureDetector(
                   onTap: () {
                     HapticFeedback.selectionClick();
@@ -835,9 +866,10 @@ class _ProfileDetailsFollowedScreenState
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
                           border: Border.all(
-                            color: (data.verified)
-                                ? const Color(0xFF4EA55E)
-                                : Colors.white,
+                            color:
+                                (data.verified)
+                                    ? const Color(0xFF4EA55E)
+                                    : Colors.white,
                             width: 2,
                           ),
                         ),
@@ -845,31 +877,35 @@ class _ProfileDetailsFollowedScreenState
                           radius: 40,
                           backgroundColor: const Color(0xFFEAEFF2),
                           child: ClipOval(
-                            child: isLoading
-                                ? const CircularProgressIndicator(
-                                    color: DesignColors.accent)
-                                : Image.network(
-                                    data.profilePictureUrl,
-                                    fit: BoxFit.cover,
-                                    width: 80,
-                                    height: 80,
-                                    errorBuilder:
-                                        (context, error, stackTrace) => Icon(
-                                      Icons.person,
-                                      size: 20,
-                                      color: Colors.grey,
-                                    ),
-                                    loadingBuilder:
-                                        (context, child, loadingProgress) =>
-                                            loadingProgress == null
-                                                ? child
-                                                : const Center(
+                            child:
+                                isLoading
+                                    ? const CircularProgressIndicator(
+                                      color: DesignColors.accent,
+                                    )
+                                    : Image.network(
+                                      data.profilePictureUrl,
+                                      fit: BoxFit.cover,
+                                      width: 80,
+                                      height: 80,
+                                      errorBuilder:
+                                          (context, error, stackTrace) => Icon(
+                                            Icons.person,
+                                            size: 20,
+                                            color: Colors.grey,
+                                          ),
+                                      loadingBuilder:
+                                          (context, child, loadingProgress) =>
+                                              loadingProgress == null
+                                                  ? child
+                                                  : const Center(
                                                     child:
                                                         CircularProgressIndicator(
-                                                            color: DesignColors
-                                                                .accent),
+                                                          color:
+                                                              DesignColors
+                                                                  .accent,
+                                                        ),
                                                   ),
-                                  ),
+                                    ),
                           ),
                         ),
                       ),
@@ -936,19 +972,25 @@ class _ProfileDetailsFollowedScreenState
                   icon: Icon(Icons.edit, color: Colors.black, size: 20),
                   onPressed: () {
                     HapticFeedback.selectionClick();
-                    Get.to(() => const OnboardingView(), arguments: [
-                      false,
-                      data.status,
-                      data.name,
-                      data.userName,
-                      data.dob,
-                      data.bio,
-                      data.profileInterests,
-                      data.userInterests,
-                      data.hashTags,
-                      data.prompts,
-                      data.gender,
-                    ]);
+                    Get.toNamed(
+                      AppRoutes.onboarding.replaceAll(
+                        ':startingPageIndex',
+                        '0',
+                      ).replaceAll(':destination', 'edit'),
+                      arguments: [
+                        false,
+                        data.status,
+                        data.name,
+                        data.userName,
+                        data.dob,
+                        data.bio,
+                        data.profileInterests,
+                        data.userInterests,
+                        data.hashTags,
+                        data.prompts,
+                        data.gender,
+                      ],
+                    );
                   },
                 ),
               ],
@@ -993,11 +1035,7 @@ class _ProfileDetailsFollowedScreenState
           SizedBox(height: 12),
           Text(
             data.bio,
-            style: TextStyle(
-              fontSize: 14,
-              color: Colors.black87,
-              height: 1.5,
-            ),
+            style: TextStyle(fontSize: 14, color: Colors.black87, height: 1.5),
           ),
         ],
       ),
@@ -1054,8 +1092,8 @@ class _ProfileDetailsFollowedScreenState
                       data.gender.toLowerCase() == 'male'
                           ? Icons.male
                           : data.gender.toLowerCase() == 'female'
-                              ? Icons.female
-                              : Icons.person,
+                          ? Icons.female
+                          : Icons.person,
                       color: Colors.purple,
                       size: 18,
                     ),
@@ -1097,11 +1135,7 @@ class _ProfileDetailsFollowedScreenState
                       color: Colors.orange.withOpacity(0.1),
                       borderRadius: BorderRadius.circular(8),
                     ),
-                    child: Icon(
-                      Icons.cake,
-                      color: Colors.orange,
-                      size: 18,
-                    ),
+                    child: Icon(Icons.cake, color: Colors.orange, size: 18),
                   ),
                   SizedBox(width: 12),
                   Column(
@@ -1139,11 +1173,7 @@ class _ProfileDetailsFollowedScreenState
                     color: Colors.blue.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: Icon(
-                    Icons.location_on,
-                    color: Colors.blue,
-                    size: 18,
-                  ),
+                  child: Icon(Icons.location_on, color: Colors.blue, size: 18),
                 ),
                 SizedBox(width: 12),
                 Expanded(
@@ -1194,8 +1224,9 @@ class _ProfileDetailsFollowedScreenState
 
     // Initial number of interests to show
     final interestsToShow = 2;
-    final profileInterestsExpandedProvider =
-        StateProvider<bool>((ref) => false);
+    final profileInterestsExpandedProvider = StateProvider<bool>(
+      (ref) => false,
+    );
     return Consumer(
       builder: (context, ref, child) {
         final isExpanded = ref.watch(profileInterestsExpandedProvider);
@@ -1240,88 +1271,92 @@ class _ProfileDetailsFollowedScreenState
 
               // Display categories with their subcategories
               ...data.profileInterests
-                  .take(isExpanded
-                      ? data.profileInterests.length
-                      : interestsToShow)
+                  .take(
+                    isExpanded ? data.profileInterests.length : interestsToShow,
+                  )
                   .map((interest) {
-                // Get the category color
-                Color categoryColor =
-                    _getColorFromHex(interest.category.bgColor ?? '#FFA726');
+                    // Get the category color
+                    Color categoryColor = _getColorFromHex(
+                      interest.category.bgColor ?? '#FFA726',
+                    );
 
-                return Container(
-                  margin: EdgeInsets.only(bottom: 16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Category header
-                      Row(
+                    return Container(
+                      margin: EdgeInsets.only(bottom: 16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Container(
-                            padding: EdgeInsets.all(4),
-                            decoration: BoxDecoration(
-                              color: categoryColor.withOpacity(0.1),
-                              borderRadius: BorderRadius.circular(6),
-                            ),
-                            child: Text(
-                              interest.category.iconUrl,
-                              style: TextStyle(fontSize: 14),
-                            ),
-                          ),
-                          SizedBox(width: 8),
-                          Text(
-                            interest.category.name,
-                            style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w500,
-                              color: categoryColor.withOpacity(0.8),
-                            ),
-                          ),
-                        ],
-                      ),
-
-                      SizedBox(height: 8),
-
-                      // Subcategories
-                      if (interest.subCategories.isNotEmpty)
-                        Padding(
-                          padding: EdgeInsets.only(left: 10, top: 6),
-                          child: Wrap(
-                            spacing: 8,
-                            runSpacing: 8,
+                          // Category header
+                          Row(
                             children: [
-                              ...interest.subCategories
-                                  .take(3)
-                                  .map((subCategory) {
-                                return _buildCompactSubCategoryChip(
-                                  emoji: subCategory.iconUrl,
-                                  label: subCategory.name,
-                                  color: categoryColor,
-                                );
-                              }),
-                              // Show "+X more" if there are more subcategories
-                              if (interest.subCategories.length > 3)
-                                Container(
-                                  padding: EdgeInsets.symmetric(
-                                      horizontal: 8, vertical: 4),
-                                  decoration: BoxDecoration(
-                                    color: Colors.grey.withOpacity(0.1),
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                  child: Text(
-                                    "+${interest.subCategories.length - 3} more",
-                                    style: TextStyle(
-                                      fontSize: 10,
-                                      color: Colors.grey.shade700,
-                                    ),
-                                  ),
+                              Container(
+                                padding: EdgeInsets.all(4),
+                                decoration: BoxDecoration(
+                                  color: categoryColor.withOpacity(0.1),
+                                  borderRadius: BorderRadius.circular(6),
                                 ),
+                                child: Text(
+                                  interest.category.iconUrl,
+                                  style: TextStyle(fontSize: 14),
+                                ),
+                              ),
+                              SizedBox(width: 8),
+                              Text(
+                                interest.category.name,
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w500,
+                                  color: categoryColor.withOpacity(0.8),
+                                ),
+                              ),
                             ],
                           ),
-                        ),
-                    ],
-                  ),
-                );
-              }).toList(),
+
+                          SizedBox(height: 8),
+
+                          // Subcategories
+                          if (interest.subCategories.isNotEmpty)
+                            Padding(
+                              padding: EdgeInsets.only(left: 10, top: 6),
+                              child: Wrap(
+                                spacing: 8,
+                                runSpacing: 8,
+                                children: [
+                                  ...interest.subCategories.take(3).map((
+                                    subCategory,
+                                  ) {
+                                    return _buildCompactSubCategoryChip(
+                                      emoji: subCategory.iconUrl,
+                                      label: subCategory.name,
+                                      color: categoryColor,
+                                    );
+                                  }),
+                                  // Show "+X more" if there are more subcategories
+                                  if (interest.subCategories.length > 3)
+                                    Container(
+                                      padding: EdgeInsets.symmetric(
+                                        horizontal: 8,
+                                        vertical: 4,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: Colors.grey.withOpacity(0.1),
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                      child: Text(
+                                        "+${interest.subCategories.length - 3} more",
+                                        style: TextStyle(
+                                          fontSize: 10,
+                                          color: Colors.grey.shade700,
+                                        ),
+                                      ),
+                                    ),
+                                ],
+                              ),
+                            ),
+                        ],
+                      ),
+                    );
+                  })
+                  .toList(),
 
               // Show More/Less button if needed
               if (data.profileInterests.length > interestsToShow)
@@ -1447,17 +1482,9 @@ class _ProfileDetailsFollowedScreenState
           children: [
             Icon(icon, color: color, size: 16),
             SizedBox(height: 8),
-            DesignText(
-              text: value,
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-            ),
+            DesignText(text: value, fontSize: 16, fontWeight: FontWeight.bold),
             SizedBox(height: 2),
-            DesignText(
-              text: label,
-              fontSize: 12,
-              color: Colors.grey,
-            ),
+            DesignText(text: label, fontSize: 12, color: Colors.grey),
           ],
         ),
       ),
@@ -1465,11 +1492,7 @@ class _ProfileDetailsFollowedScreenState
   }
 
   Widget _buildDivider() {
-    return Container(
-      height: 40,
-      width: 1,
-      color: Colors.grey.shade300,
-    );
+    return Container(height: 40, width: 1, color: Colors.grey.shade300);
   }
 
   Widget _buildInterestsSection(ProfileModel data) {
@@ -1510,8 +1533,7 @@ class _ProfileDetailsFollowedScreenState
                       color: Colors.teal.withOpacity(0.1),
                       borderRadius: BorderRadius.circular(8),
                     ),
-                    child:
-                        Icon(Icons.interests, color: Colors.teal, size: 18),
+                    child: Icon(Icons.interests, color: Colors.teal, size: 18),
                   ),
                   SizedBox(width: 8),
                   DesignText(
@@ -1526,84 +1548,89 @@ class _ProfileDetailsFollowedScreenState
               // Display categories with their subcategories (compact version)
               ...processedInterests
                   .take(
-                      isExpanded ? data.userInterests.length : interestsToShow)
+                    isExpanded ? data.userInterests.length : interestsToShow,
+                  )
                   .map((interest) {
-                // Get the category color
-                Color categoryColor =
-                    _getColorFromHex(interest.category.bgColor ?? '#4EA55E');
+                    // Get the category color
+                    Color categoryColor = _getColorFromHex(
+                      interest.category.bgColor ?? '#4EA55E',
+                    );
 
-                return Container(
-                  margin: EdgeInsets.only(bottom: 16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Category header - more compact
-                      Row(
+                    return Container(
+                      margin: EdgeInsets.only(bottom: 16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Container(
-                            padding: EdgeInsets.all(4),
-                            decoration: BoxDecoration(
-                              color: categoryColor.withOpacity(0.1),
-                              borderRadius: BorderRadius.circular(6),
-                            ),
-                            child: Text(
-                              interest.category.iconUrl,
-                              style: TextStyle(fontSize: 14),
-                            ),
-                          ),
-                          SizedBox(width: 6),
-                          Text(
-                            interest.category.name,
-                            style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w500,
-                              color: categoryColor,
-                            ),
-                          ),
-                        ],
-                      ),
-                      SizedBox(height: 8),
-                      // Subcategories - limited to 3 with "more" indicator
-                      if (interest.subCategories.isNotEmpty)
-                        Padding(
-                          padding: EdgeInsets.only(left: 10, top: 6),
-                          child: Wrap(
-                            spacing: 8,
-                            runSpacing: 8,
+                          // Category header - more compact
+                          Row(
                             children: [
-                              ...interest.subCategories
-                                  .take(3)
-                                  .map((subCategory) {
-                                return _buildCompactSubCategoryChip(
-                                  emoji: subCategory.iconUrl,
-                                  label: subCategory.name,
-                                  color: categoryColor,
-                                );
-                              }),
-                              // Show "+X more" if there are more subcategories
-                              if (interest.subCategories.length > 3)
-                                Container(
-                                  padding: EdgeInsets.symmetric(
-                                      horizontal: 8, vertical: 4),
-                                  decoration: BoxDecoration(
-                                    color: Colors.grey.withOpacity(0.1),
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                  child: Text(
-                                    "+${interest.subCategories.length - 3} more",
-                                    style: TextStyle(
-                                      fontSize: 10,
-                                      color: Colors.grey.shade700,
-                                    ),
-                                  ),
+                              Container(
+                                padding: EdgeInsets.all(4),
+                                decoration: BoxDecoration(
+                                  color: categoryColor.withOpacity(0.1),
+                                  borderRadius: BorderRadius.circular(6),
                                 ),
+                                child: Text(
+                                  interest.category.iconUrl,
+                                  style: TextStyle(fontSize: 14),
+                                ),
+                              ),
+                              SizedBox(width: 6),
+                              Text(
+                                interest.category.name,
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w500,
+                                  color: categoryColor,
+                                ),
+                              ),
                             ],
                           ),
-                        ),
-                    ],
-                  ),
-                );
-              }).toList(),
+                          SizedBox(height: 8),
+                          // Subcategories - limited to 3 with "more" indicator
+                          if (interest.subCategories.isNotEmpty)
+                            Padding(
+                              padding: EdgeInsets.only(left: 10, top: 6),
+                              child: Wrap(
+                                spacing: 8,
+                                runSpacing: 8,
+                                children: [
+                                  ...interest.subCategories.take(3).map((
+                                    subCategory,
+                                  ) {
+                                    return _buildCompactSubCategoryChip(
+                                      emoji: subCategory.iconUrl,
+                                      label: subCategory.name,
+                                      color: categoryColor,
+                                    );
+                                  }),
+                                  // Show "+X more" if there are more subcategories
+                                  if (interest.subCategories.length > 3)
+                                    Container(
+                                      padding: EdgeInsets.symmetric(
+                                        horizontal: 8,
+                                        vertical: 4,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: Colors.grey.withOpacity(0.1),
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                      child: Text(
+                                        "+${interest.subCategories.length - 3} more",
+                                        style: TextStyle(
+                                          fontSize: 10,
+                                          color: Colors.grey.shade700,
+                                        ),
+                                      ),
+                                    ),
+                                ],
+                              ),
+                            ),
+                        ],
+                      ),
+                    );
+                  })
+                  .toList(),
 
               // Show More/Less button if needed
               if (processedInterests.length > interestsToShow)
@@ -1672,7 +1699,9 @@ class _ProfileDetailsFollowedScreenState
                     if (data.hashTags.length > 5)
                       Container(
                         padding: EdgeInsets.symmetric(
-                            horizontal: 8, vertical: 4),
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
                         decoration: BoxDecoration(
                           color: Colors.grey.withOpacity(0.1),
                           borderRadius: BorderRadius.circular(12),
@@ -1695,7 +1724,7 @@ class _ProfileDetailsFollowedScreenState
     );
   }
 
-// Helper method to remove duplicate interests
+  // Helper method to remove duplicate interests
   List<UserInterest> _removeDuplicateInterests(List<UserInterest> interests) {
     // Map to track seen categories
     final Map<String, UserInterest> uniqueCategories = {};
@@ -1755,7 +1784,7 @@ class _ProfileDetailsFollowedScreenState
     );
   }
 
-// Compact hashtag chip
+  // Compact hashtag chip
   Widget _buildCompactHashtagChip(String tag) {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
@@ -1809,12 +1838,17 @@ class _ProfileDetailsFollowedScreenState
                   HapticFeedback.selectionClick();
                   await Get.to(
                     () => SocialHandlesScreen(
-                      socialMediaLinks: data.socialMediaLinks != null
-                          ? data.socialMediaLinks
-                              .map((link) =>
-                                  {'type': link.type, 'url': link.url})
-                              .toList()
-                          : [],
+                      socialMediaLinks:
+                          data.socialMediaLinks != null
+                              ? data.socialMediaLinks
+                                  .map(
+                                    (link) => {
+                                      'type': link.type,
+                                      'url': link.url,
+                                    },
+                                  )
+                                  .toList()
+                              : [],
                     ),
                   );
                   await controller.getUserProfileData();
@@ -1835,50 +1869,51 @@ class _ProfileDetailsFollowedScreenState
           if (data.socialMediaLinks != null && data.socialMediaLinks.isNotEmpty)
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: data.socialMediaLinks.map((link) {
-                // Define icon, color and URL based on social media type
-                IconData icon;
-                Color color;
-                String url;
+              children:
+                  data.socialMediaLinks.map((link) {
+                    // Define icon, color and URL based on social media type
+                    IconData icon;
+                    Color color;
+                    String url;
 
-                switch (link.type) {
-                  case 'FB':
-                    icon = FontAwesomeIcons.facebook;
-                    color = Colors.blue.shade800;
-                    url = 'https://facebook.com/${link.url}';
-                    break;
-                  case 'IG':
-                    icon = FontAwesomeIcons.instagram;
-                    color = Colors.pink;
-                    // For Instagram, format username with @
-                    url =
-                        'https://instagram.com/${link.url.replaceAll('@', '')}';
-                    break;
-                  case 'YOUTUBE':
-                    icon = FontAwesomeIcons.youtube;
-                    color = Colors.red;
-                    url = 'https://youtube.com/${link.url}';
-                    break;
-                  case 'LINKEDIN':
-                    icon = FontAwesomeIcons.linkedin;
-                    color = Colors.blue.shade700;
-                    url = 'https://linkedin.com/in/${link.url}';
-                    break;
-                  default:
-                    icon = FontAwesomeIcons.link;
-                    color = Colors.grey;
-                    url = link.url;
-                }
+                    switch (link.type) {
+                      case 'FB':
+                        icon = FontAwesomeIcons.facebook;
+                        color = Colors.blue.shade800;
+                        url = 'https://facebook.com/${link.url}';
+                        break;
+                      case 'IG':
+                        icon = FontAwesomeIcons.instagram;
+                        color = Colors.pink;
+                        // For Instagram, format username with @
+                        url =
+                            'https://instagram.com/${link.url.replaceAll('@', '')}';
+                        break;
+                      case 'YOUTUBE':
+                        icon = FontAwesomeIcons.youtube;
+                        color = Colors.red;
+                        url = 'https://youtube.com/${link.url}';
+                        break;
+                      case 'LINKEDIN':
+                        icon = FontAwesomeIcons.linkedin;
+                        color = Colors.blue.shade700;
+                        url = 'https://linkedin.com/in/${link.url}';
+                        break;
+                      default:
+                        icon = FontAwesomeIcons.link;
+                        color = Colors.grey;
+                        url = link.url;
+                    }
 
-                return _buildSocialButton(
-                  icon: icon,
-                  color: color,
-                  onTap: () {
-                    HapticFeedback.selectionClick();
-                    _launchSocialMedia(link.type, link.url);
-                  },
-                );
-              }).toList(),
+                    return _buildSocialButton(
+                      icon: icon,
+                      color: color,
+                      onTap: () {
+                        HapticFeedback.selectionClick();
+                        _launchSocialMedia(link.type, link.url);
+                      },
+                    );
+                  }).toList(),
             )
           else
             Center(
@@ -1886,10 +1921,7 @@ class _ProfileDetailsFollowedScreenState
                 padding: EdgeInsets.symmetric(vertical: 12),
                 child: Text(
                   "No social media accounts linked",
-                  style: TextStyle(
-                    color: Colors.grey.shade600,
-                    fontSize: 14,
-                  ),
+                  style: TextStyle(color: Colors.grey.shade600, fontSize: 14),
                 ),
               ),
             ),
@@ -1912,16 +1944,12 @@ class _ProfileDetailsFollowedScreenState
           color: color.withOpacity(0.1),
           shape: BoxShape.circle,
         ),
-        child: Icon(
-          icon,
-          color: color,
-          size: 24,
-        ),
+        child: Icon(icon, color: color, size: 24),
       ),
     );
   }
 
-// Helper method to launch social media apps or websites
+  // Helper method to launch social media apps or websites
   void _launchSocialMedia(String type, String username) async {
     String url;
     String appUrl;
@@ -2107,8 +2135,6 @@ class _ProfileDetailsFollowedScreenState
               Get.to(() => const TermsConditionsPage());
             },
           ),
-          
-         
         ],
       ),
     );
@@ -2128,11 +2154,7 @@ class _ProfileDetailsFollowedScreenState
           children: [
             Icon(icon, color: DesignColors.accent, size: 20),
             SizedBox(width: 16),
-            DesignText(
-              text: title,
-              fontSize: 14,
-              fontWeight: FontWeight.w500,
-            ),
+            DesignText(text: title, fontSize: 14, fontWeight: FontWeight.w500),
             Spacer(),
             Icon(Icons.arrow_forward_ios, color: Colors.grey, size: 16),
           ],
@@ -2147,14 +2169,9 @@ class _ProfileDetailsFollowedScreenState
     if (hexColor.length == 6) {
       hexColor = "FF" + hexColor;
     }
-    return Color(int.parse(
-      hexColor,
-      radix: 16,
-    ));
+    return Color(int.parse(hexColor, radix: 16));
   }
 }
-
-
 
 /// Featured Moments
 // class FeaturedMoments extends ConsumerStatefulWidget {
@@ -2213,7 +2230,7 @@ class _ProfileDetailsFollowedScreenState
 //                   fontSize: 16,
 //                   fontWeight: FontWeight.w600,
 //                 ),
-//                 Space.h(height: 18),
+//                 Space(height: 18),
 //                 SizedBox(
 //                   height: 0.14.sh,
 //                   child: ListView.builder(
@@ -2329,16 +2346,11 @@ class TermsConditionsPage extends StatelessWidget {
   }
 }
 
-
 class ImageViewer extends StatelessWidget {
   final ImageProvider<Object> image;
   final String? title;
 
-  const ImageViewer({
-    super.key,
-    required this.image,
-    this.title,
-  });
+  const ImageViewer({super.key, required this.image, this.title});
 
   @override
   Widget build(BuildContext context) {
@@ -2355,65 +2367,69 @@ class ImageViewer extends StatelessWidget {
             icon: const Icon(Icons.arrow_back, color: Colors.white),
             onPressed: () => Get.back(),
           ),
-          title: title != null
-              ? Text(
-                  title!,
-                  style: TextStyle(color: Colors.white, fontSize: 16),
-                )
-              : null,
+          title:
+              title != null
+                  ? Text(
+                    title!,
+                    style: TextStyle(color: Colors.white, fontSize: 16),
+                  )
+                  : null,
         ),
         body: PhotoView(
           imageProvider: image,
-          loadingBuilder: (context, event) => Center(
-            child: Container(
-              width: 70,
-              height: 70,
-              decoration: BoxDecoration(
-                color: Colors.black.withOpacity(0.5),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: CircularProgressIndicator(
-                value: event?.expectedTotalBytes != null
-                    ? event!.cumulativeBytesLoaded /
-                        (event.expectedTotalBytes ?? 1)
-                    : null,
-                color: Colors.white,
-              ),
-            ),
-          ),
-          errorBuilder: (context, error, stackTrace) => Center(
-            child: Container(
-              padding: EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: Colors.black.withOpacity(0.7),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    Icons.broken_image_rounded,
-                    size: 60,
-                    color: Colors.white70,
+          loadingBuilder:
+              (context, event) => Center(
+                child: Container(
+                  width: 70,
+                  height: 70,
+                  decoration: BoxDecoration(
+                    color: Colors.black.withOpacity(0.5),
+                    borderRadius: BorderRadius.circular(10),
                   ),
-                  SizedBox(height: 16),
-                  DesignText(
-                    text: "Failed to load image",
-                    fontSize: 16,
+                  child: CircularProgressIndicator(
+                    value:
+                        event?.expectedTotalBytes != null
+                            ? event!.cumulativeBytesLoaded /
+                                (event.expectedTotalBytes ?? 1)
+                            : null,
                     color: Colors.white,
-                    fontWeight: FontWeight.w500,
                   ),
-                  SizedBox(height: 8),
-                  DesignText(
-                    text: "The image could not be loaded",
-                    fontSize: 14,
-                    color: Colors.white70,
-                    textAlign: TextAlign.center,
-                  ),
-                ],
+                ),
               ),
-            ),
-          ),
+          errorBuilder:
+              (context, error, stackTrace) => Center(
+                child: Container(
+                  padding: EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    color: Colors.black.withOpacity(0.7),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.broken_image_rounded,
+                        size: 60,
+                        color: Colors.white70,
+                      ),
+                      SizedBox(height: 16),
+                      DesignText(
+                        text: "Failed to load image",
+                        fontSize: 16,
+                        color: Colors.white,
+                        fontWeight: FontWeight.w500,
+                      ),
+                      SizedBox(height: 8),
+                      DesignText(
+                        text: "The image could not be loaded",
+                        fontSize: 14,
+                        color: Colors.white70,
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
           backgroundDecoration: const BoxDecoration(color: Colors.transparent),
           minScale: PhotoViewComputedScale.contained * 0.8,
           maxScale: PhotoViewComputedScale.covered * 2.0,

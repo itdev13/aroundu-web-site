@@ -1,4 +1,3 @@
-
 import 'package:aroundu/designs/widgets/icon.widget.designs.dart';
 import 'package:aroundu/models/profile.model.dart';
 import 'package:aroundu/utils/logger.utils.dart';
@@ -7,13 +6,17 @@ import 'package:aroundu/views/onboarding/widgets/progress_indicator.widget.onboa
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-
 import '../../designs/utils.designs.dart';
 import '../../designs/widgets/space.widget.designs.dart';
 
 class OnboardingView extends StatefulWidget {
-  const OnboardingView({super.key, this.startingPageIndex=0});
+  const OnboardingView({
+    super.key,
+    this.startingPageIndex = 0,
+    this.destination = 'new',
+  });
   final int startingPageIndex;
+  final String destination;
 
   @override
   State<OnboardingView> createState() => _OnboardingViewState();
@@ -25,7 +28,7 @@ class _OnboardingViewState extends State<OnboardingView> {
   @override
   void initState() {
     super.initState();
-
+    controller.destination.value = widget.destination;
     controller.onboardingIndex.value = widget.startingPageIndex;
 
     controller.isEditingEnabled.value = Get.arguments[0] as bool;
@@ -36,16 +39,17 @@ class _OnboardingViewState extends State<OnboardingView> {
     controller.usersBioController.text = Get.arguments[5] as String;
 
     controller.assignSelectedChips(Get.arguments[6] as List<ProfileInterest>);
-    controller
-        .populateProfileInterests(Get.arguments[6] as List<ProfileInterest>);
+    controller.populateProfileInterests(
+      Get.arguments[6] as List<ProfileInterest>,
+    );
 
     controller.userInterestList.value = Get.arguments[7] as List<UserInterest>;
 
     List<String> hashtagsAsString = Get.arguments[8] as List<String>;
-// Convert List<String> to List<HashTag> with isSelected set to false
+    // Convert List<String> to List<HashTag> with isSelected set to false
     List<HashTag> hashtags =
         hashtagsAsString.map((tag) => HashTag(tag, true)).toList();
-// Assign the value to the controller
+    // Assign the value to the controller
     controller.selectedHashtags.value = hashtags;
     controller.initializeUserPrompts(Get.arguments[9] as List<Prompts>);
 
@@ -72,17 +76,16 @@ class _OnboardingViewState extends State<OnboardingView> {
         appBar: AppBar(
           backgroundColor: Colors.transparent,
           scrolledUnderElevation: 0,
-          leading: (!controller.isEditingEnabled.value)
-              ? IconButton(
-                  onPressed: () {
-                    controller.onboardingIndex.value = 0;
-                    Get.back();
-                  },
-                  icon: DesignIcon.icon(
-                    icon: Icons.arrow_back,
-                  ),
-                )
-              : null,
+          leading:
+              (!controller.isEditingEnabled.value)
+                  ? IconButton(
+                    onPressed: () {
+                      controller.onboardingIndex.value = 0;
+                      Get.back();
+                    },
+                    icon: DesignIcon.icon(icon: Icons.arrow_back),
+                  )
+                  : null,
         ),
         body: SingleChildScrollView(
           child: Padding(
@@ -117,8 +120,10 @@ class _OnboardingViewState extends State<OnboardingView> {
                 // Onboarding views
                 //
                 Obx(
-                  () => controller
-                      .onboardingViews[controller.onboardingIndex.value],
+                  () =>
+                      controller.onboardingViews[controller
+                          .onboardingIndex
+                          .value],
                 ),
               ],
             ),
