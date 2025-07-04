@@ -5,7 +5,7 @@
     "display": "standalone",
     "background_color": "#EC4B5D",
     "theme_color": "#EC4B5D",
-    "description": "AroundU Web FE",
+    "description": "AroundU",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [
