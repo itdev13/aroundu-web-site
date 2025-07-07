@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:aroundu/constants/urls.dart';
 import 'package:aroundu/utils/api_service/api.service.dart';
+import 'package:aroundu/utils/logger.utils.dart';
 import 'package:aroundu/views/auth/auth.service.dart';
 import 'package:aroundu/models/auth_api_models.dart';
 import 'package:dio/dio.dart';
@@ -63,10 +64,7 @@ class AuthApiService {
 
       final response = await _apiService.post(
         'user/api/v1/auth/verifyOtp',
-        body: {
-          'mobile': mobile,
-          'otp': otp,
-        },
+        body: {'mobile': mobile, 'otp': otp},
       );
 
       final apiResponse = ApiResponse<OtpVerificationResponse>.fromJson(
@@ -90,6 +88,7 @@ class AuthApiService {
   // Refresh the access token using the refresh token
   Future<bool> refreshToken() async {
     try {
+      kLogger.trace("refreshing token");
       // Check if we need to refresh to prevent loops
       if (!_authService.isTokenRefreshNeeded) {
         return false;
@@ -101,11 +100,13 @@ class AuthApiService {
       }
 
       // Create a new Dio instance to avoid using the interceptors
-      final dio = Dio(BaseOptions(
-        baseUrl: ApiConstants.arounduBaseUrl,
-        connectTimeout: const Duration(seconds: 30),
-        receiveTimeout: const Duration(seconds: 30),
-      ));
+      final dio = Dio(
+        BaseOptions(
+          baseUrl: ApiConstants.arounduBaseUrl,
+          connectTimeout: const Duration(seconds: 30),
+          receiveTimeout: const Duration(seconds: 30),
+        ),
+      );
 
       final response = await dio.post(
         'user/api/v1/auth/refreshToken',
@@ -113,8 +114,13 @@ class AuthApiService {
         options: Options(headers: {'Content-Type': 'application/json'}),
       );
 
-      if (response.statusCode == 200 && response.data['code'] == 'SSBD000') {
-        final tokenResponse = TokenRefreshResponse.fromJson(response.data['data']);
+      kLogger.trace(response.data.toString());
+
+
+      if (response.statusCode == 200 && response.data['status'] == 'SUCCESS') {
+        final tokenResponse = TokenRefreshResponse.fromJson(
+          response.data['data'],
+        );
         await _authService.storeToken(tokenResponse.accessToken);
         await _authService.storeRefreshToken(tokenResponse.refreshToken);
         await _authService.updateLastTokenRefresh();
