@@ -167,6 +167,7 @@ class _CheckOutPublicLobbyViewState
       bottomNavigationBar: Container(
         color: Colors.white,
         height: 0.09 * sh,
+         constraints: BoxConstraints(minHeight: 64),
         // padding: EdgeInsets.symmetric(
         //   horizontal: 0.05 * sw,
         //   vertical: 0.01 * sh,

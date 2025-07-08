@@ -343,9 +343,9 @@ class _OtpScreenState extends State<OtpScreen> {
     _pinController.clear();
 
     // Request focus to the pin input field when the screen loads
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _pinFocusNode.requestFocus();
-    });
+    // WidgetsBinding.instance.addPostFrameCallback((_) {
+    //   _pinFocusNode.requestFocus();
+    // });
   }
 
   void _startResendTimer() {
@@ -435,6 +435,9 @@ class _OtpScreenState extends State<OtpScreen> {
       controller: _pinController,
       focusNode: _pinFocusNode,
       defaultPinTheme: defaultPinTheme,
+      onTap: (){
+         _pinFocusNode.requestFocus();
+      },
       separatorBuilder: (index) => SizedBox(width: separatorWidth),
       focusedPinTheme: defaultPinTheme.copyWith(
         decoration: BoxDecoration(
