@@ -1,7 +1,7 @@
 'use strict';
 const MANIFEST = 'flutter-app-manifest';
 const TEMP = 'flutter-temp-cache';
-const CACHE_NAME = 'flutter-app-cache-v2';
+const CACHE_NAME = 'flutter-app-cache-v4.0.1';
 
 const RESOURCES = {".well-known/apple-app-site-association": "7e9de2705b35233e9b76923441f874fb",
 ".well-known/assetlinks.json": "d9adc5e27d8a698c7b1f2435456d76b4",
@@ -250,7 +250,7 @@ const RESOURCES = {".well-known/apple-app-site-association": "7e9de2705b35233e9b
 "deleteAccount.html": "49150f5f7b695b66c87376bda692fa7a",
 "favicon.png": "77a3176365c9b04a4fd436d780e156bf",
 "flutter.js": "76f08d47ff9f5715220992f993002504",
-"flutter_bootstrap.js": "26028f2b7d549817b8d94f8fa7113e41",
+"flutter_bootstrap.js": "37bf9ba52335c9140b7054f2453fe4b3",
 "icons/Icon-192.png": "96a4d880ea3fc2b1a302027ac36ac7a9",
 "icons/Icon-512.png": "7c50b66bd0166a257da9ad89cc4a1493",
 "icons/Icon-maskable-192.png": "96a4d880ea3fc2b1a302027ac36ac7a9",
