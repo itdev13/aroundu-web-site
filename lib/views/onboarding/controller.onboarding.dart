@@ -270,9 +270,13 @@ class OnboardingController extends GetxController {
     }
   }
 
-  void increaseOnboardingIndex() {
+  void increaseOnboardingIndex({int? index}) {
+    if (index != null && index >= 0 && index <=( onboardingViews.length - 1)) {
+
+      onboardingIndex.value = index;
+    } 
     if (onboardingIndex.value >= (onboardingViews.length - 1)) {
-       Get.offAllNamed(AppRoutes.dashboard);
+      Get.offAllNamed(AppRoutes.dashboard);
       if (destination.value != 'new' && destination.value != 'edit') {
         Get.toNamed(AppRoutes.lobby.replaceAll(':lobbyId', destination.value));
       }
@@ -513,8 +517,11 @@ class OnboardingController extends GetxController {
     kLogger.debug(res);
 
     isLoading.value = false;
-
-    increaseOnboardingIndex();
+    if (destination.value == 'new') {
+      increaseOnboardingIndex(index: (onboardingViews.length - 1));
+    } else {
+      increaseOnboardingIndex();
+    }
   }
 
   Future<void> updateUserProfilePicture(BuildContext context) async {

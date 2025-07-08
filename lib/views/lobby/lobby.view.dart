@@ -14,6 +14,7 @@ import 'package:aroundu/utils/custome_snackbar.dart';
 import 'package:aroundu/utils/logger.utils.dart';
 import 'package:aroundu/utils/share_util.dart';
 import 'package:aroundu/views/auth/auth.service.dart';
+import 'package:aroundu/views/auth/auth_api.service.dart';
 import 'package:aroundu/views/dashboard/home.view.dart';
 import 'package:aroundu/views/landingPage.dart';
 import 'package:aroundu/views/ledger/lobby_ledger.dart';
@@ -139,8 +140,8 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
       kLogger.error('Stack trace: ${details.stack}');
     };
 
-    Future.microtask(() {
-      ref
+    Future.microtask(()  async{
+      await ref
           .read(lobbyDetailsProvider(widget.lobbyId).notifier)
           .fetchLobbyDetails(widget.lobbyId);
 
@@ -880,46 +881,94 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
               ),
             );
       },
-      error:
-          (error, stack) => Scaffold(
-            appBar: AppBar(
-              leading: IconButton(
-                style: IconButton.styleFrom(backgroundColor: Colors.white70),
-                onPressed: () {
-                  Get.back();
-                },
-                icon: DesignIcon.icon(
-                  icon: Icons.arrow_back_ios_sharp,
-                  size: 20,
-                ),
-              ),
-              backgroundColor: Colors.transparent,
-              scrolledUnderElevation: 0,
-            ),
-            body: RefreshIndicator(
-              key: Key("errorStateRefreshIndicator"),
-              onRefresh: () async {
-                ref.read(lobbyDetailsProvider(widget.lobbyId).notifier).reset();
-                await ref
-                    .read(lobbyDetailsProvider(widget.lobbyId).notifier)
-                    .fetchLobbyDetails(widget.lobbyId);
+      error: (error, stack) {
+        Future.microtask(() {
+          ref.read(isAuthProvider(widget.lobbyId).notifier).state = false;
+        });
+        return Scaffold(
+          appBar: AppBar(
+            leading: IconButton(
+              style: IconButton.styleFrom(backgroundColor: Colors.white70),
+              onPressed: () {
+                Get.back();
               },
-              child: SingleChildScrollView(
-                child: SizedBox(
-                  height: 0.85 * sh,
-                  child: Center(
-                    child: DesignText(
-                      text: "Something went wrong \n Please try again !!!",
-                      fontSize: 18,
-                      fontWeight: FontWeight.w500,
-                      color: Color(0xFF444444),
-                      maxLines: 10,
+              icon: DesignIcon.icon(icon: Icons.arrow_back_ios_sharp, size: 20),
+            ),
+            backgroundColor: Colors.transparent,
+            scrolledUnderElevation: 0,
+          ),
+          body: RefreshIndicator(
+            key: Key("errorStateRefreshIndicator"),
+            onRefresh: () async {
+              ref.read(lobbyDetailsProvider(widget.lobbyId).notifier).reset();
+              await ref
+                  .read(lobbyDetailsProvider(widget.lobbyId).notifier)
+                  .fetchLobbyDetails(widget.lobbyId);
+            },
+            child: SingleChildScrollView(
+              child: SizedBox(
+                height: 0.85 * sh,
+                child: Column(
+                  children: [
+                    Center(
+                      child: DesignText(
+                        text: "Something went wrong \n Please try again !!!",
+                        fontSize: 18,
+                        fontWeight: FontWeight.w500,
+                        color: Color(0xFF444444),
+                        maxLines: 10,
+                      ),
                     ),
-                  ),
+                    Space.h(height: 32),
+                    DesignButton(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 24,
+                        vertical: 16,
+                      ),
+                      child: DesignText(
+                        text: "Retry",
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.white,
+                      ),
+                      onPress: () async {
+                        await authService.storeToken("");
+                        final authApiService = AuthApiService();
+                        final refreshed = await authApiService.refreshToken();
+
+                        if (refreshed) {
+                          ref
+                              .read(
+                                lobbyDetailsProvider(widget.lobbyId).notifier,
+                              )
+                              .reset();
+                          await ref
+                              .read(
+                                lobbyDetailsProvider(widget.lobbyId).notifier,
+                              )
+                              .fetchLobbyDetails(widget.lobbyId);
+                        } else {
+                          authService.clearAuthData();
+                          ref
+                              .read(
+                                lobbyDetailsProvider(widget.lobbyId).notifier,
+                              )
+                              .reset();
+                          await ref
+                              .read(
+                                lobbyDetailsProvider(widget.lobbyId).notifier,
+                              )
+                              .fetchLobbyDetails(widget.lobbyId);
+                        }
+                      },
+                    ),
+                  ],
                 ),
               ),
             ),
           ),
+        );
+      },
       loading:
           () => Scaffold(
             appBar: AppBar(

@@ -2,6 +2,7 @@
 import 'package:aroundu/constants/urls.dart';
 import 'package:aroundu/utils/api_service/file_upload.service.dart';
 import 'package:aroundu/utils/custome_snackbar.dart';
+import 'package:aroundu/utils/logger.utils.dart';
 import 'package:aroundu/views/profile/services/service.groups.profile.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
@@ -83,9 +84,12 @@ class GroupController extends GetxController {
       isSearchGroupQueryNotEmpty.value = true;
       isGroupSearchLoading.value = true;
       searchGroupsList.clear();
-      searchGroupsList.value = groups.where((group) {
-        return group.groupName.toLowerCase().contains(groupName.toLowerCase());
-      }).toList();
+      searchGroupsList.value =
+          groups.where((group) {
+            return group.groupName.toLowerCase().contains(
+              groupName.toLowerCase(),
+            );
+          }).toList();
       isGroupSearchLoading.value = false;
     } else {
       isGroupSearchLoading.value = false;
@@ -98,8 +102,9 @@ class GroupController extends GetxController {
       usersFriendList.clear();
       final res = await service.fetchFriends();
       usersFriendList.value = res;
-    } catch (e) {
-      Get.snackbar("Error", "Failed to fetch friends: $e");
+    } catch (e, s) {
+      kLogger.error("Failed to fetch friends", error: e, stackTrace: s);
+      // Get.snackbar("Error", "Failed to fetch friends: $e");
     }
   }
 
@@ -123,13 +128,13 @@ class GroupController extends GetxController {
   // Add these new variables
   final Rx<File?> selectedImage = Rx<File?>(null);
   final FileUploadService fileUploadService = FileUploadService();
-  
+
   // Add this method to pick image
   Future<void> pickImage() async {
     try {
       final ImagePicker picker = ImagePicker();
       final XFile? image = await picker.pickImage(source: ImageSource.gallery);
-      
+
       if (image != null) {
         selectedImage.value = File(image.path);
       }
@@ -137,57 +142,59 @@ class GroupController extends GetxController {
       Get.snackbar('Error', 'Failed to pick image: $e');
     }
   }
-  
+
   // Modify createGroup method to handle image upload
   Future<void> createGroup(BuildContext context) async {
     if (groupName.value.isEmpty || selectedParticipants.isEmpty) return;
-    
+
     isLoading.value = true;
     String profilePictureUrl = "";
-    
+
     try {
       // Upload image if selected
       if (selectedImage.value != null) {
-        final uploadBody = {
-          'type': 'GROUP_PROFILE'
-        };
-        
+        final uploadBody = {'type': 'GROUP_PROFILE'};
+
         final response = await fileUploadService.upload(
-         ApiConstants.uploadFile,
+          ApiConstants.uploadFile,
           selectedImage.value!,
-          uploadBody
+          uploadBody,
         );
-        
+
         if (response.statusCode == 200) {
           profilePictureUrl = response.data['imageUrl'] ?? "";
         }
       }
-      
+
       // Create the list of selected participant IDs
-      List<String> participantIds = selectedParticipants.map((user) => user.userId).toList();
-      
+      List<String> participantIds =
+          selectedParticipants.map((user) => user.userId).toList();
+
       // Call the service to create the group
       await service.createGroup(
         groupName.value,
         participantIds,
         groupDescription.value,
-        profilePictureUrl
+        profilePictureUrl,
       );
-      
-      CustomSnackBar.show(context: context, message:  'Squad created successfully!', type: SnackBarType.success);
-    
-      
-    } catch (e,s) {
+
       CustomSnackBar.show(
-          context: context,
-          message: 'Failed to create Squad!',
-          type: SnackBarType.error);
+        context: context,
+        message: 'Squad created successfully!',
+        type: SnackBarType.success,
+      );
+    } catch (e, s) {
+      CustomSnackBar.show(
+        context: context,
+        message: 'Failed to create Squad!',
+        type: SnackBarType.error,
+      );
       Get.snackbar('Error', 'Failed to create squad: $e \n $s');
     } finally {
       isLoading.value = false;
     }
   }
-  
+
   // Add this to clear state
   @override
   void onClose() {

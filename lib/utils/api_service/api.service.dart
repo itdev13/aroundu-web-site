@@ -2,10 +2,13 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:aroundu/constants/urls.dart';
+import 'package:aroundu/utils/logger.utils.dart';
 import 'package:aroundu/views/auth/auth.service.dart';
 import 'package:aroundu/views/auth/auth_api.service.dart';
+import 'package:aroundu/views/lobby/lobby.view.dart';
 import 'package:dio/dio.dart';
 import 'package:dio/io.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 
 ///
@@ -104,8 +107,10 @@ class ApiService {
           return handler.next(response);
         },
         onError: (DioException error, ErrorInterceptorHandler handler) async {
+
           // If the error is 401 Unauthorized, try to refresh the token
           if (error.response?.statusCode == 401) {
+           
             // Try to refresh the token
             final authApiService = AuthApiService();
             final refreshed = await authApiService.refreshToken();

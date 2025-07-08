@@ -2,6 +2,7 @@ import 'package:aroundu/models/detailed.lobby.model.dart';
 import 'package:aroundu/utils/api_service/api.service.dart';
 import 'package:aroundu/utils/logger.utils.dart';
 import 'package:aroundu/views/auth/auth.service.dart';
+import 'package:aroundu/views/lobby/lobby.view.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'dart:async';
 
@@ -27,14 +28,12 @@ class LobbyDetailsNotifier extends StateNotifier<AsyncValue<LobbyDetails?>> {
                   authService.getRefreshToken().isNotEmpty));
       kLogger.trace("is auth in lobby : $isauth");
       String endPoint = "match/lobby/api/v1/$lobbyId/detail";
-      if (isauth){
+      if (isauth) {
         endPoint = "match/lobby/api/v1/$lobbyId/detail";
-      } else{
+      } else {
         endPoint = "match/lobby/public/$lobbyId/detail";
       }
-        final response = await ApiService().get(
-          endPoint
-        );
+      final response = await ApiService().get(endPoint);
 
       if (response.data != null) {
         kLogger.debug('Lobby details fetched successfully');
@@ -47,8 +46,28 @@ class LobbyDetailsNotifier extends StateNotifier<AsyncValue<LobbyDetails?>> {
       }
     } catch (e, stack) {
       kLogger.error('Error in fetching lobby details: $e \n $stack');
+      authService.storeToken("");
+      final container = ProviderContainer();
+      container.read(isAuthProvider(lobbyId).notifier).state = false;
+      container.dispose();
+      state = const AsyncValue.loading();
+      final response = await ApiService().get(
+        "match/lobby/public/$lobbyId/detail",
+      );
+      if (response.data != null) {
+        kLogger.debug('Lobby details fetched successfully');
+        // Update state with data
+        state = AsyncValue.data(LobbyDetails.fromJson(response.data));
+      } else {
+        kLogger.debug('Lobby data not found for ID: $lobbyId');
+        // Update state with null data
+        state = const AsyncValue.data(null);
+        state = AsyncValue.error(e, stack);
+      }
       // Update state with error
-      state = AsyncValue.error(e, stack);
+      if (response.statusCode != 200) {
+        state = AsyncValue.error(e, stack);
+      }
     }
   }
 
