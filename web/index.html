@@ -62,6 +62,17 @@
         for (let registration of registrations) {
           registration.unregister();
         }
+        // Optional: clear old caches manually
+        if ('caches' in window) {
+          caches.keys().then(function (names) {
+            for (let name of names) {
+              caches.delete(name);
+            }
+          });
+        }
+
+        // Reload to fetch fresh content
+        window.location.reload();
       });
     }
   </script>
