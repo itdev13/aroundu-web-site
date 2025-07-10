@@ -1,5 +1,6 @@
 import 'dart:convert';
-
+import 'package:aroundu/designs/colors.designs.dart';
+import 'package:aroundu/designs/widgets/text.widget.designs.dart';
 import 'package:aroundu/views/lobby/widgets/rich_text_editor_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart';
@@ -12,9 +13,11 @@ class RichTextDisplay extends StatefulWidget {
   final bool isEditing;
   // final double? minHeight;
   final double? maxHeight;
-  final int? fontSize;
+  final double? fontSize;
+  final String? lobbyId;
+  
   const RichTextDisplay({
-    super.key,
+    Key? key,
     required this.controller,
     required this.hintText,
     this.onChanged,
@@ -22,7 +25,8 @@ class RichTextDisplay extends StatefulWidget {
     this.maxHeight,
     // this.minHeight,
     this.fontSize,
-  });
+    this.lobbyId,
+  }) : super(key: key);
 
   @override
   State<RichTextDisplay> createState() => _RichTextDisplayState();
@@ -31,6 +35,7 @@ class RichTextDisplay extends StatefulWidget {
 class _RichTextDisplayState extends State<RichTextDisplay> {
   late QuillController _quillController;
   bool _isLoaded = false;
+  bool _showFullText = false;
 
   @override
   void initState() {
@@ -103,14 +108,16 @@ class _RichTextDisplayState extends State<RichTextDisplay> {
     }
   }
 
+  void _toggleReadMore() {
+    setState(() {
+      _showFullText = !_showFullText;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-    double screenWidth = MediaQuery.of(context).size.width;
-    double screenHeight = MediaQuery.of(context).size.height;
-
-    double sw(double size) => screenWidth * size;
-
-    double sh(double size) => screenHeight * size;
+    final sw = MediaQuery.of(context).size.width;
+    final sh = MediaQuery.of(context).size.height;
     if (!_isLoaded) {
       return Center(
         child: CircularProgressIndicator(),
@@ -122,58 +129,71 @@ class _RichTextDisplayState extends State<RichTextDisplay> {
           widget.isEditing ?
           _navigateToEditor
       : null,
-      child: Container(
-        padding: (widget.maxHeight!=null)? EdgeInsets.symmetric(vertical: 4) : EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(12),
-          border: widget.isEditing
-              ? Border.all(
-                  color: Colors.grey.shade300,
-                  width: 1.5,
-                )
-              : null,
-        ),
-        child:
-            //  widget.controller.text.isEmpty
-            //     ? DesignText(
-            //         text: widget.hintText,
-            //         fontSize: 14.sp,
-            //         color: Colors.grey,
-            //       )
-            //     :
-            QuillEditor.basic(
-          controller: _quillController,
-          // readOnly: true,
-          config: QuillEditorConfig(
-            placeholder: widget.hintText,
-            customStyles: DefaultStyles(
-              paragraph: DefaultTextBlockStyle(
-                TextStyle(
-                  fontFamily: 'Poppins',
-                  fontSize: widget.fontSize?.toDouble() ?? 14,
-                  color: Colors.black,
-                  overflow: TextOverflow.ellipsis,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            padding: (widget.maxHeight!=null)? EdgeInsets.symmetric(vertical: 4) : EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(12),
+              border: widget.isEditing
+                  ? Border.all(
+                      color: Colors.grey.shade300,
+                      width: 1.5,
+                    )
+                  : null,
+            ),
+            child: QuillEditor.basic(
+              controller: _quillController,
+              config: QuillEditorConfig(
+                placeholder: widget.hintText,
+                customStyles: DefaultStyles(
+                  paragraph: DefaultTextBlockStyle(
+                    TextStyle(
+                      fontFamily: 'Poppins',
+                      fontSize: widget.fontSize ?? 14,
+                      color: Colors.black,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const HorizontalSpacing(0, 0),
+                    const VerticalSpacing(0, 0),
+                    const VerticalSpacing(0, 0),
+                    null,
+                  ),
                 ),
-                const HorizontalSpacing(
-                    0, 0), // Added missing horizontal spacing
-                const VerticalSpacing(0, 0),
-                const VerticalSpacing(0, 0),
-                null,
+                padding: EdgeInsets.zero,
+                showCursor: false,
+                autoFocus: false,
+                expands: false,
+                scrollable: true,
+                enableInteractiveSelection: false,
+                enableSelectionToolbar: false,
+                maxHeight: widget.lobbyId != null && _showFullText
+                    ? 0.8*sh
+                    : (widget.maxHeight != null)
+                        ? widget.maxHeight
+                        : widget.isEditing ? 0.4*sh : 0.2*sh,
               ),
             ),
-            padding: EdgeInsets.zero,
-            showCursor: false,
-            autoFocus: false,
-            // readOnly: true,
-            expands: false,
-            scrollable: true,
-            enableInteractiveSelection: false,
-            enableSelectionToolbar: false,
-            // minHeight: 100.h,
-            maxHeight: (widget.maxHeight!=null)? widget.maxHeight : widget.isEditing ? sh(0.4) : sh(0.2),
           ),
-        ),
+          if (widget.lobbyId != null && widget.controller.text.isNotEmpty)
+            Align(
+              alignment: Alignment.centerRight,
+              child: Padding(
+                padding: EdgeInsets.only(bottom: 4, right: 4),
+                child: GestureDetector(
+                  onTap: _toggleReadMore,
+                  child: DesignText(
+                    text: _showFullText ? 'Read Less' : 'Read More',
+                    fontSize: 14,
+                    color: DesignColors.accent,
+                    fontWeight: FontWeight.w400,
+                  ),
+                ),
+              ),
+            ),
+        ],
       ),
     );
   }

@@ -140,7 +140,7 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
       kLogger.error('Stack trace: ${details.stack}');
     };
 
-    Future.microtask(()  async{
+    Future.microtask(() async {
       await ref
           .read(lobbyDetailsProvider(widget.lobbyId).notifier)
           .fetchLobbyDetails(widget.lobbyId);
@@ -2078,6 +2078,7 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                   text: lobbyData.lobby.description,
                 ),
                 hintText: '',
+                lobbyId: lobbyData.lobby.id,
               ),
 
               // Space.h(height: 8.h),
@@ -3454,6 +3455,7 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                         ),
                         hintText: '',
                         maxHeight: 0.4 * sh,
+                         lobbyId: lobbyData.lobby.id,
                       ),
                       SizedBox(height: 16),
                       GestureDetector(
