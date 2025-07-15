@@ -72,7 +72,7 @@ class CheckOutPublicLobbyView extends ConsumerStatefulWidget {
 
 class _CheckOutPublicLobbyViewState
     extends ConsumerState<CheckOutPublicLobbyView> {
-  final profileController = Get.find<ProfileController>();
+  final profileController = Get.put(ProfileController());
 
   @override
   void initState() {

@@ -37,19 +37,18 @@ class ShareUtility {
       // final groupController = Get.find<GroupController>();
 
       showDialog(
-          context: context,
-          barrierDismissible: false,
-          builder: (BuildContext context) {
-            return AlertDialog(
-              backgroundColor: Colors.transparent,
-              content: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  CircularProgressIndicator(color: DesignColors.accent),
-                ],
-              ),
-            );
-          });
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            backgroundColor: Colors.transparent,
+            content: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [CircularProgressIndicator(color: DesignColors.accent)],
+            ),
+          );
+        },
+      );
 
       // Fetch necessary data before showing the sheet
       // await groupController.fetchGroups();
@@ -99,7 +98,7 @@ class ShareUtility {
             return GestureDetector(
               onTap: () => FocusScope.of(context).unfocus(),
               child: Container(
-                height: 0.4*sh,
+                height: 0.4 * sh,
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.only(
@@ -135,28 +134,33 @@ class ShareUtility {
                           // Entity image with proper styling
                           ClipRRect(
                             borderRadius: BorderRadius.circular(
-                                details.isCircular ? 30 : 8),
-                            child: details.imageUrl.isNotEmpty
-                                ? Image.network(
-                                    details.imageUrl,
-                                    width: 60,
-                                    height: 60,
-                                    fit: BoxFit.cover,
-                                    errorBuilder:
-                                        (context, error, stackTrace) =>
-                                            Container(
+                              details.isCircular ? 30 : 8,
+                            ),
+                            child:
+                                details.imageUrl.isNotEmpty
+                                    ? Image.network(
+                                      details.imageUrl,
+                                      width: 60,
+                                      height: 60,
+                                      fit: BoxFit.cover,
+                                      errorBuilder:
+                                          (context, error, stackTrace) =>
+                                              Container(
+                                                width: 60,
+                                                height: 60,
+                                                color: Colors.grey[200],
+                                                child: Icon(
+                                                  details.icon,
+                                                  size: 24,
+                                                ),
+                                              ),
+                                    )
+                                    : Container(
                                       width: 60,
                                       height: 60,
                                       color: Colors.grey[200],
                                       child: Icon(details.icon, size: 24),
                                     ),
-                                  )
-                                : Container(
-                                    width: 60,
-                                    height: 60,
-                                    color: Colors.grey[200],
-                                    child: Icon(details.icon, size: 24),
-                                  ),
                           ),
                           SizedBox(width: 12),
                           Expanded(
@@ -202,9 +206,11 @@ class ShareUtility {
                             label: "Copy Link",
                             onTap: () async {
                               await Clipboard.setData(
-                                  ClipboardData(text:
+                                ClipboardData(
+                                  text:
                                       '${details.defaultMessage} \n ${details.shareLink}',
-                                  ));
+                                ),
+                              );
                               if (context.mounted) {
                                 Navigator.pop(context);
                                 CustomSnackBar.show(
@@ -215,9 +221,7 @@ class ShareUtility {
                               }
                             },
                           ),
-                      
-                          
-                      
+
                           // _buildShareOption(
                           //   icon: FontAwesomeIcons.whatsapp,
                           //   color: Colors.green,
@@ -225,7 +229,7 @@ class ShareUtility {
                           //   onTap: () async {
                           //     final whatsappUrl =
                           //         "whatsapp://send?text=${Uri.encodeComponent(details.defaultMessage + ' ' + details.shareLink)}";
-                      
+
                           //     try {
                           //       final uri = Uri.parse(whatsappUrl);
                           //       if (await canLaunchUrl(uri)) {
@@ -255,8 +259,7 @@ class ShareUtility {
                             onTap: () async {
                               await Share.share(
                                 '${details.defaultMessage} \n ${details.shareLink}',
-                                subject:
-                                    "AroundU ${details.entityTypeName}",
+                                subject: "AroundU ${details.entityTypeName}",
                               );
                             },
                           ),
@@ -424,19 +427,12 @@ class ShareUtility {
                 color: color.withOpacity(0.1),
                 shape: BoxShape.circle,
               ),
-              child: Icon(
-                icon,
-                color: color,
-                size: 20,
-              ),
+              child: Icon(icon, color: color, size: 20),
             ),
             SizedBox(height: 8),
             Text(
               label,
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w500,
-              ),
+              style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
               textAlign: TextAlign.center,
             ),
           ],
@@ -451,7 +447,7 @@ class ShareUtility {
     Set<String> conversationIds,
     StateSetter setState,
   ) {
-    final profileController = Get.find<ProfileController>();
+    final profileController = Get.put(ProfileController());
 
     return Obx(() {
       final friends = profileController.friendsList;
@@ -461,18 +457,11 @@ class ShareUtility {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(
-                Icons.people_outline,
-                size: 48,
-                color: Colors.grey[400],
-              ),
+              Icon(Icons.people_outline, size: 48, color: Colors.grey[400]),
               SizedBox(height: 16),
               Text(
                 "No friends yet",
-                style: TextStyle(
-                  fontSize: 16,
-                  color: Colors.grey[600],
-                ),
+                style: TextStyle(fontSize: 16, color: Colors.grey[600]),
               ),
             ],
           ),
@@ -488,31 +477,26 @@ class ShareUtility {
           final isSelected = conversationIds.contains(conversationId);
 
           return ListTile(
-            contentPadding:
-                EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+            contentPadding: EdgeInsets.symmetric(vertical: 4, horizontal: 8),
             leading: CircleAvatar(
               radius: 20,
               backgroundColor: Colors.grey[200],
-              backgroundImage: friend!.profilePictureUrl!.isNotEmpty
-                  ? NetworkImage(friend.profilePictureUrl ?? "")
-                  : null,
-              child: friend.profilePictureUrl!.isEmpty
-                  ? Icon(Icons.person, size: 20, color: Colors.grey)
-                  : null,
+              backgroundImage:
+                  friend!.profilePictureUrl!.isNotEmpty
+                      ? NetworkImage(friend.profilePictureUrl ?? "")
+                      : null,
+              child:
+                  friend.profilePictureUrl!.isEmpty
+                      ? Icon(Icons.person, size: 20, color: Colors.grey)
+                      : null,
             ),
             title: Text(
               friend.name,
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-              ),
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
             ),
             subtitle: Text(
               "@${friend.userName}",
-              style: TextStyle(
-                fontSize: 12,
-                color: Colors.grey[600],
-              ),
+              style: TextStyle(fontSize: 12, color: Colors.grey[600]),
             ),
             trailing: Checkbox(
               value: isSelected,
@@ -551,7 +535,8 @@ class ShareUtility {
     Set<String> conversationIds,
     StateSetter setState,
   ) {
-    final groupController = Get.find<GroupController>();
+    
+    final groupController = Get.put(GroupController());
 
     return Obx(() {
       final groups = groupController.groups;
@@ -561,18 +546,11 @@ class ShareUtility {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(
-                Icons.group_outlined,
-                size: 48,
-                color: Colors.grey[400],
-              ),
+              Icon(Icons.group_outlined, size: 48, color: Colors.grey[400]),
               SizedBox(height: 16),
               Text(
                 "No groups yet",
-                style: TextStyle(
-                  fontSize: 16,
-                  color: Colors.grey[600],
-                ),
+                style: TextStyle(fontSize: 16, color: Colors.grey[600]),
               ),
             ],
           ),
@@ -588,31 +566,26 @@ class ShareUtility {
           final isSelected = conversationIds.contains(conversationId);
 
           return ListTile(
-            contentPadding:
-                EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+            contentPadding: EdgeInsets.symmetric(vertical: 4, horizontal: 8),
             leading: CircleAvatar(
               radius: 20,
               backgroundColor: Colors.grey[200],
-              backgroundImage: group.profilePicture!.isNotEmpty
-                  ? NetworkImage(group.profilePicture ?? "")
-                  : null,
-              child: group.profilePicture!.isEmpty
-                  ? Icon(Icons.group, size: 20, color: Colors.grey)
-                  : null,
+              backgroundImage:
+                  group.profilePicture!.isNotEmpty
+                      ? NetworkImage(group.profilePicture ?? "")
+                      : null,
+              child:
+                  group.profilePicture!.isEmpty
+                      ? Icon(Icons.group, size: 20, color: Colors.grey)
+                      : null,
             ),
             title: Text(
               group.groupName,
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-              ),
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
             ),
             subtitle: Text(
               "${group.participants.length} members",
-              style: TextStyle(
-                fontSize: 12,
-                color: Colors.grey[600],
-              ),
+              style: TextStyle(fontSize: 12, color: Colors.grey[600]),
             ),
             trailing: Checkbox(
               value: isSelected,
@@ -660,7 +633,8 @@ class ShareUtility {
           icon: Icons.person,
           isCircular: true,
           shareLink: "www.aroundu.in/otherProfile/${profile.userId}",
-          defaultMessage: "Check out ${profile.name}'s profile on AroundU. Looks interesting",
+          defaultMessage:
+              "Check out ${profile.name}'s profile on AroundU. Looks interesting",
         );
 
       case EntityType.lobby:
@@ -675,7 +649,8 @@ class ShareUtility {
           icon: Icons.group,
           isCircular: false,
           shareLink: "www.aroundu.in/lobby/${lobby.id}",
-          defaultMessage: "If you're around, this is where the vibe’s brewing 🌪️. Check out this ${lobby.title} lobby on AroundU",
+          defaultMessage:
+              "If you're around, this is where the vibe’s brewing 🌪️. Check out this ${lobby.title} lobby on AroundU",
         );
 
       case EntityType.house:
@@ -702,13 +677,15 @@ class ShareUtility {
           entityTypeForApi: "MOMENT",
           title: "Share Moment",
           subtitle: moment.title ?? "Shared Moment",
-          imageUrl: moment.media != null && moment.media!.isNotEmpty
-              ? moment.media!.first
-              : "",
+          imageUrl:
+              moment.media != null && moment.media!.isNotEmpty
+                  ? moment.media!.first
+                  : "",
           icon: Icons.photo,
           isCircular: false,
           shareLink: "www.aroundu.in/moment/${moment.id}",
-          defaultMessage: "Some moments speak louder than captions. Check out this moment on AroundU",
+          defaultMessage:
+              "Some moments speak louder than captions. Check out this moment on AroundU",
         );
 
       case EntityType.announcement:
@@ -719,12 +696,14 @@ class ShareUtility {
           entityTypeForApi: "ANNOUNCEMENT",
           title: "Share Announcement",
           subtitle: announcement.title ?? "Announcement",
-          imageUrl: announcement.media != null && announcement.media!.isNotEmpty
-              ? announcement.media!.first
-              : "",
+          imageUrl:
+              announcement.media != null && announcement.media!.isNotEmpty
+                  ? announcement.media!.first
+                  : "",
           icon: Icons.campaign,
           isCircular: false,
-          shareLink: "${ApiConstants.arounduBaseUrl}/announcement/${announcement.id}",
+          shareLink:
+              "${ApiConstants.arounduBaseUrl}/announcement/${announcement.id}",
           defaultMessage: "Check out this announcement on AroundU!",
         );
     }

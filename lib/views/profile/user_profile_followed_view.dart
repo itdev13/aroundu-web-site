@@ -43,7 +43,7 @@ class ProfileDetailsFollowedScreen extends ConsumerStatefulWidget {
 class _ProfileDetailsFollowedScreenState
     extends ConsumerState<ProfileDetailsFollowedScreen> {
   final DashboardController dashboardController =
-      Get.find<DashboardController>();
+      Get.put(DashboardController());
   final controller = Get.put(ProfileController());
   bool isLoading = false;
   // late final List<File> selectedImages;

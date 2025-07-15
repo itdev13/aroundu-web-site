@@ -30,7 +30,8 @@ class _LocationState extends State<Location> {
   GoogleSearchResponse? _selectedPrediction;
 
   final DashboardController dashboardController =
-      Get.find<DashboardController>();
+      Get.put(
+    DashboardController());
 
   final FocusNode locationSearchFocusNode = FocusNode();
 

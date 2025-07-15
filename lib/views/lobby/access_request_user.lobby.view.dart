@@ -56,7 +56,9 @@ class _UserLobbyAccessRequestState
   final groupController = Get.put(GroupController());
   final profileController = Get.put(ProfileController());
   final DashboardController dashboardController =
-      Get.find<DashboardController>();
+       Get.put(
+    DashboardController()
+  );
   final TextEditingController requestedTextEditingController =
       TextEditingController();
 
@@ -951,10 +953,12 @@ class UserLobbyAccessRequestShare extends ConsumerStatefulWidget {
 
 class _UserLobbyAccessRequestShare
     extends ConsumerState<UserLobbyAccessRequestShare> {
-  final controller = Get.find<ProfileController>();
+  final controller = Get.put(ProfileController());
   // final chatController = Get.find<ChatsController>();
   final DashboardController dashboardController =
-      Get.find<DashboardController>();
+       Get.put(
+    DashboardController()
+  );
 
   void _resetState() {
     ref.read(selectedFriendIds.notifier).state = [];

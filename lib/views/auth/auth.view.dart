@@ -914,8 +914,7 @@ class _AuthViewState extends State<AuthView>
   }
 
   Future<bool> _verifyPhone(String phoneNumber) async {
-    PhoneNumberController phoneNumberController =
-        Get.find<PhoneNumberController>();
+    PhoneNumberController phoneNumberController = Get.put(PhoneNumberController());
     setState(() {
       _isLoading = true;
     });
@@ -966,7 +965,7 @@ class _AuthViewState extends State<AuthView>
                   await GetStorage().write('isFirstRun', false);
                   await GetStorage().write('isLoggedOut', false);
                   await authController.checkUserOnboardingStatus(
-                    destination: widget.destination ,
+                    destination: widget.destination,
                   );
                 } else {
                   // Show error message

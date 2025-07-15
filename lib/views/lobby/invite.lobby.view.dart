@@ -61,7 +61,7 @@ class InviteFriendsView extends ConsumerStatefulWidget {
 }
 
 class _InvitePeopleViewState extends ConsumerState<InviteFriendsView> {
-  final controller = Get.find<ProfileController>();
+  final controller = Get.put(ProfileController());
   Timer? _debounceTimer;
 
   @override

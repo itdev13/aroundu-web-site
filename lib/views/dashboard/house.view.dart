@@ -43,7 +43,7 @@ class HouseView extends ConsumerStatefulWidget {
 
 class _HouseViewState extends ConsumerState<HouseView> {
   final DashboardController dashboardController =
-      Get.find<DashboardController>();
+      Get.put(DashboardController());
 
   List<House>? houses;
   bool isLiked = false;
@@ -940,7 +940,9 @@ class _CheckOutLobbiesState extends ConsumerState<CheckOutLobbies> {
     final lobbyType = ref.watch(checkOutLobbiesProvider);
     final yourLobbies = ref.watch(LobbyProviderUtil.getProvider(lobbyType));
     final DashboardController dashboardController =
-        Get.find<DashboardController>();
+        Get.put(
+      DashboardController(),
+    );
     double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
 
@@ -1275,7 +1277,9 @@ class _FollowedHousesState extends ConsumerState<FollowedHouses> {
   @override
   Widget build(BuildContext context) {
     final DashboardController dashboardController =
-        Get.find<DashboardController>();
+        Get.put(
+      DashboardController(),
+    );
     final yourHouses = ref.watch(
       HouseProviderUtil.getProvider(HouseType.followed),
     );

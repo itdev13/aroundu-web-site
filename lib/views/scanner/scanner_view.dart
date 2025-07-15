@@ -36,7 +36,7 @@ class ScanQrScreen extends ConsumerStatefulWidget {
 class _ScanQrScreenState extends ConsumerState<ScanQrScreen> {
   Timer? _timer;
   // final ChatsController _chatsController = Get.find<ChatsController>();
-  final profileController = Get.find<ProfileController>();
+  final profileController = Get.put(ProfileController());
 
   final ScreenshotController screenshotController = ScreenshotController();
 
