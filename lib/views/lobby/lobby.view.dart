@@ -70,18 +70,12 @@ import 'checkout.view.lobby.dart';
 import 'co_host.lobby.view.dart';
 import 'invite.lobby.view.dart';
 
-final housesForLobbiesProvider = FutureProvider.family<List<House>, String>((
-  ref,
-  lobbyId,
-) async {
+final housesForLobbiesProvider = FutureProvider.family<List<House>, String>((ref, lobbyId) async {
   try {
     String url = ApiConstants.getHouses;
     Map<String, dynamic> queryParameters = {'lobbyId': lobbyId};
 
-    final response = await ApiService().get(
-      url,
-      queryParameters: queryParameters,
-    );
+    final response = await ApiService().get(url, queryParameters: queryParameters);
 
     if (response.data != null) {
       final houses =
@@ -99,13 +93,9 @@ final housesForLobbiesProvider = FutureProvider.family<List<House>, String>((
   }
 });
 
-final isLocationsExpandedProvider = StateProvider.family<bool, String>(
-  (ref, houseId) => false,
-);
+final isLocationsExpandedProvider = StateProvider.family<bool, String>((ref, houseId) => false);
 
-final isAuthProvider = StateProvider.family<bool, String>(
-  (ref, lobbyId) => false,
-);
+final isAuthProvider = StateProvider.family<bool, String>((ref, lobbyId) => false);
 
 class LobbyView extends ConsumerStatefulWidget {
   const LobbyView({super.key, required this.lobbyId});
@@ -141,9 +131,7 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
     };
 
     Future.microtask(() async {
-      await ref
-          .read(lobbyDetailsProvider(widget.lobbyId).notifier)
-          .fetchLobbyDetails(widget.lobbyId);
+      await ref.read(lobbyDetailsProvider(widget.lobbyId).notifier).fetchLobbyDetails(widget.lobbyId);
 
       // Update isSaved after data is loaded
       final lobbyData = ref.read(lobbyDetailsProvider(widget.lobbyId)).value;
@@ -158,13 +146,7 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
   // Function to handle bookmark toggle on tap
   Future<void> _onBookmarkTap({required String lobbyId}) async {
     // Call the provider to toggle the bookmark and pass current isSaved value
-    await ref.read(
-      toggleBookmarkProvider(
-        itemId: lobbyId,
-        isSaved: isSaved,
-        entityType: "LOBBY",
-      ).future,
-    );
+    await ref.read(toggleBookmarkProvider(itemId: lobbyId, isSaved: isSaved, entityType: "LOBBY").future);
 
     // After API call, toggle the local isSaved state
     setState(() {
@@ -172,10 +154,7 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
     });
   }
 
-  Future<void> _onJoinOrRequest({
-    required BuildContext context,
-    required Lobby lobby,
-  }) async {
+  Future<void> _onJoinOrRequest({required BuildContext context, required Lobby lobby}) async {
     // final lobby = widget.lobbyDetail.lobby;
     double sw = MediaQuery.of(context).size.width;
     double sh = MediaQuery.of(context).size.height;
@@ -193,9 +172,7 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                 content: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    CircularProgressIndicator(color: DesignColors.accent),
-                  ],
+                  children: [CircularProgressIndicator(color: DesignColors.accent)],
                 ),
               );
             },
@@ -212,19 +189,15 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
             },
           );
           ref.read(lobbyDetailsProvider(lobby.id).notifier).reset();
-          await ref
-              .read(lobbyDetailsProvider(lobby.id).notifier)
-              .fetchLobbyDetails(lobby.id);
+          await ref.read(lobbyDetailsProvider(lobby.id).notifier).fetchLobbyDetails(lobby.id);
         },
         onInviteExternalMembers: () async {
           FancyAppDownloadDialog.show(
             context,
             title: "Unlock Premium Features",
-            message:
-                "Get the full AroundU experience with exclusive features, enhanced performance, and more!",
+            message: "Get the full AroundU experience with exclusive features, enhanced performance, and more!",
             appStoreUrl: "https://apps.apple.com/in/app/aroundu/id6744299663",
-            playStoreUrl:
-                "https://play.google.com/store/apps/details?id=com.polar.aroundu",
+            playStoreUrl: "https://play.google.com/store/apps/details?id=com.polar.aroundu",
             // cancelButtonText: "Maybe Later",
             onCancel: () {
               print("User chose to skip download");
@@ -257,54 +230,33 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                   content: Row(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      CircularProgressIndicator(color: DesignColors.accent),
-                    ],
+                    children: [CircularProgressIndicator(color: DesignColors.accent)],
                   ),
                 );
               },
             );
 
-            await Future.wait([
-              groupController.fetchGroups(),
-              profileController.getFriends(),
-            ]);
+            await Future.wait([groupController.fetchGroups(), profileController.getFriends()]);
             if (context.mounted) {
-              if (dialogKey.currentContext != null &&
-                  Navigator.canPop(dialogKey.currentContext!)) {
+              if (dialogKey.currentContext != null && Navigator.canPop(dialogKey.currentContext!)) {
                 Navigator.pop(dialogKey.currentContext!);
               }
             }
-            await Get.toNamed(
-              AppRoutes.lobbyAccessRequest,
-              arguments: {'lobby': lobby, 'isIndividual': false},
-            );
+            await Get.toNamed(AppRoutes.lobbyAccessRequest, arguments: {'lobby': lobby, 'isIndividual': false});
             ref.read(lobbyDetailsProvider(lobby.id).notifier).reset();
-            await ref
-                .read(lobbyDetailsProvider(lobby.id).notifier)
-                .fetchLobbyDetails(lobby.id);
+            await ref.read(lobbyDetailsProvider(lobby.id).notifier).fetchLobbyDetails(lobby.id);
           },
           onJoinAsIndividual: () async {
-            await Get.toNamed(
-              AppRoutes.lobbyAccessRequest,
-              arguments: {'lobby': lobby},
-            );
+            await Get.toNamed(AppRoutes.lobbyAccessRequest, arguments: {'lobby': lobby});
             ref.read(lobbyDetailsProvider(lobby.id).notifier).reset();
-            await ref
-                .read(lobbyDetailsProvider(lobby.id).notifier)
-                .fetchLobbyDetails(lobby.id);
+            await ref.read(lobbyDetailsProvider(lobby.id).notifier).fetchLobbyDetails(lobby.id);
           },
         );
       } else {
         if (lobby.hasForm) {
-          await Get.toNamed(
-            AppRoutes.lobbyAccessRequest,
-            arguments: {'lobby': lobby},
-          );
+          await Get.toNamed(AppRoutes.lobbyAccessRequest, arguments: {'lobby': lobby});
           ref.read(lobbyDetailsProvider(lobby.id).notifier).reset();
-          await ref
-              .read(lobbyDetailsProvider(lobby.id).notifier)
-              .fetchLobbyDetails(lobby.id);
+          await ref.read(lobbyDetailsProvider(lobby.id).notifier).fetchLobbyDetails(lobby.id);
         } else {
           //only price
           if (lobby.priceDetails?.price != 0.0 && lobby.lobbyType == "PUBLIC") {
@@ -318,18 +270,14 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                   content: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      CircularProgressIndicator(color: DesignColors.accent),
-                    ],
+                    children: [CircularProgressIndicator(color: DesignColors.accent)],
                   ),
                 );
               },
             );
 
             // Fetch pricing data
-            await ref
-                .read(pricingProvider(lobby.id).notifier)
-                .fetchPricing(lobby.id, groupSize: 1);
+            await ref.read(pricingProvider(lobby.id).notifier).fetchPricing(lobby.id, groupSize: 1);
 
             // Close the loading dialog
             Navigator.of(context, rootNavigator: true).pop();
@@ -338,21 +286,12 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
             final pricingData = pricingState.pricingData;
 
             if (pricingData != null && pricingData.status == 'SUCCESS') {
-              await Get.toNamed(
-                AppRoutes.checkOutPublicLobbyView,
-                arguments: {'lobby': lobby},
-              );
+              await Get.toNamed(AppRoutes.checkOutPublicLobbyView, arguments: {'lobby': lobby});
               ref.read(lobbyDetailsProvider(lobby.id).notifier).reset();
-              await ref
-                  .read(lobbyDetailsProvider(lobby.id).notifier)
-                  .fetchLobbyDetails(lobby.id);
+              await ref.read(lobbyDetailsProvider(lobby.id).notifier).fetchLobbyDetails(lobby.id);
             } else {
               // Show error message if pricing data couldn't be fetched
-              CustomSnackBar.show(
-                context: context,
-                message: "Something went wrong",
-                type: SnackBarType.error,
-              );
+              CustomSnackBar.show(context: context, message: "Something went wrong", type: SnackBarType.error);
             }
           }
           //nothing
@@ -367,18 +306,14 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                   content: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      CircularProgressIndicator(color: DesignColors.accent),
-                    ],
+                    children: [CircularProgressIndicator(color: DesignColors.accent)],
                   ),
                 );
               },
             );
 
             // Fetch pricing data
-            await ref
-                .read(pricingProvider(lobby.id).notifier)
-                .fetchPricing(lobby.id, groupSize: 1);
+            await ref.read(pricingProvider(lobby.id).notifier).fetchPricing(lobby.id, groupSize: 1);
 
             // Close the loading dialog
             Navigator.of(context, rootNavigator: true).pop();
@@ -387,32 +322,21 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
             final pricingData = pricingState.pricingData;
 
             // Check if pricing data is available
-            if (pricingData != null &&
-                pricingData.status == 'SUCCESS' &&
-                pricingData.total == 0.0) {
+            if (pricingData != null && pricingData.status == 'SUCCESS' && pricingData.total == 0.0) {
               final response = await ref.read(
-                handleLobbyAccessProvider(
-                  lobby.id,
-                  lobby.isPrivate,
-                  text: "",
-                  hasForm: false,
-                ).future,
+                handleLobbyAccessProvider(lobby.id, lobby.isPrivate, text: "", hasForm: false).future,
               );
               if (response != null && response['status'] == 'SUCCESS') {
                 Get.dialog(
                   Dialog(
                     backgroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
-                    ),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                     child: Stack(
                       alignment: AlignmentDirectional.center,
                       children: [
                         Container(
                           padding: EdgeInsets.all(24),
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(16),
-                          ),
+                          decoration: BoxDecoration(borderRadius: BorderRadius.circular(16)),
                           child: Column(
                             mainAxisSize: MainAxisSize.min,
                             children: [
@@ -456,16 +380,10 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                 Fluttertoast.showToast(msg: "successfully joined the lobby");
               }
               ref.read(lobbyDetailsProvider(lobby.id).notifier).reset();
-              await ref
-                  .read(lobbyDetailsProvider(lobby.id).notifier)
-                  .fetchLobbyDetails(lobby.id);
+              await ref.read(lobbyDetailsProvider(lobby.id).notifier).fetchLobbyDetails(lobby.id);
             } else {
               // Show error message if pricing data couldn't be fetched
-              CustomSnackBar.show(
-                context: context,
-                message: "Something went wrong",
-                type: SnackBarType.error,
-              );
+              CustomSnackBar.show(context: context, message: "Something went wrong", type: SnackBarType.error);
             }
 
             // Get.back();
@@ -473,11 +391,7 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
         }
       }
     } else {
-      CustomSnackBar.show(
-        context: context,
-        message: "Unexpected user status.",
-        type: SnackBarType.error,
-      );
+      CustomSnackBar.show(context: context, message: "Unexpected user status.", type: SnackBarType.error);
     }
   }
 
@@ -490,10 +404,8 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
     final lobbyDetailsAsync = ref.watch(lobbyDetailsProvider(widget.lobbyId));
 
     final isauth =
-        ((authService.getToken() != null &&
-                authService.getToken().isNotEmpty) &&
-            (authService.getRefreshToken() != null &&
-                authService.getRefreshToken().isNotEmpty));
+        ((authService.getToken() != null && authService.getToken().isNotEmpty) &&
+            (authService.getRefreshToken() != null && authService.getRefreshToken().isNotEmpty));
 
     Future.microtask(() {
       print("isAuth in init : $isauth");
@@ -516,8 +428,7 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
           userInfos = lobbyData.lobby.userSummaries ?? [];
 
           displayAvatars = userInfos.take(3).toList();
-          remainingCount =
-              lobbyData.lobby.currentMembers - displayAvatars.length;
+          remainingCount = lobbyData.lobby.currentMembers - displayAvatars.length;
           print(lobbyData.lobby.userStatus);
         }
         final deviceType = DesignUtils.getDeviceType(context);
@@ -529,10 +440,7 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                   onPressed: () {
                     Get.back();
                   },
-                  icon: DesignIcon.icon(
-                    icon: Icons.arrow_back_ios_sharp,
-                    size: 20,
-                  ),
+                  icon: DesignIcon.icon(icon: Icons.arrow_back_ios_sharp, size: 20),
                 ),
                 backgroundColor: Colors.transparent,
                 scrolledUnderElevation: 0,
@@ -540,12 +448,8 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
               body: RefreshIndicator(
                 key: Key("nullDataStateRefreshIndicator"),
                 onRefresh: () async {
-                  ref
-                      .read(lobbyDetailsProvider(widget.lobbyId).notifier)
-                      .reset();
-                  await ref
-                      .read(lobbyDetailsProvider(widget.lobbyId).notifier)
-                      .fetchLobbyDetails(widget.lobbyId);
+                  ref.read(lobbyDetailsProvider(widget.lobbyId).notifier).reset();
+                  await ref.read(lobbyDetailsProvider(widget.lobbyId).notifier).fetchLobbyDetails(widget.lobbyId);
                 },
                 child: SingleChildScrollView(
                   child: SizedBox(
@@ -572,89 +476,57 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                   onPressed: () {
                     Get.back();
                   },
-                  icon: DesignIcon.icon(
-                    icon: Icons.arrow_back_ios_sharp,
-                    size: 20,
-                  ),
+                  icon: DesignIcon.icon(icon: Icons.arrow_back_ios_sharp, size: 20),
                 ),
                 actions: [
                   // For FULL or CLOSED lobbies with privileged users
-                  if ((lobbyData.lobby.lobbyStatus == "FULL" ||
-                          lobbyData.lobby.lobbyStatus == "CLOSED") &&
+                  if ((lobbyData.lobby.lobbyStatus == "FULL" || lobbyData.lobby.lobbyStatus == "CLOSED") &&
                       lobbyData.lobby.userStatus == "MEMBER")
                     IconButton(
-                      style: IconButton.styleFrom(
-                        backgroundColor: Colors.white70,
-                      ),
+                      style: IconButton.styleFrom(backgroundColor: Colors.white70),
                       onPressed: () {
                         HapticFeedback.selectionClick();
                         showModalBottomSheet(
                           context: context,
                           backgroundColor: Colors.white,
                           elevation: 4,
-                          builder:
-                              (context) => LobbyAttendingStatusBottomSheet(
-                                lobby: lobbyData.lobby,
-                              ),
+                          builder: (context) => LobbyAttendingStatusBottomSheet(lobby: lobbyData.lobby),
                         );
                       },
-                      icon: DesignIcon.icon(
-                        icon: Icons.edit_calendar_outlined,
-                        color: Color(0xFF323232),
-                      ),
+                      icon: DesignIcon.icon(icon: Icons.edit_calendar_outlined, color: Color(0xFF323232)),
                     ),
 
                   // For ACTIVE lobby with MEMBER status
-                  if (lobbyData.lobby.lobbyStatus == "ACTIVE" &&
-                      lobbyData.lobby.userStatus == "MEMBER")
+                  if (lobbyData.lobby.lobbyStatus == "ACTIVE" && lobbyData.lobby.userStatus == "MEMBER")
                     IconButton(
-                      style: IconButton.styleFrom(
-                        backgroundColor: Colors.white70,
-                      ),
+                      style: IconButton.styleFrom(backgroundColor: Colors.white70),
                       onPressed: () {
                         HapticFeedback.selectionClick();
                         showModalBottomSheet(
                           context: context,
                           backgroundColor: Colors.white,
                           elevation: 4,
-                          builder:
-                              (context) => LobbyAttendingStatusBottomSheet(
-                                lobby: lobbyData.lobby,
-                              ),
+                          builder: (context) => LobbyAttendingStatusBottomSheet(lobby: lobbyData.lobby),
                         );
                       },
-                      icon: DesignIcon.icon(
-                        icon: Icons.edit_calendar_outlined,
-                        color: Color(0xFF323232),
-                      ),
+                      icon: DesignIcon.icon(icon: Icons.edit_calendar_outlined, color: Color(0xFF323232)),
                     ),
 
-                  if (lobbyData.lobby.userStatus == "MEMBER" &&
-                      lobbyData.lobby.lobbyStatus != "PAST")
+                  if (lobbyData.lobby.userStatus == "MEMBER" && lobbyData.lobby.lobbyStatus != "PAST")
                     IconButton(
-                      style: IconButton.styleFrom(
-                        backgroundColor: Colors.white70,
-                      ),
+                      style: IconButton.styleFrom(backgroundColor: Colors.white70),
                       onPressed: () {
                         Get.toNamed(
                           AppRoutes.scanQrScreen,
-                          arguments: {
-                            'lobbyId': lobbyData.lobby.id,
-                            'lobby': lobbyData.lobby,
-                          },
+                          arguments: {'lobbyId': lobbyData.lobby.id, 'lobby': lobbyData.lobby},
                         );
                       },
-                      icon: DesignIcon.icon(
-                        icon: Icons.qr_code_scanner,
-                        color: Color(0xFF323232),
-                      ),
+                      icon: DesignIcon.icon(icon: Icons.qr_code_scanner, color: Color(0xFF323232)),
                     ),
 
                   // Existing buttons
                   IconButton(
-                    style: IconButton.styleFrom(
-                      backgroundColor: Colors.white70,
-                    ),
+                    style: IconButton.styleFrom(backgroundColor: Colors.white70),
                     onPressed: () async {
                       HapticFeedback.selectionClick();
                       await ShareUtility.showShareBottomSheet(
@@ -663,41 +535,28 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                         entity: lobbyData.lobby,
                       );
                     },
-                    icon: DesignIcon.icon(
-                      icon: Icons.share,
-                      color: Color(0xFF323232),
-                    ),
+                    icon: DesignIcon.icon(icon: Icons.share, color: Color(0xFF323232)),
                   ),
                   IconButton(
-                    style: IconButton.styleFrom(
-                      backgroundColor: Colors.white70,
-                    ),
+                    style: IconButton.styleFrom(backgroundColor: Colors.white70),
                     onPressed: () {
                       HapticFeedback.selectionClick();
                       _onBookmarkTap(lobbyId: lobbyData.lobby.id);
                     },
                     icon: DesignIcon.icon(
-                      icon:
-                          isSaved
-                              ? FontAwesomeIcons.solidBookmark
-                              : FontAwesomeIcons.bookmark,
+                      icon: isSaved ? FontAwesomeIcons.solidBookmark : FontAwesomeIcons.bookmark,
                       size: 18,
                       color: isSaved ? DesignColors.accent : Color(0xFF323232),
                     ),
                   ),
                   if (lobbyData.lobby.userStatus == "ADMIN")
                     IconButton(
-                      style: IconButton.styleFrom(
-                        backgroundColor: Colors.white70,
-                      ),
+                      style: IconButton.styleFrom(backgroundColor: Colors.white70),
                       onPressed: () {
                         HapticFeedback.selectionClick();
                         scaffoldKey.currentState?.openEndDrawer();
                       },
-                      icon: DesignIcon.icon(
-                        icon: Icons.more_vert_rounded,
-                        color: Color(0xFF323232),
-                      ),
+                      icon: DesignIcon.icon(icon: Icons.more_vert_rounded, color: Color(0xFF323232)),
                     ),
                 ],
                 backgroundColor: Colors.transparent,
@@ -718,16 +577,10 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    _buildBottomNavigationBarLeftSideWidget(
-                      lobbyDetail: lobbyData,
-                    ),
+                    _buildBottomNavigationBarLeftSideWidget(lobbyDetail: lobbyData),
 
                     // Right side button (expanded to fill remaining space)
-                    Expanded(
-                      child: _buildBottomNavigationBarRightSideWidget(
-                        lobbyDetail: lobbyData,
-                      ),
-                    ),
+                    Expanded(child: _buildBottomNavigationBarRightSideWidget(lobbyDetail: lobbyData)),
                   ],
                 ),
               ),
@@ -735,17 +588,10 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                 backgroundColor: DesignColors.bg,
                 width: 0.65 * sw,
                 child: ListView(
-                  padding: EdgeInsets.symmetric(
-                    vertical: 0.12 * sh,
-                    horizontal: 0.05 * sw,
-                  ),
+                  padding: EdgeInsets.symmetric(vertical: 0.12 * sh, horizontal: 0.05 * sw),
                   children: [
                     ListTile(
-                      leading: DesignIcon.custom(
-                        icon: DesignIcons.pencil,
-                        size: 16,
-                        color: const Color(0xFFEC4B5D),
-                      ),
+                      leading: DesignIcon.custom(icon: DesignIcons.pencil, size: 16, color: const Color(0xFFEC4B5D)),
                       title: DesignText(
                         text: 'Edit',
                         fontSize: 14,
@@ -763,13 +609,8 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                           useSafeArea: true,
                           builder: (BuildContext context) {
                             return Padding(
-                              padding: EdgeInsets.only(
-                                bottom:
-                                    MediaQuery.of(context).viewInsets.bottom,
-                              ),
-                              child: LobbySmallEditSheet(
-                                lobby: lobbyData.lobby,
-                              ),
+                              padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+                              child: LobbySmallEditSheet(lobby: lobbyData.lobby),
                             );
                           },
                         );
@@ -778,16 +619,9 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                     Space.h(height: 8),
 
                     ListTile(
-                      leading: DesignIcon.custom(
-                        icon: DesignIcons.personAdd,
-                        size: 16,
-                        color: const Color(0xFFEC4B5D),
-                      ),
+                      leading: DesignIcon.custom(icon: DesignIcons.personAdd, size: 16, color: const Color(0xFFEC4B5D)),
                       title: DesignText(
-                        text:
-                            (lobbyData.lobby.lobbyType == 'PUBLIC')
-                                ? 'Form Submissions'
-                                : 'Access Requests',
+                        text: (lobbyData.lobby.lobbyType == 'PUBLIC') ? 'Form Submissions' : 'Access Requests',
                         fontSize: 14,
                         fontWeight: FontWeight.w500,
                         color: const Color(0xFF323232),
@@ -796,12 +630,7 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                         Get.toNamed(
                           AppRoutes.lobbyRequests
                               .replaceAll(':lobbyId', lobbyData.lobby.id)
-                              .replaceAll(
-                                ':title',
-                                (lobbyData.lobby.lobbyType == 'PUBLIC')
-                                    ? 'Forms'
-                                    : 'Requests',
-                              ),
+                              .replaceAll(':title', (lobbyData.lobby.lobbyType == 'PUBLIC') ? 'Forms' : 'Requests'),
                         );
                         // Get.to(() => const AccessRequestPage());
                       },
@@ -828,10 +657,8 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                           title: "Unlock Premium Features",
                           message:
                               "Get the full AroundU experience with exclusive features, enhanced performance, and more!",
-                          appStoreUrl:
-                              "https://apps.apple.com/in/app/aroundu/id6744299663",
-                          playStoreUrl:
-                              "https://play.google.com/store/apps/details?id=com.polar.aroundu",
+                          appStoreUrl: "https://apps.apple.com/in/app/aroundu/id6744299663",
+                          playStoreUrl: "https://play.google.com/store/apps/details?id=com.polar.aroundu",
                           // cancelButtonText: "Maybe Later",
                           onCancel: () {
                             print("User chose to skip download");
@@ -842,11 +669,7 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                     Space.h(height: 8),
 
                     ListTile(
-                      leading: DesignIcon.icon(
-                        icon: Icons.settings_outlined,
-                        size: 16,
-                        color: const Color(0xFFEC4B5D),
-                      ),
+                      leading: DesignIcon.icon(icon: Icons.settings_outlined, size: 16, color: const Color(0xFFEC4B5D)),
                       title: DesignText(
                         text: 'Settings',
                         fontSize: 14,
@@ -854,10 +677,7 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                         color: const Color(0xFF323232),
                       ),
                       onTap: () {
-                        Get.toNamed(
-                          AppRoutes.lobbySettings,
-                          arguments: {'lobby': lobbyData.lobby},
-                        );
+                        Get.toNamed(AppRoutes.lobbySettings, arguments: {'lobby': lobbyData.lobby});
                       },
                     ),
                     Space.h(height: 8),
@@ -867,9 +687,7 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
               body: RefreshIndicator(
                 key: Key("normalStateRefreshIndicator"),
                 onRefresh: () async {
-                  ref
-                      .read(lobbyDetailsProvider(lobbyData.lobby.id).notifier)
-                      .reset();
+                  ref.read(lobbyDetailsProvider(lobbyData.lobby.id).notifier).reset();
                   await ref
                       .read(lobbyDetailsProvider(lobbyData.lobby.id).notifier)
                       .fetchLobbyDetails(lobbyData.lobby.id);
@@ -901,9 +719,7 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
             key: Key("errorStateRefreshIndicator"),
             onRefresh: () async {
               ref.read(lobbyDetailsProvider(widget.lobbyId).notifier).reset();
-              await ref
-                  .read(lobbyDetailsProvider(widget.lobbyId).notifier)
-                  .fetchLobbyDetails(widget.lobbyId);
+              await ref.read(lobbyDetailsProvider(widget.lobbyId).notifier).fetchLobbyDetails(widget.lobbyId);
             },
             child: SingleChildScrollView(
               child: SizedBox(
@@ -921,43 +737,23 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                     ),
                     Space.h(height: 32),
                     DesignButton(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: 24,
-                        vertical: 16,
-                      ),
-                      child: DesignText(
-                        text: "Retry",
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.white,
-                      ),
+                      padding: EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                      child: DesignText(text: "Retry", fontSize: 16, fontWeight: FontWeight.w600, color: Colors.white),
                       onPress: () async {
                         await authService.storeToken("");
                         final authApiService = AuthApiService();
                         final refreshed = await authApiService.refreshToken();
 
                         if (refreshed) {
-                          ref
-                              .read(
-                                lobbyDetailsProvider(widget.lobbyId).notifier,
-                              )
-                              .reset();
+                          ref.read(lobbyDetailsProvider(widget.lobbyId).notifier).reset();
                           await ref
-                              .read(
-                                lobbyDetailsProvider(widget.lobbyId).notifier,
-                              )
+                              .read(lobbyDetailsProvider(widget.lobbyId).notifier)
                               .fetchLobbyDetails(widget.lobbyId);
                         } else {
                           authService.clearAuthData();
-                          ref
-                              .read(
-                                lobbyDetailsProvider(widget.lobbyId).notifier,
-                              )
-                              .reset();
+                          ref.read(lobbyDetailsProvider(widget.lobbyId).notifier).reset();
                           await ref
-                              .read(
-                                lobbyDetailsProvider(widget.lobbyId).notifier,
-                              )
+                              .read(lobbyDetailsProvider(widget.lobbyId).notifier)
                               .fetchLobbyDetails(widget.lobbyId);
                         }
                       },
@@ -977,10 +773,7 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                 onPressed: () {
                   Get.back();
                 },
-                icon: DesignIcon.icon(
-                  icon: Icons.arrow_back_ios_sharp,
-                  size: 20,
-                ),
+                icon: DesignIcon.icon(icon: Icons.arrow_back_ios_sharp, size: 20),
               ),
               backgroundColor: Colors.transparent,
               scrolledUnderElevation: 0,
@@ -988,31 +781,21 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
             body: SingleChildScrollView(
               child: SizedBox(
                 height: 0.85 * sh,
-                child: Center(
-                  child: CircularProgressIndicator(color: DesignColors.accent),
-                ),
+                child: Center(child: CircularProgressIndicator(color: DesignColors.accent)),
               ),
             ),
           ),
     );
   }
 
-  Widget responsiveLayout({
-    required LobbyDetails lobbyData,
-    required double sw,
-    required double sh,
-  }) {
+  Widget responsiveLayout({required LobbyDetails lobbyData, required double sw, required double sh}) {
     return SimpleScreenBuilder(
       mobileLayout: mobileLayout(lobbyData: lobbyData, sh: sh, sw: sw),
       desktopLayout: desktopLayout(lobbyData: lobbyData, sh: sh, sw: sw),
     );
   }
 
-  Widget mobileLayout({
-    required LobbyDetails lobbyData,
-    required double sw,
-    required double sh,
-  }) {
+  Widget mobileLayout({required LobbyDetails lobbyData, required double sw, required double sh}) {
     final isAuth = ref.watch(isAuthProvider(lobbyData.lobby.id));
 
     List<UserSummary> userInfos = <UserSummary>[];
@@ -1060,12 +843,7 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
               top: 0.1 * sh,
               left: 0,
               child: Container(
-                padding: EdgeInsets.only(
-                  left: 16,
-                  right: 12,
-                  top: 8,
-                  bottom: 8,
-                ),
+                padding: EdgeInsets.only(left: 16, right: 12, top: 8, bottom: 8),
                 decoration: BoxDecoration(
                   color:
                       (() {
@@ -1082,9 +860,7 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                             return Color(0xFF52D17C);
                         }
                       })(),
-                  borderRadius: BorderRadius.horizontal(
-                    right: Radius.circular(24),
-                  ),
+                  borderRadius: BorderRadius.horizontal(right: Radius.circular(24)),
                 ),
                 child: Row(
                   children: [
@@ -1104,10 +880,7 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                                 return DesignIcons.running;
                             }
                           })(),
-                      color:
-                          (lobbyData.lobby.lobbyStatus == 'ACTIVE')
-                              ? Colors.white
-                              : null,
+                      color: (lobbyData.lobby.lobbyStatus == 'ACTIVE') ? Colors.white : null,
                     ),
                     Space.w(width: 8),
                     DesignText(
@@ -1145,52 +918,33 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                 children: [
                   Container(
                     padding: EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                    decoration: BoxDecoration(
-                      color: Color(0xFF5750E2),
-                      borderRadius: BorderRadius.circular(24),
-                    ),
+                    decoration: BoxDecoration(color: Color(0xFF5750E2), borderRadius: BorderRadius.circular(24)),
                     child: DesignText(
-                      text:
-                          "${lobbyData.subCategory.iconUrl}    ${lobbyData.subCategory.name}",
+                      text: "${lobbyData.subCategory.iconUrl}    ${lobbyData.subCategory.name}",
                       fontSize: 10,
                       fontWeight: FontWeight.w400,
                       color: Colors.white,
                     ),
                   ),
-                  if (lobbyData.lobby.lobbyStatus != "PAST" &&
-                      lobbyData.lobby.lobbyStatus != "CLOSED")
+                  if (lobbyData.lobby.lobbyStatus != "PAST" && lobbyData.lobby.lobbyStatus != "CLOSED")
                     IconButton(
-                      style: IconButton.styleFrom(
-                        backgroundColor: Colors.black38,
-                      ),
+                      style: IconButton.styleFrom(backgroundColor: Colors.black38),
                       onPressed: () {},
                       icon: DesignIcon.icon(
-                        icon:
-                            (lobbyData.lobby.isPrivate)
-                                ? Icons.lock_outline_rounded
-                                : Icons.lock_open_outlined,
+                        icon: (lobbyData.lobby.isPrivate) ? Icons.lock_outline_rounded : Icons.lock_open_outlined,
                         color: Color(0xFFFFFFFF),
                       ),
                     ),
-                  if (lobbyData.lobby.lobbyStatus == "PAST" ||
-                      lobbyData.lobby.lobbyStatus == "CLOSED")
+                  if (lobbyData.lobby.lobbyStatus == "PAST" || lobbyData.lobby.lobbyStatus == "CLOSED")
                     Container(
                       padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(6),
-                        color: Colors.white,
-                      ),
+                      decoration: BoxDecoration(borderRadius: BorderRadius.circular(6), color: Colors.white),
                       child: Row(
                         children: [
-                          DesignIcon.custom(
-                            icon: DesignIcons.star,
-                            color: null,
-                            size: 14,
-                          ),
+                          DesignIcon.custom(icon: DesignIcons.star, color: null, size: 14),
                           Space.w(width: 4),
                           DesignText(
-                            text:
-                                "${lobbyData.lobby.rating.average} (${lobbyData.lobby.rating.count})",
+                            text: "${lobbyData.lobby.rating.average} (${lobbyData.lobby.rating.count})",
                             fontSize: 12,
                             fontWeight: FontWeight.w400,
                             color: Color(0xFF444444),
@@ -1213,12 +967,10 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
 
                 switch (lobbyData.lobby.lobbyStatus) {
                   case "PAST":
-                    combinedStatus =
-                        "${lobbyData.lobby.userStatus}_${lobbyData.lobby.lobbyStatus}";
+                    combinedStatus = "${lobbyData.lobby.userStatus}_${lobbyData.lobby.lobbyStatus}";
                   case "UPCOMING":
                   case "CLOSED":
-                    combinedStatus =
-                        "${lobbyData.lobby.userStatus}_${lobbyData.lobby.lobbyStatus}";
+                    combinedStatus = "${lobbyData.lobby.userStatus}_${lobbyData.lobby.lobbyStatus}";
 
                   default: // ACTIVE
                 }
@@ -1239,10 +991,8 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                                 title: "Unlock Premium Features",
                                 message:
                                     "Get the full AroundU experience with exclusive features, enhanced performance, and more!",
-                                appStoreUrl:
-                                    "https://apps.apple.com/in/app/aroundu/id6744299663",
-                                playStoreUrl:
-                                    "https://play.google.com/store/apps/details?id=com.polar.aroundu",
+                                appStoreUrl: "https://apps.apple.com/in/app/aroundu/id6744299663",
+                                playStoreUrl: "https://play.google.com/store/apps/details?id=com.polar.aroundu",
                                 // cancelButtonText: "Maybe Later",
                                 onCancel: () {
                                   print("User chose to skip download");
@@ -1257,8 +1007,7 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                             },
                             child: const CustomOfferCard(
                               boldText: "Add Custom Offers",
-                              normalText:
-                                  "to attract more attendees to your lobby now.",
+                              normalText: "to attract more attendees to your lobby now.",
                             ),
                           ),
                           Space.h(height: 24),
@@ -1279,12 +1028,10 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
 
                 switch (lobbyData.lobby.lobbyStatus) {
                   case "PAST":
-                    combinedStatus =
-                        "${lobbyData.lobby.userStatus}_${lobbyData.lobby.lobbyStatus}";
+                    combinedStatus = "${lobbyData.lobby.userStatus}_${lobbyData.lobby.lobbyStatus}";
                   case "UPCOMING":
                   case "CLOSED":
-                    combinedStatus =
-                        "${lobbyData.lobby.userStatus}_${lobbyData.lobby.lobbyStatus}";
+                    combinedStatus = "${lobbyData.lobby.userStatus}_${lobbyData.lobby.lobbyStatus}";
 
                   default: // ACTIVE
                 }
@@ -1326,20 +1073,15 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                                 title: "Unlock Premium Features",
                                 message:
                                     "Get the full AroundU experience with exclusive features, enhanced performance, and more!",
-                                appStoreUrl:
-                                    "https://apps.apple.com/in/app/aroundu/id6744299663",
-                                playStoreUrl:
-                                    "https://play.google.com/store/apps/details?id=com.polar.aroundu",
+                                appStoreUrl: "https://apps.apple.com/in/app/aroundu/id6744299663",
+                                playStoreUrl: "https://play.google.com/store/apps/details?id=com.polar.aroundu",
                                 // cancelButtonText: "Maybe Later",
                                 onCancel: () {
                                   print("User chose to skip download");
                                 },
                               );
                             },
-                            child: const CustomOfferCard(
-                              boldText: "Add tier pricing ",
-                              normalText: "to your lobby",
-                            ),
+                            child: const CustomOfferCard(boldText: "Add tier pricing ", normalText: "to your lobby"),
                           ),
                           Space.h(height: 24),
                         ],
@@ -1373,121 +1115,38 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                 runSpacing: 12,
                 direction: Axis.vertical,
                 children: [
-                  if (lobbyData.lobby.filter.otherFilterInfo.dateInfo !=
-                      null) ...[
+                  if (lobbyData.lobby.filter.otherFilterInfo.dateInfo != null) ...[
                     InfoItemWithTitle(
-                      iconUrl:
-                          lobbyData
-                              .lobby
-                              .filter
-                              .otherFilterInfo
-                              .dateInfo!
-                              .iconUrl,
-                      title:
-                          lobbyData
-                              .lobby
-                              .filter
-                              .otherFilterInfo
-                              .dateInfo!
-                              .title,
-                      subTitle:
-                          lobbyData
-                              .lobby
-                              .filter
-                              .otherFilterInfo
-                              .dateInfo!
-                              .formattedDate ??
-                          "",
+                      iconUrl: lobbyData.lobby.filter.otherFilterInfo.dateInfo!.iconUrl,
+                      title: lobbyData.lobby.filter.otherFilterInfo.dateInfo!.title,
+                      subTitle: lobbyData.lobby.filter.otherFilterInfo.dateInfo!.formattedDate ?? "",
                     ),
                     const Space.h(height: 4),
                   ],
-                  if (lobbyData.lobby.filter.otherFilterInfo.dateRange !=
-                      null) ...[
+                  if (lobbyData.lobby.filter.otherFilterInfo.dateRange != null) ...[
                     InfoItemWithTitle(
-                      iconUrl:
-                          lobbyData
-                              .lobby
-                              .filter
-                              .otherFilterInfo
-                              .dateRange!
-                              .iconUrl,
-                      title:
-                          lobbyData
-                              .lobby
-                              .filter
-                              .otherFilterInfo
-                              .dateRange!
-                              .title,
-                      subTitle:
-                          lobbyData
-                              .lobby
-                              .filter
-                              .otherFilterInfo
-                              .dateRange!
-                              .formattedDateCompactView,
+                      iconUrl: lobbyData.lobby.filter.otherFilterInfo.dateRange!.iconUrl,
+                      title: lobbyData.lobby.filter.otherFilterInfo.dateRange!.title,
+                      subTitle: lobbyData.lobby.filter.otherFilterInfo.dateRange!.formattedDateCompactView,
                     ),
                     const Space.h(height: 4),
                   ],
 
                   if (lobbyData.lobby.filter.otherFilterInfo.pickUp != null ||
-                      lobbyData.lobby.filter.otherFilterInfo.destination !=
-                          null) ...[
+                      lobbyData.lobby.filter.otherFilterInfo.destination != null) ...[
                     InfoItemWithTitle(
-                      iconUrl:
-                          lobbyData
-                              .lobby
-                              .filter
-                              .otherFilterInfo
-                              .pickUp!
-                              .iconUrl,
-                      title:
-                          lobbyData
-                              .lobby
-                              .filter
-                              .otherFilterInfo
-                              .pickUp
-                              ?.title ??
-                          "",
-                      subTitle:
-                          lobbyData
-                              .lobby
-                              .filter
-                              .otherFilterInfo
-                              .pickUp!
-                              .locationResponse
-                              ?.areaName ??
-                          "",
+                      iconUrl: lobbyData.lobby.filter.otherFilterInfo.pickUp!.iconUrl,
+                      title: lobbyData.lobby.filter.otherFilterInfo.pickUp?.title ?? "",
+                      subTitle: lobbyData.lobby.filter.otherFilterInfo.pickUp!.locationResponse?.areaName ?? "",
                     ),
                     const Space.h(height: 4),
                     InfoItemWithTitle(
-                      iconUrl:
-                          lobbyData
-                              .lobby
-                              .filter
-                              .otherFilterInfo
-                              .pickUp!
-                              .iconUrl,
-                      title:
-                          lobbyData
-                              .lobby
-                              .filter
-                              .otherFilterInfo
-                              .destination
-                              ?.title ??
-                          "",
-                      subTitle:
-                          lobbyData
-                              .lobby
-                              .filter
-                              .otherFilterInfo
-                              .destination!
-                              .locationResponse
-                              ?.areaName ??
-                          "",
+                      iconUrl: lobbyData.lobby.filter.otherFilterInfo.pickUp!.iconUrl,
+                      title: lobbyData.lobby.filter.otherFilterInfo.destination?.title ?? "",
+                      subTitle: lobbyData.lobby.filter.otherFilterInfo.destination!.locationResponse?.areaName ?? "",
                     ),
                     if (lobbyData.lobby.filter.otherFilterInfo.pickUp != null ||
-                        lobbyData.lobby.filter.otherFilterInfo.destination !=
-                            null) ...[
+                        lobbyData.lobby.filter.otherFilterInfo.destination != null) ...[
                       Row(
                         mainAxisAlignment: MainAxisAlignment.start,
                         children: [
@@ -1498,10 +1157,7 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                               padding: EdgeInsets.all(8),
                               // constraints:
                               //     BoxConstraints(minWidth: 0.15.sw),
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(12),
-                                color: Colors.white,
-                              ),
+                              decoration: BoxDecoration(borderRadius: BorderRadius.circular(12), color: Colors.white),
                               child: InfoItemWithIcon(
                                 iconUrl: "googleMaps",
                                 text: "Show directions",
@@ -1514,22 +1170,9 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                                   double latDestination = 0.0;
                                   double lngDestination = 0.0;
 
-                                  if (lobbyData
-                                              .lobby
-                                              .filter
-                                              .otherFilterInfo
-                                              .pickUp
-                                              ?.locationResponse !=
-                                          null ||
-                                      lobbyData
-                                              .lobby
-                                              .filter
-                                              .otherFilterInfo
-                                              .destination
-                                              ?.locationResponse !=
-                                          null) {
-                                    if (lobbyData.lobby.userStatus !=
-                                        "MEMBER") {
+                                  if (lobbyData.lobby.filter.otherFilterInfo.pickUp?.locationResponse != null ||
+                                      lobbyData.lobby.filter.otherFilterInfo.destination?.locationResponse != null) {
+                                    if (lobbyData.lobby.userStatus != "MEMBER") {
                                       latPickUp =
                                           (lobbyData
                                               .lobby
@@ -1636,17 +1279,12 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                                       try {
                                         await launchUrl(
                                           mapsUri,
-                                          mode:
-                                              LaunchMode
-                                                  .platformDefault, // Use platformDefault for web
-                                          webOnlyWindowName:
-                                              '_blank', // Open in new tab
+                                          mode: LaunchMode.platformDefault, // Use platformDefault for web
+                                          webOnlyWindowName: '_blank', // Open in new tab
                                         );
                                         launched = true;
                                       } catch (e) {
-                                        kLogger.error(
-                                          'Error launching directions URL on web: $e',
-                                        );
+                                        kLogger.error('Error launching directions URL on web: $e');
                                       }
                                     } else {
                                       // Mobile platform handling
@@ -1656,11 +1294,7 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                                           'https://www.google.com/maps/dir/?api=1&origin=$latPickUp,$lngPickUp&destination=$latDestination,$lngDestination',
                                         );
                                         if (await canLaunchUrl(mapsUri)) {
-                                          await launchUrl(
-                                            mapsUri,
-                                            mode:
-                                                LaunchMode.externalApplication,
-                                          );
+                                          await launchUrl(mapsUri, mode: LaunchMode.externalApplication);
                                           launched = true;
                                         }
                                       } else if (Platform.isIOS) {
@@ -1669,11 +1303,7 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                                           'comgooglemaps://?saddr=$latPickUp,$lngPickUp&daddr=$latDestination,$lngDestination&directionsmode=driving',
                                         );
                                         if (await canLaunchUrl(mapsUri)) {
-                                          await launchUrl(
-                                            mapsUri,
-                                            mode:
-                                                LaunchMode.externalApplication,
-                                          );
+                                          await launchUrl(mapsUri, mode: LaunchMode.externalApplication);
                                           launched = true;
                                         } else {
                                           // Fall back to Apple Maps
@@ -1681,12 +1311,7 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                                             'https://maps.apple.com/?saddr=$latPickUp,$lngPickUp&daddr=$latDestination,$lngDestination&dirflg=d',
                                           );
                                           if (await canLaunchUrl(mapsUri)) {
-                                            await launchUrl(
-                                              mapsUri,
-                                              mode:
-                                                  LaunchMode
-                                                      .externalApplication,
-                                            );
+                                            await launchUrl(mapsUri, mode: LaunchMode.externalApplication);
                                             launched = true;
                                           }
                                         }
@@ -1698,15 +1323,9 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                                           'https://www.google.com/maps/dir/?api=1&origin=$latPickUp,$lngPickUp&destination=$latDestination,$lngDestination',
                                         );
                                         try {
-                                          await launchUrl(
-                                            mapsUri,
-                                            mode:
-                                                LaunchMode.externalApplication,
-                                          );
+                                          await launchUrl(mapsUri, mode: LaunchMode.externalApplication);
                                         } catch (e) {
-                                          kLogger.error(
-                                            'Error launching URL: $e',
-                                          );
+                                          kLogger.error('Error launching URL: $e');
                                         }
                                       }
                                     }
@@ -1716,20 +1335,9 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                             ),
                           ),
                           // Space.w(width: 8.w),
-                          if (lobbyData
-                                      .lobby
-                                      .filter
-                                      .otherFilterInfo
-                                      .locationInfo !=
-                                  null &&
-                              (lobbyData
-                                  .lobby
-                                  .filter
-                                  .otherFilterInfo
-                                  .locationInfo!
-                                  .hideLocation) &&
-                              (lobbyData.lobby.userStatus != "MEMBER" ||
-                                  lobbyData.lobby.userStatus != "ADMIN"))
+                          if (lobbyData.lobby.filter.otherFilterInfo.locationInfo != null &&
+                              (lobbyData.lobby.filter.otherFilterInfo.locationInfo!.hideLocation) &&
+                              (lobbyData.lobby.userStatus != "MEMBER" || lobbyData.lobby.userStatus != "ADMIN"))
                             GestureDetector(
                               onTap: () {
                                 showDialog(
@@ -1737,9 +1345,7 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                                   builder: (BuildContext context) {
                                     return AlertDialog(
                                       backgroundColor: Colors.white,
-                                      title: const Text(
-                                        "Approximate Location Shown 🌍",
-                                      ),
+                                      title: const Text("Approximate Location Shown 🌍"),
                                       content: const Text(
                                         "The admin has chosen to hide the exact location. You're seeing an approximate location within a 1 km radius. Once you join the lobby, the exact location will be visible.",
                                       ),
@@ -1747,9 +1353,7 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                                         TextButton(
                                           child: const Text("Got it!"),
                                           onPressed: () {
-                                            Navigator.of(
-                                              context,
-                                            ).pop(); // Dismiss the dialog
+                                            Navigator.of(context).pop(); // Dismiss the dialog
                                           },
                                         ),
                                       ],
@@ -1767,8 +1371,7 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                 ],
               ),
               // Space.h(height: 8.h),
-              if (lobbyData.lobby.filter.otherFilterInfo.locationInfo !=
-                  null) ...[
+              if (lobbyData.lobby.filter.otherFilterInfo.locationInfo != null) ...[
                 Row(
                   mainAxisAlignment: MainAxisAlignment.start,
                   mainAxisSize: MainAxisSize.min,
@@ -1779,25 +1382,9 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                           double lat = 0.0;
                           double lng = 0.0;
 
-                          if (lobbyData
-                                      .lobby
-                                      .filter
-                                      .otherFilterInfo
-                                      .locationInfo !=
-                                  null &&
-                              lobbyData
-                                  .lobby
-                                  .filter
-                                  .otherFilterInfo
-                                  .locationInfo!
-                                  .locationResponses
-                                  .isNotEmpty) {
-                            if ((lobbyData
-                                    .lobby
-                                    .filter
-                                    .otherFilterInfo
-                                    .locationInfo!
-                                    .hideLocation) &&
+                          if (lobbyData.lobby.filter.otherFilterInfo.locationInfo != null &&
+                              lobbyData.lobby.filter.otherFilterInfo.locationInfo!.locationResponses.isNotEmpty) {
+                            if ((lobbyData.lobby.filter.otherFilterInfo.locationInfo!.hideLocation) &&
                                 (lobbyData.lobby.userStatus != "MEMBER")) {
                               lat =
                                   lobbyData
@@ -1857,49 +1444,32 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                             // Check if running on web
                             if (kIsWeb) {
                               // For web, always use Google Maps web interface
-                              mapsUri = Uri.parse(
-                                'https://www.google.com/maps/search/?api=1&query=$lat,$lng',
-                              );
+                              mapsUri = Uri.parse('https://www.google.com/maps/search/?api=1&query=$lat,$lng');
 
                               try {
                                 await launchUrl(
                                   mapsUri,
-                                  mode:
-                                      LaunchMode
-                                          .platformDefault, // Use platformDefault for web
-                                  webOnlyWindowName:
-                                      '_blank', // Open in new tab
+                                  mode: LaunchMode.platformDefault, // Use platformDefault for web
+                                  webOnlyWindowName: '_blank', // Open in new tab
                                 );
                                 launched = true;
                               } catch (e) {
-                                kLogger.error(
-                                  'Error launching maps URL on web: $e',
-                                );
+                                kLogger.error('Error launching maps URL on web: $e');
                               }
                             } else {
                               // Mobile platform handling (your existing code)
                               if (Platform.isAndroid) {
                                 // Try Android's native maps app first
-                                mapsUri = Uri.parse(
-                                  'http://maps.google.com/maps?z=12&t=m&q=$lat,$lng',
-                                );
+                                mapsUri = Uri.parse('http://maps.google.com/maps?z=12&t=m&q=$lat,$lng');
                                 if (await canLaunchUrl(mapsUri)) {
-                                  await launchUrl(
-                                    mapsUri,
-                                    mode: LaunchMode.externalApplication,
-                                  );
+                                  await launchUrl(mapsUri, mode: LaunchMode.externalApplication);
                                   launched = true;
                                 }
                               } else if (Platform.isIOS) {
                                 // Try Google Maps on iOS first
-                                mapsUri = Uri.parse(
-                                  'comgooglemaps://?center=$lat,$lng&zoom=12&q=$lat,$lng',
-                                );
+                                mapsUri = Uri.parse('comgooglemaps://?center=$lat,$lng&zoom=12&q=$lat,$lng');
                                 if (await canLaunchUrl(mapsUri)) {
-                                  await launchUrl(
-                                    mapsUri,
-                                    mode: LaunchMode.externalApplication,
-                                  );
+                                  await launchUrl(mapsUri, mode: LaunchMode.externalApplication);
                                   launched = true;
                                 } else {
                                   // Fall back to Apple Maps
@@ -1907,10 +1477,7 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                                     'https://maps.apple.com/?q=${Uri.encodeFull("Location")}&sll=$lat,$lng&z=12',
                                   );
                                   if (await canLaunchUrl(mapsUri)) {
-                                    await launchUrl(
-                                      mapsUri,
-                                      mode: LaunchMode.externalApplication,
-                                    );
+                                    await launchUrl(mapsUri, mode: LaunchMode.externalApplication);
                                     launched = true;
                                   }
                                 }
@@ -1918,14 +1485,9 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
 
                               // If none of the above worked, fall back to web browser
                               if (!launched) {
-                                mapsUri = Uri.parse(
-                                  'https://www.google.com/maps/search/?api=1&query=$lat,$lng',
-                                );
+                                mapsUri = Uri.parse('https://www.google.com/maps/search/?api=1&query=$lat,$lng');
                                 try {
-                                  await launchUrl(
-                                    mapsUri,
-                                    mode: LaunchMode.externalApplication,
-                                  );
+                                  await launchUrl(mapsUri, mode: LaunchMode.externalApplication);
                                 } catch (e) {
                                   kLogger.error('Error launching URL: $e');
                                 }
@@ -1948,16 +1510,9 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                       ),
                     ),
                     // Space.w(width: 8.w),
-                    if (lobbyData.lobby.filter.otherFilterInfo.locationInfo !=
-                            null &&
-                        (lobbyData
-                            .lobby
-                            .filter
-                            .otherFilterInfo
-                            .locationInfo!
-                            .hideLocation) &&
-                        (lobbyData.lobby.userStatus != "MEMBER" ||
-                            lobbyData.lobby.userStatus != "ADMIN"))
+                    if (lobbyData.lobby.filter.otherFilterInfo.locationInfo != null &&
+                        (lobbyData.lobby.filter.otherFilterInfo.locationInfo!.hideLocation) &&
+                        (lobbyData.lobby.userStatus != "MEMBER" || lobbyData.lobby.userStatus != "ADMIN"))
                       GestureDetector(
                         onTap: () {
                           showDialog(
@@ -1965,9 +1520,7 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                             builder: (BuildContext context) {
                               return AlertDialog(
                                 backgroundColor: Colors.white,
-                                title: const Text(
-                                  "Approximate Location Shown 🌍",
-                                ),
+                                title: const Text("Approximate Location Shown 🌍"),
                                 content: const Text(
                                   "The admin has chosen to hide the exact location. You're seeing an approximate location within a 1 km radius. Once you join the lobby, the exact location will be visible.",
                                 ),
@@ -1975,9 +1528,7 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                                   TextButton(
                                     child: const Text("Got it!"),
                                     onPressed: () {
-                                      Navigator.of(
-                                        context,
-                                      ).pop(); // Dismiss the dialog
+                                      Navigator.of(context).pop(); // Dismiss the dialog
                                     },
                                   ),
                                 ],
@@ -1991,18 +1542,10 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                 ),
               ],
 
-              if (lobbyData.lobby.filter.otherFilterInfo.multipleLocations !=
-                  null) ...[
+              if (lobbyData.lobby.filter.otherFilterInfo.multipleLocations != null) ...[
                 Space.h(height: 16),
                 DesignText(
-                  text:
-                      lobbyData
-                          .lobby
-                          .filter
-                          .otherFilterInfo
-                          .multipleLocations
-                          ?.title ??
-                      'Multiple Location',
+                  text: lobbyData.lobby.filter.otherFilterInfo.multipleLocations?.title ?? 'Multiple Location',
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
                   color: const Color(0xFF444444),
@@ -2018,17 +1561,13 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                   !lobbyData.lobby.ratingGiven) ...[
                 Container(
                   padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                  decoration: BoxDecoration(
-                    color: const Color(0x143E79A1),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
+                  decoration: BoxDecoration(color: const Color(0x143E79A1), borderRadius: BorderRadius.circular(12)),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Expanded(
                         child: DesignText(
-                          text:
-                              "Tell us about your experience, so we can improve further in future.",
+                          text: "Tell us about your experience, so we can improve further in future.",
                           fontSize: 12,
                           fontWeight: FontWeight.w400,
                           maxLines: 3,
@@ -2052,13 +1591,8 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                         },
                         style: OutlinedButton.styleFrom(
                           side: const BorderSide(color: Color(0xFFEC4B5D)),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(24),
-                          ),
-                          padding: EdgeInsets.symmetric(
-                            vertical: 12,
-                            horizontal: 24,
-                          ),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+                          padding: EdgeInsets.symmetric(vertical: 12, horizontal: 24),
                         ),
                         child: DesignText(
                           text: "Feedback",
@@ -2074,9 +1608,7 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
               ],
 
               RichTextDisplay(
-                controller: TextEditingController(
-                  text: lobbyData.lobby.description,
-                ),
+                controller: TextEditingController(text: lobbyData.lobby.description),
                 hintText: '',
                 lobbyId: lobbyData.lobby.id,
               ),
@@ -2086,10 +1618,7 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                 cards: [
                   InfoCard(
                     icon: Icons.payment,
-                    title:
-                        (lobbyData.lobby.priceDetails.originalPrice > 0.0)
-                            ? "Refund Policies :"
-                            : "Pricing ",
+                    title: (lobbyData.lobby.priceDetails.originalPrice > 0.0) ? "Refund Policies :" : "Pricing ",
                     subtitle:
                         (lobbyData.lobby.priceDetails.isRefundAllowed)
                             ? "Up to 2 days before the lobby."
@@ -2105,17 +1634,14 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                   if (lobbyData.lobby.filter.otherFilterInfo.range != null)
                     InfoCard(
                       icon: Icons.cake,
-                      title:
-                          lobbyData.lobby.filter.otherFilterInfo.range?.title ??
-                          "Age Limit",
+                      title: lobbyData.lobby.filter.otherFilterInfo.range?.title ?? "Age Limit",
                       subtitle:
                           "${lobbyData.lobby.filter.otherFilterInfo.range?.min ?? 0} to ${lobbyData.lobby.filter.otherFilterInfo.range?.max ?? 0} ",
                     ),
                 ],
               ),
 
-              if (lobbyData.lobby.userStatus != "MEMBER" ||
-                  (lobbyData.lobby.houseDetail != null)) ...[
+              if (lobbyData.lobby.userStatus != "MEMBER" || (lobbyData.lobby.houseDetail != null)) ...[
                 Space.h(height: 8),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -2129,10 +1655,8 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                             title: "Unlock Premium Features",
                             message:
                                 "Get the full AroundU experience with exclusive features, enhanced performance, and more!",
-                            appStoreUrl:
-                                "https://apps.apple.com/in/app/aroundu/id6744299663",
-                            playStoreUrl:
-                                "https://play.google.com/store/apps/details?id=com.polar.aroundu",
+                            appStoreUrl: "https://apps.apple.com/in/app/aroundu/id6744299663",
+                            playStoreUrl: "https://play.google.com/store/apps/details?id=com.polar.aroundu",
                             // cancelButtonText: "Maybe Later",
                             onCancel: () {
                               print("User chose to skip download");
@@ -2194,25 +1718,15 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                               child: ClipOval(
                                 child: Image.network(
                                   (lobbyData.lobby.houseDetail != null)
-                                      ? lobbyData
-                                          .lobby
-                                          .houseDetail!
-                                          .profilePhoto
-                                      : lobbyData
-                                          .lobby
-                                          .adminSummary
-                                          .profilePictureUrl,
+                                      ? lobbyData.lobby.houseDetail!.profilePhoto
+                                      : lobbyData.lobby.adminSummary.profilePictureUrl,
                                   fit: BoxFit.cover,
                                   width: 32,
                                   height: 32,
                                   errorBuilder: (context, error, stackTrace) {
                                     return Icon(Icons.person, size: 16);
                                   },
-                                  loadingBuilder: (
-                                    context,
-                                    child,
-                                    loadingProgress,
-                                  ) {
+                                  loadingBuilder: (context, child, loadingProgress) {
                                     if (loadingProgress == null) return child;
                                     return Center(
                                       child: SizedBox(
@@ -2221,13 +1735,9 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                                         child: CircularProgressIndicator(
                                           strokeWidth: 2,
                                           value:
-                                              loadingProgress
-                                                          .expectedTotalBytes !=
-                                                      null
-                                                  ? loadingProgress
-                                                          .cumulativeBytesLoaded /
-                                                      loadingProgress
-                                                          .expectedTotalBytes!
+                                              loadingProgress.expectedTotalBytes != null
+                                                  ? loadingProgress.cumulativeBytesLoaded /
+                                                      loadingProgress.expectedTotalBytes!
                                                   : null,
                                         ),
                                       ),
@@ -2256,14 +1766,8 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                                     TextSpan(
                                       text:
                                           (lobbyData.lobby.houseDetail != null)
-                                              ? lobbyData
-                                                  .lobby
-                                                  .houseDetail!
-                                                  .name
-                                              : lobbyData
-                                                  .lobby
-                                                  .adminSummary
-                                                  .name,
+                                              ? lobbyData.lobby.houseDetail!.name
+                                              : lobbyData.lobby.adminSummary.name,
                                       style: TextStyle(
                                         fontSize: 12,
                                         fontWeight: FontWeight.w400,
@@ -2295,10 +1799,8 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                               title: "Unlock Premium Features",
                               message:
                                   "Get the full AroundU experience with exclusive features, enhanced performance, and more!",
-                              appStoreUrl:
-                                  "https://apps.apple.com/in/app/aroundu/id6744299663",
-                              playStoreUrl:
-                                  "https://play.google.com/store/apps/details?id=com.polar.aroundu",
+                              appStoreUrl: "https://apps.apple.com/in/app/aroundu/id6744299663",
+                              playStoreUrl: "https://play.google.com/store/apps/details?id=com.polar.aroundu",
                               // cancelButtonText: "Maybe Later",
                               onCancel: () {
                                 print("User chose to skip download");
@@ -2330,12 +1832,7 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
 
               Space.h(height: 24),
               if (userInfos.isEmpty)
-                DesignText(
-                  text: "Attendee",
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                  color: const Color(0xFF323232),
-                ),
+                DesignText(text: "Attendee", fontSize: 14, fontWeight: FontWeight.w600, color: const Color(0xFF323232)),
               lobbyData.lobby.userStatus == "MEMBER"
                   ? SizedBox(
                     height: 70,
@@ -2361,10 +1858,8 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                                     title: "Unlock Premium Features",
                                     message:
                                         "Get the full AroundU experience with exclusive features, enhanced performance, and more!",
-                                    appStoreUrl:
-                                        "https://apps.apple.com/in/app/aroundu/id6744299663",
-                                    playStoreUrl:
-                                        "https://play.google.com/store/apps/details?id=com.polar.aroundu",
+                                    appStoreUrl: "https://apps.apple.com/in/app/aroundu/id6744299663",
+                                    playStoreUrl: "https://play.google.com/store/apps/details?id=com.polar.aroundu",
                                     // cancelButtonText: "Maybe Later",
                                     onCancel: () {
                                       print("User chose to skip download");
@@ -2441,29 +1936,15 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                                       child: ClipOval(
                                         child: Image.network(
                                           (lobbyData.lobby.houseDetail != null)
-                                              ? lobbyData
-                                                  .lobby
-                                                  .houseDetail!
-                                                  .profilePhoto
-                                              : lobbyData
-                                                  .lobby
-                                                  .adminSummary
-                                                  .profilePictureUrl,
+                                              ? lobbyData.lobby.houseDetail!.profilePhoto
+                                              : lobbyData.lobby.adminSummary.profilePictureUrl,
                                           fit: BoxFit.cover,
                                           width: 40,
                                           height: 40,
-                                          errorBuilder: (
-                                            context,
-                                            error,
-                                            stackTrace,
-                                          ) {
+                                          errorBuilder: (context, error, stackTrace) {
                                             return Icon(Icons.person, size: 18);
                                           },
-                                          loadingBuilder: (
-                                            context,
-                                            child,
-                                            loadingProgress,
-                                          ) {
+                                          loadingBuilder: (context, child, loadingProgress) {
                                             if (loadingProgress == null) {
                                               return child;
                                             }
@@ -2474,13 +1955,9 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                                                 child: CircularProgressIndicator(
                                                   strokeWidth: 2,
                                                   value:
-                                                      loadingProgress
-                                                                  .expectedTotalBytes !=
-                                                              null
-                                                          ? loadingProgress
-                                                                  .cumulativeBytesLoaded /
-                                                              loadingProgress
-                                                                  .expectedTotalBytes!
+                                                      loadingProgress.expectedTotalBytes != null
+                                                          ? loadingProgress.cumulativeBytesLoaded /
+                                                              loadingProgress.expectedTotalBytes!
                                                           : null,
                                                 ),
                                               ),
@@ -2494,23 +1971,14 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                                       // Wrapped in Flexible to handle overflow
                                       child: Column(
                                         mainAxisSize: MainAxisSize.min,
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        crossAxisAlignment: CrossAxisAlignment.start,
                                         children: [
                                           DesignText(
                                             text:
-                                                (lobbyData.lobby.houseDetail !=
-                                                        null)
-                                                    ? lobbyData
-                                                        .lobby
-                                                        .houseDetail!
-                                                        .name
-                                                    : lobbyData
-                                                        .lobby
-                                                        .adminSummary
-                                                        .userName,
+                                                (lobbyData.lobby.houseDetail != null)
+                                                    ? lobbyData.lobby.houseDetail!.name
+                                                    : lobbyData.lobby.adminSummary.userName,
                                             fontSize: 12,
                                             fontWeight: FontWeight.w400,
                                             color: const Color(0xFF323232),
@@ -2538,12 +2006,7 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                         // Vertical Divider - Taking up 20% of space
                         const Expanded(
                           flex: 20,
-                          child: Center(
-                            child: VerticalDivider(
-                              color: Color(0xFFBBBCBD),
-                              thickness: 1,
-                            ),
-                          ),
+                          child: Center(child: VerticalDivider(color: Color(0xFFBBBCBD), thickness: 1)),
                         ),
 
                         // Attendee section - Taking up 40% of space
@@ -2556,10 +2019,8 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                                 title: "Unlock Premium Features",
                                 message:
                                     "Get the full AroundU experience with exclusive features, enhanced performance, and more!",
-                                appStoreUrl:
-                                    "https://apps.apple.com/in/app/aroundu/id6744299663",
-                                playStoreUrl:
-                                    "https://play.google.com/store/apps/details?id=com.polar.aroundu",
+                                appStoreUrl: "https://apps.apple.com/in/app/aroundu/id6744299663",
+                                playStoreUrl: "https://play.google.com/store/apps/details?id=com.polar.aroundu",
                                 // cancelButtonText: "Maybe Later",
                                 onCancel: () {
                                   print("User chose to skip download");
@@ -2592,8 +2053,7 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                                         color: const Color(0xFF323232),
                                       ),
                                       DesignText(
-                                        text:
-                                            "(${lobbyData.lobby.currentMembers})",
+                                        text: "(${lobbyData.lobby.currentMembers})",
                                         fontSize: 8,
                                         fontWeight: FontWeight.w400,
                                         color: const Color(0xFF444444),
@@ -2617,57 +2077,35 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                                         clipBehavior: Clip.none,
                                         alignment: AlignmentDirectional.center,
                                         children: List.generate(
-                                          remainingCount > 0
-                                              ? displayAvatars.length + 1
-                                              : displayAvatars.length,
+                                          remainingCount > 0 ? displayAvatars.length + 1 : displayAvatars.length,
                                           (index) {
-                                            print(
-                                              "remainingCount `$remainingCount",
-                                            );
-                                            final positionIndex =
-                                                displayAvatars.length -
-                                                1 -
-                                                index;
+                                            print("remainingCount `$remainingCount");
+                                            final positionIndex = displayAvatars.length - 1 - index;
 
-                                            if (index ==
-                                                    displayAvatars.length &&
-                                                remainingCount > 0) {
+                                            if (index == displayAvatars.length && remainingCount > 0) {
                                               return Positioned(
                                                 left: index * 20,
                                                 child: CircleAvatar(
                                                   radius: 20,
-                                                  backgroundColor:
-                                                      Colors.teal[200],
+                                                  backgroundColor: Colors.teal[200],
                                                   child: Text(
                                                     '+$remainingCount',
-                                                    style: const TextStyle(
-                                                      color: Colors.white,
-                                                      fontSize: 16,
-                                                    ),
+                                                    style: const TextStyle(color: Colors.white, fontSize: 16),
                                                   ),
                                                 ),
                                               );
                                             }
-                                            final url =
-                                                displayAvatars[index]
-                                                    .profilePictureUrl;
+                                            final url = displayAvatars[index].profilePictureUrl;
                                             return Positioned(
                                               left: index * 20,
                                               child: CircleAvatar(
                                                 radius: 20,
-                                                backgroundColor:
-                                                    avatarColors[index],
+                                                backgroundColor: avatarColors[index],
                                                 child:
                                                     url!.isEmpty
-                                                        ? const Icon(
-                                                          Icons.person,
-                                                          color: Colors.white,
-                                                        )
+                                                        ? const Icon(Icons.person, color: Colors.white)
                                                         : ClipRRect(
-                                                          borderRadius:
-                                                              BorderRadius.circular(
-                                                                20,
-                                                              ),
+                                                          borderRadius: BorderRadius.circular(20),
                                                           child: Image.network(
                                                             url,
                                                             width: 40,
@@ -2696,8 +2134,7 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                       mainAxisAlignment:
                           (userInfos.length == 1)
                               ? MainAxisAlignment.start
-                              : MainAxisAlignment
-                                  .spaceAround, // This will add space around the elements
+                              : MainAxisAlignment.spaceAround, // This will add space around the elements
                       children: [
                         // Combined stack and column in a Row
                         userInfos.isNotEmpty
@@ -2708,10 +2145,8 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                                   title: "Unlock Premium Features",
                                   message:
                                       "Get the full AroundU experience with exclusive features, enhanced performance, and more!",
-                                  appStoreUrl:
-                                      "https://apps.apple.com/in/app/aroundu/id6744299663",
-                                  playStoreUrl:
-                                      "https://play.google.com/store/apps/details?id=com.polar.aroundu",
+                                  appStoreUrl: "https://apps.apple.com/in/app/aroundu/id6744299663",
+                                  playStoreUrl: "https://play.google.com/store/apps/details?id=com.polar.aroundu",
                                   // cancelButtonText: "Maybe Later",
                                   onCancel: () {
                                     print("User chose to skip download");
@@ -2744,90 +2179,55 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                                             ? 0.18 * sw
                                             : userInfos.length == 1
                                             ? 0.12 * sw
-                                            : 0.1 *
-                                                sw, // Adjust width as needed
+                                            : 0.1 * sw, // Adjust width as needed
                                     child: Stack(
                                       clipBehavior: Clip.none,
                                       alignment: AlignmentDirectional.centerEnd,
                                       children: List.generate(
-                                        remainingCount > 0
-                                            ? displayAvatars.length + 1
-                                            : displayAvatars.length,
+                                        remainingCount > 0 ? displayAvatars.length + 1 : displayAvatars.length,
                                         (index) {
-                                          final positionIndex =
-                                              displayAvatars.length - 1 - index;
+                                          final positionIndex = displayAvatars.length - 1 - index;
 
                                           // Show the '+remainingCount' for more avatars
-                                          if (index == displayAvatars.length &&
-                                              remainingCount > 0) {
+                                          if (index == displayAvatars.length && remainingCount > 0) {
                                             return Positioned(
                                               left: index * 24,
                                               child: CircleAvatar(
                                                 radius: 24,
-                                                backgroundColor:
-                                                    Colors.teal[200],
+                                                backgroundColor: Colors.teal[200],
                                                 child: Text(
                                                   '+$remainingCount',
-                                                  style: const TextStyle(
-                                                    color: Colors.white,
-                                                    fontSize: 16,
-                                                  ),
+                                                  style: const TextStyle(color: Colors.white, fontSize: 16),
                                                 ),
                                               ),
                                             );
                                           }
-                                          final url =
-                                              displayAvatars[index]
-                                                  .profilePictureUrl;
+                                          final url = displayAvatars[index].profilePictureUrl;
                                           // Regular avatar logic
                                           return Positioned(
                                             left: index * 24,
                                             child: CircleAvatar(
                                               radius: 24,
-                                              backgroundColor:
-                                                  avatarColors[index],
+                                              backgroundColor: avatarColors[index],
                                               child:
                                                   url == null || url.isEmpty
-                                                      ? const Icon(
-                                                        Icons.person,
-                                                        color: Colors.white,
-                                                      )
+                                                      ? const Icon(Icons.person, color: Colors.white)
                                                       : ClipRRect(
-                                                        borderRadius:
-                                                            BorderRadius.circular(
-                                                              24,
-                                                            ),
+                                                        borderRadius: BorderRadius.circular(24),
                                                         child: Image.network(
                                                           url,
                                                           width: 48,
                                                           height: 48,
                                                           fit: BoxFit.cover,
-                                                          errorBuilder: (
-                                                            context,
-                                                            error,
-                                                            stackTrace,
-                                                          ) {
-                                                            return const Icon(
-                                                              Icons.person,
-                                                              color:
-                                                                  Colors.white,
-                                                            );
+                                                          errorBuilder: (context, error, stackTrace) {
+                                                            return const Icon(Icons.person, color: Colors.white);
                                                           },
-                                                          loadingBuilder: (
-                                                            context,
-                                                            child,
-                                                            loadingProgress,
-                                                          ) {
-                                                            if (loadingProgress ==
-                                                                null) {
+                                                          loadingBuilder: (context, child, loadingProgress) {
+                                                            if (loadingProgress == null) {
                                                               return child;
                                                             }
                                                             return const Center(
-                                                              child: CircularProgressIndicator(
-                                                                color:
-                                                                    Colors
-                                                                        .white,
-                                                              ),
+                                                              child: CircularProgressIndicator(color: Colors.white),
                                                             );
                                                           },
                                                         ),
@@ -2844,8 +2244,7 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                                   // Column for the text
                                   Column(
                                     mainAxisAlignment: MainAxisAlignment.center,
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
+                                    crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
                                       DesignText(
                                         text: "Attendee",
@@ -2873,9 +2272,7 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                               color: const Color(0xFF444444),
                             ),
                         if (userInfos.length == 1 &&
-                            (((lobbyData.lobby.lobbyStatus != 'PAST') &&
-                                    (lobbyData.lobby.lobbyStatus !=
-                                        'CLOSED')) ||
+                            (((lobbyData.lobby.lobbyStatus != 'PAST') && (lobbyData.lobby.lobbyStatus != 'CLOSED')) ||
                                 (lobbyData.lobby.userStatus == 'MEMBER'))) ...[
                           const Spacer(),
                           InkWell(
@@ -2885,10 +2282,8 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                                 title: "Unlock Premium Features",
                                 message:
                                     "Get the full AroundU experience with exclusive features, enhanced performance, and more!",
-                                appStoreUrl:
-                                    "https://apps.apple.com/in/app/aroundu/id6744299663",
-                                playStoreUrl:
-                                    "https://play.google.com/store/apps/details?id=com.polar.aroundu",
+                                appStoreUrl: "https://apps.apple.com/in/app/aroundu/id6744299663",
+                                playStoreUrl: "https://play.google.com/store/apps/details?id=com.polar.aroundu",
                                 // cancelButtonText: "Maybe Later",
                                 onCancel: () {
                                   print("User chose to skip download");
@@ -2911,10 +2306,7 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                   ),
               Space.h(height: 34),
               Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 0.0,
-                  vertical: 5,
-                ),
+                padding: const EdgeInsets.symmetric(horizontal: 0.0, vertical: 5),
                 child: Container(
                   decoration: BoxDecoration(
                     color: Colors.white,
@@ -2923,56 +2315,43 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: List.generate(
-                      lobbyData.lobby.filter.filterInfoList.length,
-                      (index) {
-                        final item =
-                            lobbyData.lobby.filter.filterInfoList[index];
+                    children: List.generate(lobbyData.lobby.filter.filterInfoList.length, (index) {
+                      final item = lobbyData.lobby.filter.filterInfoList[index];
 
-                        // Format the options list as a string
-                        String formattedOptions = item.options
-                            .take(3)
-                            .join(', ');
-                        if (item.options.length > 3) {
-                          formattedOptions += '...';
-                        }
+                      // Format the options list as a string
+                      String formattedOptions = item.options.take(3).join(', ');
+                      if (item.options.length > 3) {
+                        formattedOptions += '...';
+                      }
 
-                        return Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            buildDetailCard(
-                              context,
-                              icon: item.iconUrl ?? "",
-                              title: item.title,
-                              subtitle: formattedOptions,
-                            ),
-                            if (index !=
-                                (lobbyData.lobby.filter.filterInfoList.length -
-                                    1))
-                              Divider(color: Colors.grey.shade300, height: 2.0),
-                          ],
-                        );
-                      },
-                    ),
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          buildDetailCard(
+                            context,
+                            icon: item.iconUrl ?? "",
+                            title: item.title,
+                            subtitle: formattedOptions,
+                          ),
+                          if (index != (lobbyData.lobby.filter.filterInfoList.length - 1))
+                            Divider(color: Colors.grey.shade300, height: 2.0),
+                        ],
+                      );
+                    }),
                   ),
                 ),
               ),
               Space.h(height: 16),
               ResponsiveAppDownloadCard(
-                appStoreUrl:
-                    "https://apps.apple.com/in/app/aroundu/id6744299663",
-                playStoreUrl:
-                    "https://play.google.com/store/apps/details?id=com.polar.aroundu",
+                appStoreUrl: "https://apps.apple.com/in/app/aroundu/id6744299663",
+                playStoreUrl: "https://play.google.com/store/apps/details?id=com.polar.aroundu",
                 onClose: () {
                   FancyAppDownloadDialog.show(
                     context,
                     title: "Unlock Premium Features",
-                    message:
-                        "Get the full AroundU experience with exclusive features, enhanced performance, and more!",
-                    appStoreUrl:
-                        "https://apps.apple.com/in/app/aroundu/id6744299663",
-                    playStoreUrl:
-                        "https://play.google.com/store/apps/details?id=com.polar.aroundu",
+                    message: "Get the full AroundU experience with exclusive features, enhanced performance, and more!",
+                    appStoreUrl: "https://apps.apple.com/in/app/aroundu/id6744299663",
+                    playStoreUrl: "https://play.google.com/store/apps/details?id=com.polar.aroundu",
                     // cancelButtonText: "Maybe Later",
                     onCancel: () {
                       print("User chose to skip download");
@@ -3040,11 +2419,7 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
             ],
           ),
         ),
-        if (isAuth)
-          const LobbiesList(
-            lobbyType: LobbyType.recommendations,
-            title: "Recommended Lobbies",
-          ),
+        if (isAuth) const LobbiesList(lobbyType: LobbyType.recommendations, title: "Recommended Lobbies"),
         Space.h(height: 34),
         // LobbyHousesList(lobbyId: lobbyData.lobby.id),
         // Space.h(height: 16.h),
@@ -3052,11 +2427,7 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
     );
   }
 
-  Widget desktopLayout({
-    required LobbyDetails lobbyData,
-    required double sw,
-    required double sh,
-  }) {
+  Widget desktopLayout({required LobbyDetails lobbyData, required double sw, required double sh}) {
     final isAuth = ref.watch(isAuthProvider(lobbyData.lobby.id));
     List<UserSummary> userInfos = <UserSummary>[];
     List<UserSummary> displayAvatars = <UserSummary>[];
@@ -3095,10 +2466,8 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                       title: "Unlock Premium Features",
                       message:
                           "Get the full AroundU experience with exclusive features, enhanced performance, and more!",
-                      appStoreUrl:
-                          "https://apps.apple.com/in/app/aroundu/id6744299663",
-                      playStoreUrl:
-                          "https://play.google.com/store/apps/details?id=com.polar.aroundu",
+                      appStoreUrl: "https://apps.apple.com/in/app/aroundu/id6744299663",
+                      playStoreUrl: "https://play.google.com/store/apps/details?id=com.polar.aroundu",
                       // cancelButtonText: "Maybe Later",
                       onCancel: () {
                         print("User chose to skip download");
@@ -3161,10 +2530,7 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                           child: Image.network(
                             (lobbyData.lobby.houseDetail != null)
                                 ? lobbyData.lobby.houseDetail!.profilePhoto
-                                : lobbyData
-                                    .lobby
-                                    .adminSummary
-                                    .profilePictureUrl,
+                                : lobbyData.lobby.adminSummary.profilePictureUrl,
                             fit: BoxFit.cover,
                             width: 32,
                             height: 32,
@@ -3180,12 +2546,9 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                                   child: CircularProgressIndicator(
                                     strokeWidth: 2,
                                     value:
-                                        loadingProgress.expectedTotalBytes !=
-                                                null
-                                            ? loadingProgress
-                                                    .cumulativeBytesLoaded /
-                                                loadingProgress
-                                                    .expectedTotalBytes!
+                                        loadingProgress.expectedTotalBytes != null
+                                            ? loadingProgress.cumulativeBytesLoaded /
+                                                loadingProgress.expectedTotalBytes!
                                             : null,
                                   ),
                                 ),
@@ -3292,12 +2655,7 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                               top: 0.1 * sh,
                               left: 0,
                               child: Container(
-                                padding: EdgeInsets.only(
-                                  left: 16,
-                                  right: 12,
-                                  top: 8,
-                                  bottom: 8,
-                                ),
+                                padding: EdgeInsets.only(left: 16, right: 12, top: 8, bottom: 8),
                                 decoration: BoxDecoration(
                                   color:
                                       (() {
@@ -3314,18 +2672,14 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                                             return Color(0xFF52D17C);
                                         }
                                       })(),
-                                  borderRadius: BorderRadius.horizontal(
-                                    right: Radius.circular(24),
-                                  ),
+                                  borderRadius: BorderRadius.horizontal(right: Radius.circular(24)),
                                 ),
                                 child: Row(
                                   children: [
                                     DesignIcon.custom(
                                       icon:
                                           (() {
-                                            switch (lobbyData
-                                                .lobby
-                                                .lobbyStatus) {
+                                            switch (lobbyData.lobby.lobbyStatus) {
                                               case "UPCOMING":
                                                 return DesignIcons.upcoming;
                                               case "PAST":
@@ -3338,19 +2692,13 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                                                 return DesignIcons.running;
                                             }
                                           })(),
-                                      color:
-                                          (lobbyData.lobby.lobbyStatus ==
-                                                  'ACTIVE')
-                                              ? Colors.white
-                                              : null,
+                                      color: (lobbyData.lobby.lobbyStatus == 'ACTIVE') ? Colors.white : null,
                                     ),
                                     Space.w(width: 8),
                                     DesignText(
                                       text:
                                           (() {
-                                            switch (lobbyData
-                                                .lobby
-                                                .lobbyStatus) {
+                                            switch (lobbyData.lobby.lobbyStatus) {
                                               case "UPCOMING":
                                                 return "Upcoming";
                                               case "PAST":
@@ -3378,32 +2726,24 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                               left: 16,
                               right: 16,
                               child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 children: [
                                   Container(
-                                    padding: EdgeInsets.symmetric(
-                                      horizontal: 14,
-                                      vertical: 8,
-                                    ),
+                                    padding: EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                                     decoration: BoxDecoration(
                                       color: Color(0xFF5750E2),
                                       borderRadius: BorderRadius.circular(24),
                                     ),
                                     child: DesignText(
-                                      text:
-                                          "${lobbyData.subCategory.iconUrl}    ${lobbyData.subCategory.name}",
+                                      text: "${lobbyData.subCategory.iconUrl}    ${lobbyData.subCategory.name}",
                                       fontSize: 10,
                                       fontWeight: FontWeight.w400,
                                       color: Colors.white,
                                     ),
                                   ),
-                                  if (lobbyData.lobby.lobbyStatus != "PAST" &&
-                                      lobbyData.lobby.lobbyStatus != "CLOSED")
+                                  if (lobbyData.lobby.lobbyStatus != "PAST" && lobbyData.lobby.lobbyStatus != "CLOSED")
                                     IconButton(
-                                      style: IconButton.styleFrom(
-                                        backgroundColor: Colors.black38,
-                                      ),
+                                      style: IconButton.styleFrom(backgroundColor: Colors.black38),
                                       onPressed: () {},
                                       icon: DesignIcon.icon(
                                         icon:
@@ -3413,28 +2753,19 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                                         color: Color(0xFFFFFFFF),
                                       ),
                                     ),
-                                  if (lobbyData.lobby.lobbyStatus == "PAST" ||
-                                      lobbyData.lobby.lobbyStatus == "CLOSED")
+                                  if (lobbyData.lobby.lobbyStatus == "PAST" || lobbyData.lobby.lobbyStatus == "CLOSED")
                                     Container(
-                                      padding: EdgeInsets.symmetric(
-                                        horizontal: 8,
-                                        vertical: 4,
-                                      ),
+                                      padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                                       decoration: BoxDecoration(
                                         borderRadius: BorderRadius.circular(6),
                                         color: Colors.white,
                                       ),
                                       child: Row(
                                         children: [
-                                          DesignIcon.custom(
-                                            icon: DesignIcons.star,
-                                            color: null,
-                                            size: 14,
-                                          ),
+                                          DesignIcon.custom(icon: DesignIcons.star, color: null, size: 14),
                                           Space.w(width: 4),
                                           DesignText(
-                                            text:
-                                                "${lobbyData.lobby.rating.average} (${lobbyData.lobby.rating.count})",
+                                            text: "${lobbyData.lobby.rating.average} (${lobbyData.lobby.rating.count})",
                                             fontSize: 12,
                                             fontWeight: FontWeight.w400,
                                             color: Color(0xFF444444),
@@ -3450,12 +2781,10 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                       ),
                       SizedBox(height: 16),
                       RichTextDisplay(
-                        controller: TextEditingController(
-                          text: lobbyData.lobby.description,
-                        ),
+                        controller: TextEditingController(text: lobbyData.lobby.description),
                         hintText: '',
                         maxHeight: 0.4 * sh,
-                         lobbyId: lobbyData.lobby.id,
+                        lobbyId: lobbyData.lobby.id,
                       ),
                       SizedBox(height: 16),
                       GestureDetector(
@@ -3465,10 +2794,8 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                             title: "Unlock Premium Features",
                             message:
                                 "Get the full AroundU experience with exclusive features, enhanced performance, and more!",
-                            appStoreUrl:
-                                "https://apps.apple.com/in/app/aroundu/id6744299663",
-                            playStoreUrl:
-                                "https://play.google.com/store/apps/details?id=com.polar.aroundu",
+                            appStoreUrl: "https://apps.apple.com/in/app/aroundu/id6744299663",
+                            playStoreUrl: "https://play.google.com/store/apps/details?id=com.polar.aroundu",
                             // cancelButtonText: "Maybe Later",
                             onCancel: () {
                               print("User chose to skip download");
@@ -3476,21 +2803,16 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                           );
                         },
                         child: Container(
-                          decoration: BoxDecoration(
-                            color: Color(0xFFF9F9F9),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
+                          decoration: BoxDecoration(color: Color(0xFFF9F9F9), borderRadius: BorderRadius.circular(12)),
                           padding: EdgeInsets.all(12),
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.start,
                             children: [
                               Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 children: [
                                   DesignText(
-                                    text:
-                                        "Attendees (${lobbyData.lobby.currentMembers})",
+                                    text: "Attendees (${lobbyData.lobby.currentMembers})",
                                     fontSize: 16,
                                     fontWeight: FontWeight.w600,
                                     color: const Color(0xFF323232),
@@ -3518,46 +2840,29 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                                         child: Card(
                                           color: Colors.white,
                                           child: Padding(
-                                            padding: const EdgeInsets.symmetric(
-                                              horizontal: 24.0,
-                                              vertical: 12.0,
-                                            ),
+                                            padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 12.0),
                                             child: Column(
                                               mainAxisSize: MainAxisSize.min,
                                               children: [
                                                 CircleAvatar(
                                                   radius: 24,
-                                                  backgroundColor: const Color(
-                                                    0xFFEAEFF2,
-                                                  ),
+                                                  backgroundColor: const Color(0xFFEAEFF2),
                                                   backgroundImage:
-                                                      user
-                                                              .profilePictureUrl
-                                                              .isNotEmpty
-                                                          ? NetworkImage(
-                                                            user.profilePictureUrl,
-                                                          )
+                                                      user.profilePictureUrl.isNotEmpty
+                                                          ? NetworkImage(user.profilePictureUrl)
                                                           : null,
                                                   child:
-                                                      user
-                                                              .profilePictureUrl
-                                                              .isEmpty
-                                                          ? Icon(
-                                                            Icons.person,
-                                                            size: 24,
-                                                          )
+                                                      user.profilePictureUrl.isEmpty
+                                                          ? Icon(Icons.person, size: 24)
                                                           : null,
                                                 ),
                                                 SizedBox(height: 4),
                                                 Text(
                                                   user.name,
-                                                  style: TextStyle(
-                                                    fontSize: 12,
-                                                  ),
+                                                  style: TextStyle(fontSize: 12),
                                                   textAlign: TextAlign.center,
                                                   maxLines: 2,
-                                                  overflow:
-                                                      TextOverflow.ellipsis,
+                                                  overflow: TextOverflow.ellipsis,
                                                 ),
                                               ],
                                             ),
@@ -3571,10 +2876,7 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                                   padding: EdgeInsets.only(top: 8),
                                   child: Text(
                                     "+$remainingCount more attendees",
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      color: Color(0xFF666666),
-                                    ),
+                                    style: TextStyle(fontSize: 12, color: Color(0xFF666666)),
                                   ),
                                 ),
                             ],
@@ -3583,63 +2885,38 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                       ),
                       SizedBox(height: 16),
                       Padding(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 0.0,
-                          vertical: 5,
-                        ),
+                        padding: const EdgeInsets.symmetric(horizontal: 0.0, vertical: 5),
                         child: Container(
                           decoration: BoxDecoration(
                             color: Colors.white,
                             borderRadius: BorderRadius.circular(16.0),
-                            border: Border.all(
-                              color: Colors.grey.shade300,
-                              width: 1,
-                            ),
+                            border: Border.all(color: Colors.grey.shade300, width: 1),
                           ),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: List.generate(
-                              lobbyData.lobby.filter.filterInfoList.length,
-                              (index) {
-                                final item =
-                                    lobbyData
-                                        .lobby
-                                        .filter
-                                        .filterInfoList[index];
+                            children: List.generate(lobbyData.lobby.filter.filterInfoList.length, (index) {
+                              final item = lobbyData.lobby.filter.filterInfoList[index];
 
-                                // Format the options list as a string
-                                String formattedOptions = item.options
-                                    .take(3)
-                                    .join(', ');
-                                if (item.options.length > 3) {
-                                  formattedOptions += '...';
-                                }
+                              // Format the options list as a string
+                              String formattedOptions = item.options.take(3).join(', ');
+                              if (item.options.length > 3) {
+                                formattedOptions += '...';
+                              }
 
-                                return Column(
-                                  crossAxisAlignment:
-                                      CrossAxisAlignment.stretch,
-                                  children: [
-                                    buildDetailCard(
-                                      context,
-                                      icon: item.iconUrl ?? "",
-                                      title: item.title,
-                                      subtitle: formattedOptions,
-                                    ),
-                                    if (index !=
-                                        (lobbyData
-                                                .lobby
-                                                .filter
-                                                .filterInfoList
-                                                .length -
-                                            1))
-                                      Divider(
-                                        color: Colors.grey.shade300,
-                                        height: 2.0,
-                                      ),
-                                  ],
-                                );
-                              },
-                            ),
+                              return Column(
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                children: [
+                                  buildDetailCard(
+                                    context,
+                                    icon: item.iconUrl ?? "",
+                                    title: item.title,
+                                    subtitle: formattedOptions,
+                                  ),
+                                  if (index != (lobbyData.lobby.filter.filterInfoList.length - 1))
+                                    Divider(color: Colors.grey.shade300, height: 2.0),
+                                ],
+                              );
+                            }),
                           ),
                         ),
                       ),
@@ -3665,12 +2942,10 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
 
                           switch (lobbyData.lobby.lobbyStatus) {
                             case "PAST":
-                              combinedStatus =
-                                  "${lobbyData.lobby.userStatus}_${lobbyData.lobby.lobbyStatus}";
+                              combinedStatus = "${lobbyData.lobby.userStatus}_${lobbyData.lobby.lobbyStatus}";
                             case "UPCOMING":
                             case "CLOSED":
-                              combinedStatus =
-                                  "${lobbyData.lobby.userStatus}_${lobbyData.lobby.lobbyStatus}";
+                              combinedStatus = "${lobbyData.lobby.userStatus}_${lobbyData.lobby.lobbyStatus}";
 
                             default: // ACTIVE
                           }
@@ -3681,8 +2956,7 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                             case "ADMIN_PAST":
                               return SizedBox.shrink();
                             case "ADMIN":
-                              if (lobbyData.lobby.priceDetails.originalPrice >
-                                  0.0) {
+                              if (lobbyData.lobby.priceDetails.originalPrice > 0.0) {
                                 return Column(
                                   children: [
                                     GestureDetector(
@@ -3692,15 +2966,12 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                                           title: "Unlock Premium Features",
                                           message:
                                               "Get the full AroundU experience with exclusive features, enhanced performance, and more!",
-                                          appStoreUrl:
-                                              "https://apps.apple.com/in/app/aroundu/id6744299663",
+                                          appStoreUrl: "https://apps.apple.com/in/app/aroundu/id6744299663",
                                           playStoreUrl:
                                               "https://play.google.com/store/apps/details?id=com.polar.aroundu",
                                           // cancelButtonText: "Maybe Later",
                                           onCancel: () {
-                                            print(
-                                              "User chose to skip download",
-                                            );
+                                            print("User chose to skip download");
                                           },
                                         );
 
@@ -3712,8 +2983,7 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                                       },
                                       child: const CustomOfferCard(
                                         boldText: "Add Custom Offers",
-                                        normalText:
-                                            "to attract more attendees to your lobby now.",
+                                        normalText: "to attract more attendees to your lobby now.",
                                       ),
                                     ),
                                     Space.h(height: 24),
@@ -3734,12 +3004,10 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
 
                         switch (lobbyData.lobby.lobbyStatus) {
                           case "PAST":
-                            combinedStatus =
-                                "${lobbyData.lobby.userStatus}_${lobbyData.lobby.lobbyStatus}";
+                            combinedStatus = "${lobbyData.lobby.userStatus}_${lobbyData.lobby.lobbyStatus}";
                           case "UPCOMING":
                           case "CLOSED":
-                            combinedStatus =
-                                "${lobbyData.lobby.userStatus}_${lobbyData.lobby.lobbyStatus}";
+                            combinedStatus = "${lobbyData.lobby.userStatus}_${lobbyData.lobby.lobbyStatus}";
 
                           default: // ACTIVE
                         }
@@ -3750,8 +3018,7 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                           case "ADMIN_PAST":
                             return SizedBox.shrink();
                           case "ADMIN":
-                            if (lobbyData.lobby.priceDetails.originalPrice >
-                                0.0) {
+                            if (lobbyData.lobby.priceDetails.originalPrice > 0.0) {
                               return Column(
                                 children: [
                                   GestureDetector(
@@ -3761,10 +3028,8 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                                         title: "Unlock Premium Features",
                                         message:
                                             "Get the full AroundU experience with exclusive features, enhanced performance, and more!",
-                                        appStoreUrl:
-                                            "https://apps.apple.com/in/app/aroundu/id6744299663",
-                                        playStoreUrl:
-                                            "https://play.google.com/store/apps/details?id=com.polar.aroundu",
+                                        appStoreUrl: "https://apps.apple.com/in/app/aroundu/id6744299663",
+                                        playStoreUrl: "https://play.google.com/store/apps/details?id=com.polar.aroundu",
                                         // cancelButtonText: "Maybe Later",
                                         onCancel: () {
                                           print("User chose to skip download");
@@ -3811,10 +3076,7 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                       })(),
 
                       Container(
-                        decoration: BoxDecoration(
-                          color: Color(0xFFF9F9F9),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
+                        decoration: BoxDecoration(color: Color(0xFFF9F9F9), borderRadius: BorderRadius.circular(12)),
                         padding: EdgeInsets.all(24),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -3823,125 +3085,36 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                               runSpacing: 12,
                               direction: Axis.vertical,
                               children: [
-                                if (lobbyData
-                                        .lobby
-                                        .filter
-                                        .otherFilterInfo
-                                        .dateInfo !=
-                                    null) ...[
+                                if (lobbyData.lobby.filter.otherFilterInfo.dateInfo != null) ...[
                                   InfoItemWithTitle(
-                                    iconUrl:
-                                        lobbyData
-                                            .lobby
-                                            .filter
-                                            .otherFilterInfo
-                                            .dateInfo!
-                                            .iconUrl,
-                                    title:
-                                        lobbyData
-                                            .lobby
-                                            .filter
-                                            .otherFilterInfo
-                                            .dateInfo!
-                                            .title,
-                                    subTitle:
-                                        lobbyData
-                                            .lobby
-                                            .filter
-                                            .otherFilterInfo
-                                            .dateInfo!
-                                            .formattedDate ??
-                                        "",
+                                    iconUrl: lobbyData.lobby.filter.otherFilterInfo.dateInfo!.iconUrl,
+                                    title: lobbyData.lobby.filter.otherFilterInfo.dateInfo!.title,
+                                    subTitle: lobbyData.lobby.filter.otherFilterInfo.dateInfo!.formattedDate ?? "",
                                   ),
                                   const Space.h(height: 4),
                                 ],
-                                if (lobbyData
-                                        .lobby
-                                        .filter
-                                        .otherFilterInfo
-                                        .dateRange !=
-                                    null) ...[
+                                if (lobbyData.lobby.filter.otherFilterInfo.dateRange != null) ...[
                                   InfoItemWithTitle(
-                                    iconUrl:
-                                        lobbyData
-                                            .lobby
-                                            .filter
-                                            .otherFilterInfo
-                                            .dateRange!
-                                            .iconUrl,
-                                    title:
-                                        lobbyData
-                                            .lobby
-                                            .filter
-                                            .otherFilterInfo
-                                            .dateRange!
-                                            .title,
+                                    iconUrl: lobbyData.lobby.filter.otherFilterInfo.dateRange!.iconUrl,
+                                    title: lobbyData.lobby.filter.otherFilterInfo.dateRange!.title,
                                     subTitle:
-                                        lobbyData
-                                            .lobby
-                                            .filter
-                                            .otherFilterInfo
-                                            .dateRange!
-                                            .formattedDateCompactView,
+                                        lobbyData.lobby.filter.otherFilterInfo.dateRange!.formattedDateCompactView,
                                   ),
                                   const Space.h(height: 4),
                                 ],
 
-                                if (lobbyData
-                                            .lobby
-                                            .filter
-                                            .otherFilterInfo
-                                            .pickUp !=
-                                        null ||
-                                    lobbyData
-                                            .lobby
-                                            .filter
-                                            .otherFilterInfo
-                                            .destination !=
-                                        null) ...[
+                                if (lobbyData.lobby.filter.otherFilterInfo.pickUp != null ||
+                                    lobbyData.lobby.filter.otherFilterInfo.destination != null) ...[
                                   InfoItemWithTitle(
-                                    iconUrl:
-                                        lobbyData
-                                            .lobby
-                                            .filter
-                                            .otherFilterInfo
-                                            .pickUp!
-                                            .iconUrl,
-                                    title:
-                                        lobbyData
-                                            .lobby
-                                            .filter
-                                            .otherFilterInfo
-                                            .pickUp
-                                            ?.title ??
-                                        "",
+                                    iconUrl: lobbyData.lobby.filter.otherFilterInfo.pickUp!.iconUrl,
+                                    title: lobbyData.lobby.filter.otherFilterInfo.pickUp?.title ?? "",
                                     subTitle:
-                                        lobbyData
-                                            .lobby
-                                            .filter
-                                            .otherFilterInfo
-                                            .pickUp!
-                                            .locationResponse
-                                            ?.areaName ??
-                                        "",
+                                        lobbyData.lobby.filter.otherFilterInfo.pickUp!.locationResponse?.areaName ?? "",
                                   ),
                                   const Space.h(height: 4),
                                   InfoItemWithTitle(
-                                    iconUrl:
-                                        lobbyData
-                                            .lobby
-                                            .filter
-                                            .otherFilterInfo
-                                            .pickUp!
-                                            .iconUrl,
-                                    title:
-                                        lobbyData
-                                            .lobby
-                                            .filter
-                                            .otherFilterInfo
-                                            .destination
-                                            ?.title ??
-                                        "",
+                                    iconUrl: lobbyData.lobby.filter.otherFilterInfo.pickUp!.iconUrl,
+                                    title: lobbyData.lobby.filter.otherFilterInfo.destination?.title ?? "",
                                     subTitle:
                                         lobbyData
                                             .lobby
@@ -3952,21 +3125,10 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                                             ?.areaName ??
                                         "",
                                   ),
-                                  if (lobbyData
-                                              .lobby
-                                              .filter
-                                              .otherFilterInfo
-                                              .pickUp !=
-                                          null ||
-                                      lobbyData
-                                              .lobby
-                                              .filter
-                                              .otherFilterInfo
-                                              .destination !=
-                                          null) ...[
+                                  if (lobbyData.lobby.filter.otherFilterInfo.pickUp != null ||
+                                      lobbyData.lobby.filter.otherFilterInfo.destination != null) ...[
                                     Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.start,
+                                      mainAxisAlignment: MainAxisAlignment.start,
                                       children: [
                                         Card(
                                           elevation: 8,
@@ -3976,8 +3138,7 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                                             // constraints:
                                             //     BoxConstraints(minWidth: 0.15.sw),
                                             decoration: BoxDecoration(
-                                              borderRadius:
-                                                  BorderRadius.circular(12),
+                                              borderRadius: BorderRadius.circular(12),
                                               color: Colors.white,
                                             ),
                                             child: InfoItemWithIcon(
@@ -3992,12 +3153,7 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                                                 double latDestination = 0.0;
                                                 double lngDestination = 0.0;
 
-                                                if (lobbyData
-                                                            .lobby
-                                                            .filter
-                                                            .otherFilterInfo
-                                                            .pickUp
-                                                            ?.locationResponse !=
+                                                if (lobbyData.lobby.filter.otherFilterInfo.pickUp?.locationResponse !=
                                                         null ||
                                                     lobbyData
                                                             .lobby
@@ -4006,10 +3162,7 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                                                             .destination
                                                             ?.locationResponse !=
                                                         null) {
-                                                  if (lobbyData
-                                                          .lobby
-                                                          .userStatus !=
-                                                      "MEMBER") {
+                                                  if (lobbyData.lobby.userStatus != "MEMBER") {
                                                     latPickUp =
                                                         (lobbyData
                                                             .lobby
@@ -4116,17 +3269,12 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                                                     try {
                                                       await launchUrl(
                                                         mapsUri,
-                                                        mode:
-                                                            LaunchMode
-                                                                .platformDefault, // Use platformDefault for web
-                                                        webOnlyWindowName:
-                                                            '_blank', // Open in new tab
+                                                        mode: LaunchMode.platformDefault, // Use platformDefault for web
+                                                        webOnlyWindowName: '_blank', // Open in new tab
                                                       );
                                                       launched = true;
                                                     } catch (e) {
-                                                      kLogger.error(
-                                                        'Error launching directions URL on web: $e',
-                                                      );
+                                                      kLogger.error('Error launching directions URL on web: $e');
                                                     }
                                                   } else {
                                                     // Mobile platform handling
@@ -4135,15 +3283,8 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                                                       mapsUri = Uri.parse(
                                                         'https://www.google.com/maps/dir/?api=1&origin=$latPickUp,$lngPickUp&destination=$latDestination,$lngDestination',
                                                       );
-                                                      if (await canLaunchUrl(
-                                                        mapsUri,
-                                                      )) {
-                                                        await launchUrl(
-                                                          mapsUri,
-                                                          mode:
-                                                              LaunchMode
-                                                                  .externalApplication,
-                                                        );
+                                                      if (await canLaunchUrl(mapsUri)) {
+                                                        await launchUrl(mapsUri, mode: LaunchMode.externalApplication);
                                                         launched = true;
                                                       }
                                                     } else if (Platform.isIOS) {
@@ -4151,29 +3292,18 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                                                       mapsUri = Uri.parse(
                                                         'comgooglemaps://?saddr=$latPickUp,$lngPickUp&daddr=$latDestination,$lngDestination&directionsmode=driving',
                                                       );
-                                                      if (await canLaunchUrl(
-                                                        mapsUri,
-                                                      )) {
-                                                        await launchUrl(
-                                                          mapsUri,
-                                                          mode:
-                                                              LaunchMode
-                                                                  .externalApplication,
-                                                        );
+                                                      if (await canLaunchUrl(mapsUri)) {
+                                                        await launchUrl(mapsUri, mode: LaunchMode.externalApplication);
                                                         launched = true;
                                                       } else {
                                                         // Fall back to Apple Maps
                                                         mapsUri = Uri.parse(
                                                           'https://maps.apple.com/?saddr=$latPickUp,$lngPickUp&daddr=$latDestination,$lngDestination&dirflg=d',
                                                         );
-                                                        if (await canLaunchUrl(
-                                                          mapsUri,
-                                                        )) {
+                                                        if (await canLaunchUrl(mapsUri)) {
                                                           await launchUrl(
                                                             mapsUri,
-                                                            mode:
-                                                                LaunchMode
-                                                                    .externalApplication,
+                                                            mode: LaunchMode.externalApplication,
                                                           );
                                                           launched = true;
                                                         }
@@ -4186,16 +3316,9 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                                                         'https://www.google.com/maps/dir/?api=1&origin=$latPickUp,$lngPickUp&destination=$latDestination,$lngDestination',
                                                       );
                                                       try {
-                                                        await launchUrl(
-                                                          mapsUri,
-                                                          mode:
-                                                              LaunchMode
-                                                                  .externalApplication,
-                                                        );
+                                                        await launchUrl(mapsUri, mode: LaunchMode.externalApplication);
                                                       } catch (e) {
-                                                        kLogger.error(
-                                                          'Error launching URL: $e',
-                                                        );
+                                                        kLogger.error('Error launching URL: $e');
                                                       }
                                                     }
                                                   }
@@ -4205,47 +3328,26 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                                           ),
                                         ),
                                         // Space.w(width: 8.w),
-                                        if (lobbyData
-                                                    .lobby
-                                                    .filter
-                                                    .otherFilterInfo
-                                                    .locationInfo !=
-                                                null &&
-                                            (lobbyData
-                                                .lobby
-                                                .filter
-                                                .otherFilterInfo
-                                                .locationInfo!
-                                                .hideLocation) &&
-                                            (lobbyData.lobby.userStatus !=
-                                                    "MEMBER" ||
-                                                lobbyData.lobby.userStatus !=
-                                                    "ADMIN"))
+                                        if (lobbyData.lobby.filter.otherFilterInfo.locationInfo != null &&
+                                            (lobbyData.lobby.filter.otherFilterInfo.locationInfo!.hideLocation) &&
+                                            (lobbyData.lobby.userStatus != "MEMBER" ||
+                                                lobbyData.lobby.userStatus != "ADMIN"))
                                           GestureDetector(
                                             onTap: () {
                                               showDialog(
                                                 context: context,
-                                                builder: (
-                                                  BuildContext context,
-                                                ) {
+                                                builder: (BuildContext context) {
                                                   return AlertDialog(
-                                                    backgroundColor:
-                                                        Colors.white,
-                                                    title: const Text(
-                                                      "Approximate Location Shown 🌍",
-                                                    ),
+                                                    backgroundColor: Colors.white,
+                                                    title: const Text("Approximate Location Shown 🌍"),
                                                     content: const Text(
                                                       "The admin has chosen to hide the exact location. You're seeing an approximate location within a 1 km radius. Once you join the lobby, the exact location will be visible.",
                                                     ),
                                                     actions: <Widget>[
                                                       TextButton(
-                                                        child: const Text(
-                                                          "Got it!",
-                                                        ),
+                                                        child: const Text("Got it!"),
                                                         onPressed: () {
-                                                          Navigator.of(
-                                                            context,
-                                                          ).pop(); // Dismiss the dialog
+                                                          Navigator.of(context).pop(); // Dismiss the dialog
                                                         },
                                                       ),
                                                     ],
@@ -4253,10 +3355,7 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                                                 },
                                               );
                                             },
-                                            child: Icon(
-                                              Icons.info_outline,
-                                              size: 18,
-                                            ),
+                                            child: Icon(Icons.info_outline, size: 18),
                                           ),
                                       ],
                                     ),
@@ -4265,12 +3364,7 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                                 ],
                               ],
                             ),
-                            if (lobbyData
-                                    .lobby
-                                    .filter
-                                    .otherFilterInfo
-                                    .locationInfo !=
-                                null) ...[
+                            if (lobbyData.lobby.filter.otherFilterInfo.locationInfo != null) ...[
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.start,
                                 mainAxisSize: MainAxisSize.min,
@@ -4281,12 +3375,7 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                                         double lat = 0.0;
                                         double lng = 0.0;
 
-                                        if (lobbyData
-                                                    .lobby
-                                                    .filter
-                                                    .otherFilterInfo
-                                                    .locationInfo !=
-                                                null &&
+                                        if (lobbyData.lobby.filter.otherFilterInfo.locationInfo != null &&
                                             lobbyData
                                                 .lobby
                                                 .filter
@@ -4294,14 +3383,8 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                                                 .locationInfo!
                                                 .locationResponses
                                                 .isNotEmpty) {
-                                          if ((lobbyData
-                                                  .lobby
-                                                  .filter
-                                                  .otherFilterInfo
-                                                  .locationInfo!
-                                                  .hideLocation) &&
-                                              (lobbyData.lobby.userStatus !=
-                                                  "MEMBER")) {
+                                          if ((lobbyData.lobby.filter.otherFilterInfo.locationInfo!.hideLocation) &&
+                                              (lobbyData.lobby.userStatus != "MEMBER")) {
                                             lat =
                                                 lobbyData
                                                     .lobby
@@ -4355,9 +3438,7 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                                           Uri? mapsUri;
                                           bool launched = false;
 
-                                          kLogger.trace(
-                                            "lat : $lat \n lng : $lng",
-                                          );
+                                          kLogger.trace("lat : $lat \n lng : $lng");
 
                                           // Check if running on web
                                           if (kIsWeb) {
@@ -4369,32 +3450,20 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                                             try {
                                               await launchUrl(
                                                 mapsUri,
-                                                mode:
-                                                    LaunchMode
-                                                        .platformDefault, // Use platformDefault for web
-                                                webOnlyWindowName:
-                                                    '_blank', // Open in new tab
+                                                mode: LaunchMode.platformDefault, // Use platformDefault for web
+                                                webOnlyWindowName: '_blank', // Open in new tab
                                               );
                                               launched = true;
                                             } catch (e) {
-                                              kLogger.error(
-                                                'Error launching maps URL on web: $e',
-                                              );
+                                              kLogger.error('Error launching maps URL on web: $e');
                                             }
                                           } else {
                                             // Mobile platform handling (your existing code)
                                             if (Platform.isAndroid) {
                                               // Try Android's native maps app first
-                                              mapsUri = Uri.parse(
-                                                'http://maps.google.com/maps?z=12&t=m&q=$lat,$lng',
-                                              );
+                                              mapsUri = Uri.parse('http://maps.google.com/maps?z=12&t=m&q=$lat,$lng');
                                               if (await canLaunchUrl(mapsUri)) {
-                                                await launchUrl(
-                                                  mapsUri,
-                                                  mode:
-                                                      LaunchMode
-                                                          .externalApplication,
-                                                );
+                                                await launchUrl(mapsUri, mode: LaunchMode.externalApplication);
                                                 launched = true;
                                               }
                                             } else if (Platform.isIOS) {
@@ -4403,27 +3472,15 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                                                 'comgooglemaps://?center=$lat,$lng&zoom=12&q=$lat,$lng',
                                               );
                                               if (await canLaunchUrl(mapsUri)) {
-                                                await launchUrl(
-                                                  mapsUri,
-                                                  mode:
-                                                      LaunchMode
-                                                          .externalApplication,
-                                                );
+                                                await launchUrl(mapsUri, mode: LaunchMode.externalApplication);
                                                 launched = true;
                                               } else {
                                                 // Fall back to Apple Maps
                                                 mapsUri = Uri.parse(
                                                   'https://maps.apple.com/?q=${Uri.encodeFull("Location")}&sll=$lat,$lng&z=12',
                                                 );
-                                                if (await canLaunchUrl(
-                                                  mapsUri,
-                                                )) {
-                                                  await launchUrl(
-                                                    mapsUri,
-                                                    mode:
-                                                        LaunchMode
-                                                            .externalApplication,
-                                                  );
+                                                if (await canLaunchUrl(mapsUri)) {
+                                                  await launchUrl(mapsUri, mode: LaunchMode.externalApplication);
                                                   launched = true;
                                                 }
                                               }
@@ -4435,16 +3492,9 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                                                 'https://www.google.com/maps/search/?api=1&query=$lat,$lng',
                                               );
                                               try {
-                                                await launchUrl(
-                                                  mapsUri,
-                                                  mode:
-                                                      LaunchMode
-                                                          .externalApplication,
-                                                );
+                                                await launchUrl(mapsUri, mode: LaunchMode.externalApplication);
                                               } catch (e) {
-                                                kLogger.error(
-                                                  'Error launching URL: $e',
-                                                );
+                                                kLogger.error('Error launching URL: $e');
                                               }
                                             }
                                           }
@@ -4465,21 +3515,9 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                                     ),
                                   ),
                                   // Space.w(width: 8.w),
-                                  if (lobbyData
-                                              .lobby
-                                              .filter
-                                              .otherFilterInfo
-                                              .locationInfo !=
-                                          null &&
-                                      (lobbyData
-                                          .lobby
-                                          .filter
-                                          .otherFilterInfo
-                                          .locationInfo!
-                                          .hideLocation) &&
-                                      (lobbyData.lobby.userStatus != "MEMBER" ||
-                                          lobbyData.lobby.userStatus !=
-                                              "ADMIN"))
+                                  if (lobbyData.lobby.filter.otherFilterInfo.locationInfo != null &&
+                                      (lobbyData.lobby.filter.otherFilterInfo.locationInfo!.hideLocation) &&
+                                      (lobbyData.lobby.userStatus != "MEMBER" || lobbyData.lobby.userStatus != "ADMIN"))
                                     GestureDetector(
                                       onTap: () {
                                         showDialog(
@@ -4487,9 +3525,7 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                                           builder: (BuildContext context) {
                                             return AlertDialog(
                                               backgroundColor: Colors.white,
-                                              title: const Text(
-                                                "Approximate Location Shown 🌍",
-                                              ),
+                                              title: const Text("Approximate Location Shown 🌍"),
                                               content: const Text(
                                                 "The admin has chosen to hide the exact location. You're seeing an approximate location within a 1 km radius. Once you join the lobby, the exact location will be visible.",
                                               ),
@@ -4497,9 +3533,7 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                                                 TextButton(
                                                   child: const Text("Got it!"),
                                                   onPressed: () {
-                                                    Navigator.of(
-                                                      context,
-                                                    ).pop(); // Dismiss the dialog
+                                                    Navigator.of(context).pop(); // Dismiss the dialog
                                                   },
                                                 ),
                                               ],
@@ -4513,21 +3547,11 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                               ),
                             ],
 
-                            if (lobbyData
-                                    .lobby
-                                    .filter
-                                    .otherFilterInfo
-                                    .multipleLocations !=
-                                null) ...[
+                            if (lobbyData.lobby.filter.otherFilterInfo.multipleLocations != null) ...[
                               Space.h(height: 16),
                               DesignText(
                                 text:
-                                    lobbyData
-                                        .lobby
-                                        .filter
-                                        .otherFilterInfo
-                                        .multipleLocations
-                                        ?.title ??
+                                    lobbyData.lobby.filter.otherFilterInfo.multipleLocations?.title ??
                                     'Multiple Location',
                                 fontSize: 14,
                                 fontWeight: FontWeight.w500,
@@ -4545,59 +3569,39 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                           InfoCard(
                             icon: Icons.payment,
                             title:
-                                (lobbyData.lobby.priceDetails.originalPrice >
-                                        0.0)
-                                    ? "Refund Policies :"
-                                    : "Pricing ",
+                                (lobbyData.lobby.priceDetails.originalPrice > 0.0) ? "Refund Policies :" : "Pricing ",
                             subtitle:
                                 (lobbyData.lobby.priceDetails.isRefundAllowed)
                                     ? "Up to 2 days before the lobby."
-                                    : (lobbyData
-                                            .lobby
-                                            .priceDetails
-                                            .originalPrice >
-                                        0.0)
+                                    : (lobbyData.lobby.priceDetails.originalPrice > 0.0)
                                     ? "refund not allowed for this lobby"
                                     : "This Lobby is Free",
                           ),
                           InfoCard(
                             icon: Icons.groups,
                             title: "Lobby Size",
-                            subtitle:
-                                "Maximum: ${lobbyData.lobby.totalMembers}",
+                            subtitle: "Maximum: ${lobbyData.lobby.totalMembers}",
                           ),
-                          if (lobbyData.lobby.filter.otherFilterInfo.range !=
-                              null)
+                          if (lobbyData.lobby.filter.otherFilterInfo.range != null)
                             InfoCard(
                               icon: Icons.cake,
-                              title:
-                                  lobbyData
-                                      .lobby
-                                      .filter
-                                      .otherFilterInfo
-                                      .range
-                                      ?.title ??
-                                  "Age Limit",
+                              title: lobbyData.lobby.filter.otherFilterInfo.range?.title ?? "Age Limit",
                               subtitle:
                                   "${lobbyData.lobby.filter.otherFilterInfo.range?.min ?? 0} to ${lobbyData.lobby.filter.otherFilterInfo.range?.max ?? 0} ",
                             ),
                         ],
                       ),
                       ResponsiveAppDownloadCard(
-                        appStoreUrl:
-                            "https://apps.apple.com/in/app/aroundu/id6744299663",
-                        playStoreUrl:
-                            "https://play.google.com/store/apps/details?id=com.polar.aroundu",
+                        appStoreUrl: "https://apps.apple.com/in/app/aroundu/id6744299663",
+                        playStoreUrl: "https://play.google.com/store/apps/details?id=com.polar.aroundu",
                         onClose: () {
                           FancyAppDownloadDialog.show(
                             context,
                             title: "Unlock Premium Features",
                             message:
                                 "Get the full AroundU experience with exclusive features, enhanced performance, and more!",
-                            appStoreUrl:
-                                "https://apps.apple.com/in/app/aroundu/id6744299663",
-                            playStoreUrl:
-                                "https://play.google.com/store/apps/details?id=com.polar.aroundu",
+                            appStoreUrl: "https://apps.apple.com/in/app/aroundu/id6744299663",
+                            playStoreUrl: "https://play.google.com/store/apps/details?id=com.polar.aroundu",
                             // cancelButtonText: "Maybe Later",
                             onCancel: () {
                               print("User chose to skip download");
@@ -4612,20 +3616,14 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
               ),
             ],
           ),
-          if (isAuth)
-            const LobbiesList(
-              lobbyType: LobbyType.recommendations,
-              title: "Recommended Lobbies",
-            ),
+          if (isAuth) const LobbiesList(lobbyType: LobbyType.recommendations, title: "Recommended Lobbies"),
           Space.h(height: 34),
         ],
       ),
     );
   }
 
-  Widget _buildBottomNavigationBarLeftSideWidget({
-    required LobbyDetails lobbyDetail,
-  }) {
+  Widget _buildBottomNavigationBarLeftSideWidget({required LobbyDetails lobbyDetail}) {
     final lobbyStatus = lobbyDetail.lobby.lobbyStatus;
     final userStatus = lobbyDetail.lobby.userStatus;
     final isPrivilegedUser = userStatus == "MEMBER" || userStatus == "ADMIN";
@@ -4636,9 +3634,7 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
           color: Colors.white,
           shadowColor: const Color(0x6C3E79A1),
           elevation: 0,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           child: Padding(
             padding: EdgeInsets.only(top: 0, left: 0, right: 8),
             child: Column(
@@ -4668,9 +3664,7 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
   }
 
   // Helper method for right side widget
-  Widget _buildBottomNavigationBarRightSideWidget({
-    required LobbyDetails lobbyDetail,
-  }) {
+  Widget _buildBottomNavigationBarRightSideWidget({required LobbyDetails lobbyDetail}) {
     final isAuth = ref.watch(isAuthProvider(lobbyDetail.lobby.id));
     double sw = MediaQuery.of(context).size.width;
     double sh = MediaQuery.of(context).size.height;
@@ -4686,11 +3680,9 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
             FancyAppDownloadDialog.show(
               context,
               title: "Unlock Premium Features",
-              message:
-                  "Get the full AroundU experience with exclusive features, enhanced performance, and more!",
+              message: "Get the full AroundU experience with exclusive features, enhanced performance, and more!",
               appStoreUrl: "https://apps.apple.com/in/app/aroundu/id6744299663",
-              playStoreUrl:
-                  "https://play.google.com/store/apps/details?id=com.polar.aroundu",
+              playStoreUrl: "https://play.google.com/store/apps/details?id=com.polar.aroundu",
               // cancelButtonText: "Maybe Later",
               onCancel: () {
                 print("User chose to skip download");
@@ -4708,32 +3700,18 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
           bgColor: DesignColors.accent,
           // padding: EdgeInsets.symmetric(vertical: 12.h, horizontal: 16.w),
           child: Center(
-            child: DesignText(
-              text: "Create Moment",
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-              color: Colors.white,
-            ),
+            child: DesignText(text: "Create Moment", fontSize: 16, fontWeight: FontWeight.w600, color: Colors.white),
           ),
         );
       } else {
         return DesignButton(
           onPress: () {
             HapticFeedback.lightImpact();
-            CustomSnackBar.show(
-              context: context,
-              message: "This Lobby is Closed",
-              type: SnackBarType.info,
-            );
+            CustomSnackBar.show(context: context, message: "This Lobby is Closed", type: SnackBarType.info);
           },
           bgColor: const Color(0xFF989898),
           child: Center(
-            child: DesignText(
-              text: "Lobby Closed",
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-              color: Colors.white,
-            ),
+            child: DesignText(text: "Lobby Closed", fontSize: 16, fontWeight: FontWeight.w600, color: Colors.white),
           ),
         );
       }
@@ -4753,9 +3731,7 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                 useSafeArea: true,
                 builder: (BuildContext context) {
                   return Padding(
-                    padding: EdgeInsets.only(
-                      bottom: MediaQuery.of(context).viewInsets.bottom,
-                    ),
+                    padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
                     child: LobbySmallEditSheet(lobby: lobbyDetail.lobby),
                   );
                 },
@@ -4787,12 +3763,8 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
               );
 
               // Make API call to activate lobby
-              final activationNotifier = ref.read(
-                lobbyActivationProvider(lobbyDetail.lobby.id).notifier,
-              );
-              final success = await activationNotifier.activateLobby(
-                lobbyDetail.lobby.id,
-              );
+              final activationNotifier = ref.read(lobbyActivationProvider(lobbyDetail.lobby.id).notifier);
+              final success = await activationNotifier.activateLobby(lobbyDetail.lobby.id);
 
               // Close the loading dialog
               if (Navigator.canPop(context)) {
@@ -4808,9 +3780,7 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                 );
 
                 // Refresh the lobby details
-                ref
-                    .read(lobbyDetailsProvider(lobbyDetail.lobby.id).notifier)
-                    .reset();
+                ref.read(lobbyDetailsProvider(lobbyDetail.lobby.id).notifier).reset();
                 await ref
                     .read(lobbyDetailsProvider(lobbyDetail.lobby.id).notifier)
                     .fetchLobbyDetails(lobbyDetail.lobby.id);
@@ -4826,10 +3796,7 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
           bgColor: const Color(0xFF989898),
           child: Center(
             child: DesignText(
-              text:
-                  lobbyStatus == "FULL"
-                      ? "Lobby Full  (Edit Lobby)"
-                      : "Make Lobby Active",
+              text: lobbyStatus == "FULL" ? "Lobby Full  (Edit Lobby)" : "Make Lobby Active",
               fontSize: 16,
               fontWeight: FontWeight.w600,
               color: Colors.white,
@@ -4842,8 +3809,7 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
             HapticFeedback.lightImpact();
             CustomSnackBar.show(
               context: context,
-              message:
-                  "This Lobby is ${lobbyStatus == "FULL" ? "Full" : "Closed"}",
+              message: "This Lobby is ${lobbyStatus == "FULL" ? "Full" : "Closed"}",
               type: SnackBarType.info,
             );
           },
@@ -4875,11 +3841,7 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                     if (isAuth) {
                       switch (lobbyDetail.lobby.userStatus) {
                         case "REQUESTED":
-                          CustomSnackBar.show(
-                            context: context,
-                            message: "Already Requested",
-                            type: SnackBarType.info,
-                          );
+                          CustomSnackBar.show(context: context, message: "Already Requested", type: SnackBarType.info);
                           return;
                         case "REQUEST_DENIED":
                           CustomSnackBar.show(
@@ -4890,28 +3852,15 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                           return;
                         case "INTERNAL_ACCESS_REQUEST":
                           if (lobbyDetail.lobby.accessRequestData != null &&
-                              (lobbyDetail
-                                      .lobby
-                                      .accessRequestData
-                                      ?.accessId
-                                      .isNotEmpty ??
-                                  false)) {
+                              (lobbyDetail.lobby.accessRequestData?.accessId.isNotEmpty ?? false)) {
                             Get.toNamed(
-                              AppRoutes.sharedAccessRequestCardExtendedView
-                                  .replaceAll(
-                                    ':accessReqId',
-                                    lobbyDetail
-                                            .lobby
-                                            .accessRequestData
-                                            ?.accessId ??
-                                        "",
-                                  ),
+                              AppRoutes.sharedAccessRequestCardExtendedView.replaceAll(
+                                ':accessReqId',
+                                lobbyDetail.lobby.accessRequestData?.accessId ?? "",
+                              ),
                             );
                           } else {
-                            Fluttertoast.showToast(
-                              msg:
-                                  "Something went wrong \n Please try again!!!",
-                            );
+                            Fluttertoast.showToast(msg: "Something went wrong \n Please try again!!!");
                           }
                         case "REMOVED":
                           CustomSnackBar.show(
@@ -4923,14 +3872,8 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                           return;
                         case "PAYMENT_PENDING":
                           if (lobbyDetail.lobby.accessRequestData != null) {
-                            if (lobbyDetail
-                                .lobby
-                                .accessRequestData!
-                                .isGroupAccess) {
-                              if (lobbyDetail
-                                  .lobby
-                                  .accessRequestData!
-                                  .isAdmin) {
+                            if (lobbyDetail.lobby.accessRequestData!.isGroupAccess) {
+                              if (lobbyDetail.lobby.accessRequestData!.isAdmin) {
                                 showDialog(
                                   context: context,
                                   barrierDismissible: false,
@@ -4938,15 +3881,9 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                                     return AlertDialog(
                                       backgroundColor: Colors.transparent,
                                       content: Column(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.center,
-                                        children: [
-                                          CircularProgressIndicator(
-                                            color: DesignColors.accent,
-                                          ),
-                                        ],
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        crossAxisAlignment: CrossAxisAlignment.center,
+                                        children: [CircularProgressIndicator(color: DesignColors.accent)],
                                       ),
                                     );
                                   },
@@ -4954,29 +3891,16 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
 
                                 // Fetch pricing data
                                 await ref
-                                    .read(
-                                      pricingProvider(
-                                        lobbyDetail.lobby.id,
-                                      ).notifier,
-                                    )
-                                    .fetchPricing(
-                                      lobbyDetail.lobby.id,
-                                      groupSize: 1,
-                                    );
+                                    .read(pricingProvider(lobbyDetail.lobby.id).notifier)
+                                    .fetchPricing(lobbyDetail.lobby.id, groupSize: 1);
 
                                 // Close the loading dialog
-                                Navigator.of(
-                                  context,
-                                  rootNavigator: true,
-                                ).pop();
+                                Navigator.of(context, rootNavigator: true).pop();
 
-                                final pricingState = ref.read(
-                                  pricingProvider(lobbyDetail.lobby.id),
-                                );
+                                final pricingState = ref.read(pricingProvider(lobbyDetail.lobby.id));
                                 final pricingData = pricingState.pricingData;
 
-                                if (pricingData != null &&
-                                    pricingData.status == 'SUCCESS') {
+                                if (pricingData != null && pricingData.status == 'SUCCESS') {
                                   await Get.toNamed(
                                     AppRoutes.checkOutPublicLobbyView,
                                     arguments: {'lobby': lobbyDetail.lobby},
@@ -4992,8 +3916,7 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                               } else {
                                 CustomSnackBar.show(
                                   context: context,
-                                  message:
-                                      "contact your admin to finish payment",
+                                  message: "contact your admin to finish payment",
                                   type: SnackBarType.info,
                                 );
                               }
@@ -5005,15 +3928,9 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                                   return AlertDialog(
                                     backgroundColor: Colors.transparent,
                                     content: Column(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.center,
-                                      children: [
-                                        CircularProgressIndicator(
-                                          color: DesignColors.accent,
-                                        ),
-                                      ],
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      crossAxisAlignment: CrossAxisAlignment.center,
+                                      children: [CircularProgressIndicator(color: DesignColors.accent)],
                                     ),
                                   );
                                 },
@@ -5021,26 +3938,16 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
 
                               // Fetch pricing data
                               await ref
-                                  .read(
-                                    pricingProvider(
-                                      lobbyDetail.lobby.id,
-                                    ).notifier,
-                                  )
-                                  .fetchPricing(
-                                    lobbyDetail.lobby.id,
-                                    groupSize: 1,
-                                  );
+                                  .read(pricingProvider(lobbyDetail.lobby.id).notifier)
+                                  .fetchPricing(lobbyDetail.lobby.id, groupSize: 1);
 
                               // Close the loading dialog
                               Navigator.of(context, rootNavigator: true).pop();
 
-                              final pricingState = ref.read(
-                                pricingProvider(lobbyDetail.lobby.id),
-                              );
+                              final pricingState = ref.read(pricingProvider(lobbyDetail.lobby.id));
                               final pricingData = pricingState.pricingData;
 
-                              if (pricingData != null &&
-                                  pricingData.status == 'SUCCESS') {
+                              if (pricingData != null && pricingData.status == 'SUCCESS') {
                                 await Get.toNamed(
                                   AppRoutes.checkOutPublicLobbyView,
                                   arguments: {'lobby': lobbyDetail.lobby},
@@ -5055,10 +3962,7 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                               }
                             }
                           } else {
-                            Fluttertoast.showToast(
-                              msg:
-                                  "Something went wrong \n Please try again!!!",
-                            );
+                            Fluttertoast.showToast(msg: "Something went wrong \n Please try again!!!");
                           }
 
                         default:
@@ -5071,23 +3975,12 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                       LoginRequiredDialog.show(
                         context,
                         title: "Authentication Required",
-                        message:
-                            "Please sign in or create an account to access this exclusive lobby experience.",
+                        message: "Please sign in or create an account to access this exclusive lobby experience.",
                         onLogin: () {
-                          Get.toNamed(
-                            AppRoutes.auth.replaceAll(
-                              ':destination',
-                              widget.lobbyId,
-                            ),
-                          );
+                          Get.toNamed(AppRoutes.auth.replaceAll(':destination', widget.lobbyId));
                         },
                         onSignup: () {
-                          Get.toNamed(
-                            AppRoutes.auth.replaceAll(
-                              ':destination',
-                              widget.lobbyId,
-                            ),
-                          );
+                          Get.toNamed(AppRoutes.auth.replaceAll(':destination', widget.lobbyId));
                         },
                         cancelButtonText: "Maybe Later",
                       );
@@ -5107,10 +4000,7 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                         if (lobbyDetail.lobby.accessRequestData != null) {
                           if (lobbyDetail.lobby.accessRequestData!.isAdmin) {
                             return const Color(0xFF3E79A1);
-                          } else if (!lobbyDetail
-                              .lobby
-                              .accessRequestData!
-                              .isGroupAccess) {
+                          } else if (!lobbyDetail.lobby.accessRequestData!.isGroupAccess) {
                             return const Color(0xFF3E79A1);
                           } else {
                             return const Color(0xFF989898);
@@ -5118,8 +4008,7 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                         }
                         return const Color(0xFF989898);
                       default:
-                        return DesignColors
-                            .accent; // Default case if userStatus is unexpected
+                        return DesignColors.accent; // Default case if userStatus is unexpected
                     }
                   }(),
                   child: Center(
@@ -5174,10 +4063,7 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
             ],
           ),
         )
-        : DigitalCountdownButton(
-          endTimestamp: lobbyDetail.lobby.dateRange['startDate'],
-          onPressed: () {},
-        );
+        : DigitalCountdownButton(endTimestamp: lobbyDetail.lobby.dateRange['startDate'], onPressed: () {});
   }
 
   Widget buildDetailCard(
@@ -5196,32 +4082,11 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
       child: Row(
         children: [
           icon.length > 2
-              ? DesignIcon.custom(
-                icon: iconUrl ?? DesignIcons.all,
-                size: 16,
-                color: const Color(0xFF3E79A1),
-              )
-              : DesignText(
-                text: icon,
-                fontSize: 12,
-                fontWeight: FontWeight.w500,
-                maxLines: 1,
-              ),
+              ? DesignIcon.custom(icon: iconUrl ?? DesignIcons.all, size: 16, color: const Color(0xFF3E79A1))
+              : DesignText(text: icon, fontSize: 12, fontWeight: FontWeight.w500, maxLines: 1),
           SizedBox(width: 16),
-          Expanded(
-            child: DesignText(
-              text: title,
-              fontSize: 12,
-              fontWeight: FontWeight.w500,
-              maxLines: 1,
-            ),
-          ),
-          DesignText(
-            text: subtitle,
-            fontSize: 10,
-            fontWeight: FontWeight.w400,
-            maxLines: 1,
-          ),
+          Expanded(child: DesignText(text: title, fontSize: 12, fontWeight: FontWeight.w500, maxLines: 1)),
+          DesignText(text: subtitle, fontSize: 10, fontWeight: FontWeight.w400, maxLines: 1),
         ],
       ),
     );
@@ -5230,12 +4095,7 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
   Widget _buildLocationSection({required Lobby lobby}) {
     if (lobby.filter.otherFilterInfo.multipleLocations == null ||
         (lobby.filter.otherFilterInfo.multipleLocations == null &&
-            lobby
-                    .filter
-                    .otherFilterInfo
-                    .multipleLocations!
-                    .googleSearchResponses ==
-                null)) {
+            lobby.filter.otherFilterInfo.multipleLocations!.googleSearchResponses == null)) {
       return SizedBox.shrink();
     }
 
@@ -5244,17 +4104,10 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
 
     // Add locations from locationResponses
     if (lobby.filter.otherFilterInfo.multipleLocations != null) {
-      for (var location
-          in lobby
-              .filter
-              .otherFilterInfo
-              .multipleLocations!
-              .googleSearchResponses) {
-        if (location.structuredFormatting?.mainText != null &&
-            location.structuredFormatting!.mainText!.isNotEmpty) {
+      for (var location in lobby.filter.otherFilterInfo.multipleLocations!.googleSearchResponses) {
+        if (location.structuredFormatting?.mainText != null && location.structuredFormatting!.mainText!.isNotEmpty) {
           locations.add(location.structuredFormatting!.mainText!);
-        } else if (location.description != null &&
-            location.description!.isNotEmpty) {
+        } else if (location.description != null && location.description!.isNotEmpty) {
           locations.add(location.description!);
         }
       }
@@ -5273,8 +4126,7 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
 
     // Determine if we need to show "Show More" button
     bool hasMoreLocations = locations.length > 3;
-    List<String> displayedLocations =
-        isExpanded ? locations : locations.take(3).toList();
+    List<String> displayedLocations = isExpanded ? locations : locations.take(3).toList();
 
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 8),
@@ -5297,29 +4149,18 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                   decoration: BoxDecoration(
                     color: Colors.grey.shade50,
                     borderRadius: BorderRadius.circular(16),
-                    border: Border.all(
-                      color: ColorsPalette.redColor.withOpacity(0.3),
-                      width: 1,
-                    ),
+                    border: Border.all(color: ColorsPalette.redColor.withOpacity(0.3), width: 1),
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(
-                        Icons.place,
-                        size: 14,
-                        color: ColorsPalette.redColor,
-                      ),
+                      Icon(Icons.place, size: 14, color: ColorsPalette.redColor),
                       SizedBox(width: 4),
                       Flexible(
                         child: Text(
                           location,
                           style: DesignFonts.poppins.merge(
-                            TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w400,
-                              color: Colors.black87,
-                            ),
+                            TextStyle(fontSize: 14, fontWeight: FontWeight.w400, color: Colors.black87),
                           ),
                           overflow: TextOverflow.ellipsis,
                           maxLines: 1,
@@ -5336,21 +4177,14 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
           if (hasMoreLocations)
             GestureDetector(
               onTap: () {
-                ref.read(isLocationsExpandedProvider(lobbyId).notifier).state =
-                    !isExpanded;
+                ref.read(isLocationsExpandedProvider(lobbyId).notifier).state = !isExpanded;
               },
               child: Container(
                 margin: EdgeInsets.only(top: 8),
                 child: Text(
-                  isExpanded
-                      ? "Show less"
-                      : "Show more locations (${locations.length - 3})",
+                  isExpanded ? "Show less" : "Show more locations (${locations.length - 3})",
                   style: DesignFonts.poppins.merge(
-                    TextStyle(
-                      color: ColorsPalette.redColor,
-                      fontWeight: FontWeight.w500,
-                      fontSize: 12,
-                    ),
+                    TextStyle(color: ColorsPalette.redColor, fontWeight: FontWeight.w500, fontSize: 12),
                   ),
                 ),
               ),
@@ -5362,10 +4196,9 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
 }
 
 // Provider to manage countdown state
-final countdownStateProvider = StateNotifierProvider.autoDispose
-    .family<CountdownStateNotifier, String, int>(
-      (ref, timestamp) => CountdownStateNotifier(timestamp),
-    );
+final countdownStateProvider = StateNotifierProvider.autoDispose.family<CountdownStateNotifier, String, int>(
+  (ref, timestamp) => CountdownStateNotifier(timestamp),
+);
 
 class CountdownStateNotifier extends StateNotifier<String> {
   CountdownStateNotifier(this.endTimestamp) : super('') {
@@ -5412,11 +4245,7 @@ class DigitalCountdownButton extends ConsumerWidget {
   final VoidCallback? onPressed;
   final int endTimestamp;
 
-  const DigitalCountdownButton({
-    super.key,
-    this.onPressed,
-    required this.endTimestamp,
-  });
+  const DigitalCountdownButton({super.key, this.onPressed, required this.endTimestamp});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -5452,9 +4281,7 @@ class DigitalCountdownButton extends ConsumerWidget {
   }
 }
 
-final expandedStateProvider = StateProvider.family<bool, String>(
-  (ref, id) => false,
-);
+final expandedStateProvider = StateProvider.family<bool, String>((ref, id) => false);
 
 class ExpandableText extends ConsumerStatefulWidget {
   final String text;
@@ -5498,11 +4325,7 @@ class _ExpandableTextState extends ConsumerState<ExpandableText> {
     _textPainter = TextPainter(
       text: TextSpan(
         text: widget.text,
-        style: TextStyle(
-          fontSize: widget.fontSize,
-          fontWeight: widget.fontWeight,
-          color: widget.color,
-        ),
+        style: TextStyle(fontSize: widget.fontSize, fontWeight: widget.fontWeight, color: widget.color),
       ),
       textDirection: Directionality.of(context), // Use a simple hardcoded value
       maxLines: widget.collapsedMaxLines,
@@ -5538,17 +4361,13 @@ class _ExpandableTextState extends ConsumerState<ExpandableText> {
           text: widget.text,
           fontSize: widget.fontSize,
           fontWeight: widget.fontWeight,
-          maxLines:
-              isExpanded
-                  ? 1000
-                  : widget.collapsedMaxLines, // null means no limit
+          maxLines: isExpanded ? 1000 : widget.collapsedMaxLines, // null means no limit
           color: widget.color,
         ),
         if (_needsReadMore)
           GestureDetector(
             onTap: () {
-              ref.read(expandedStateProvider(widget.id).notifier).state =
-                  !isExpanded;
+              ref.read(expandedStateProvider(widget.id).notifier).state = !isExpanded;
             },
             child: Padding(
               padding: EdgeInsets.only(top: 4),
@@ -5569,11 +4388,7 @@ class JoinOptionsModal extends StatelessWidget {
   final VoidCallback onJoinWithFriends;
   final VoidCallback onJoinAsIndividual;
 
-  const JoinOptionsModal({
-    super.key,
-    required this.onJoinWithFriends,
-    required this.onJoinAsIndividual,
-  });
+  const JoinOptionsModal({super.key, required this.onJoinWithFriends, required this.onJoinAsIndividual});
 
   static Future<void> show(
     BuildContext context, {
@@ -5585,20 +4400,14 @@ class JoinOptionsModal extends StatelessWidget {
       backgroundColor: Colors.transparent,
       isScrollControlled: true,
       builder:
-          (context) => JoinOptionsModal(
-            onJoinWithFriends: onJoinWithFriends,
-            onJoinAsIndividual: onJoinAsIndividual,
-          ),
+          (context) => JoinOptionsModal(onJoinWithFriends: onJoinWithFriends, onJoinAsIndividual: onJoinAsIndividual),
     );
   }
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
+      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -5608,10 +4417,7 @@ class JoinOptionsModal extends StatelessWidget {
               width: 40,
               height: 4,
               margin: EdgeInsets.only(bottom: 20),
-              decoration: BoxDecoration(
-                color: const Color(0xFF444444),
-                borderRadius: BorderRadius.circular(2),
-              ),
+              decoration: BoxDecoration(color: const Color(0xFF444444), borderRadius: BorderRadius.circular(2)),
             ),
             _buildOptionButton(
               title: 'Join with friends',
@@ -5635,10 +4441,7 @@ class JoinOptionsModal extends StatelessWidget {
     );
   }
 
-  Widget _buildOptionButton({
-    required String title,
-    required VoidCallback onPressed,
-  }) {
+  Widget _buildOptionButton({required String title, required VoidCallback onPressed}) {
     return SizedBox(
       width: double.infinity,
       child: DesignButton(
@@ -5663,11 +4466,7 @@ class InviteOptionsModal extends StatelessWidget {
   final VoidCallback onInviteFriends;
   final VoidCallback onInviteExternalMembers;
 
-  const InviteOptionsModal({
-    super.key,
-    required this.onInviteFriends,
-    required this.onInviteExternalMembers,
-  });
+  const InviteOptionsModal({super.key, required this.onInviteFriends, required this.onInviteExternalMembers});
 
   static Future<void> show(
     BuildContext context, {
@@ -5679,20 +4478,15 @@ class InviteOptionsModal extends StatelessWidget {
       backgroundColor: Colors.transparent,
       isScrollControlled: true,
       builder:
-          (context) => InviteOptionsModal(
-            onInviteFriends: onInviteFriends,
-            onInviteExternalMembers: onInviteExternalMembers,
-          ),
+          (context) =>
+              InviteOptionsModal(onInviteFriends: onInviteFriends, onInviteExternalMembers: onInviteExternalMembers),
     );
   }
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
+      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -5702,10 +4496,7 @@ class InviteOptionsModal extends StatelessWidget {
               width: 40,
               height: 4,
               margin: EdgeInsets.only(bottom: 20),
-              decoration: BoxDecoration(
-                color: const Color(0xFF444444),
-                borderRadius: BorderRadius.circular(2),
-              ),
+              decoration: BoxDecoration(color: const Color(0xFF444444), borderRadius: BorderRadius.circular(2)),
             ),
             _buildOptionButton(
               title: 'Invite Users',
@@ -5729,10 +4520,7 @@ class InviteOptionsModal extends StatelessWidget {
     );
   }
 
-  Widget _buildOptionButton({
-    required String title,
-    required VoidCallback onPressed,
-  }) {
+  Widget _buildOptionButton({required String title, required VoidCallback onPressed}) {
     return SizedBox(
       width: double.infinity,
       child: DesignButton(
@@ -5773,8 +4561,7 @@ class InfoItemWithIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final convertedIcon =
-        iconUrl != null ? DesignIcons.getIconFromString(iconUrl!) : null;
+    final convertedIcon = iconUrl != null ? DesignIcons.getIconFromString(iconUrl!) : null;
     double sw = MediaQuery.of(context).size.width;
     double sh = MediaQuery.of(context).size.height;
     return SizedBox(
@@ -5785,11 +4572,7 @@ class InfoItemWithIcon extends StatelessWidget {
             convertedIcon != null
                 ? Row(
                   children: [
-                    DesignIcon.custom(
-                      icon: convertedIcon,
-                      color: iconColor,
-                      size: iconSize,
-                    ),
+                    DesignIcon.custom(icon: convertedIcon, color: iconColor, size: iconSize),
                     SizedBox(width: 10),
                     Expanded(
                       child: DesignText(

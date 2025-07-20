@@ -63,6 +63,10 @@ class DesignTextField extends StatelessWidget {
         filled: true, // Enables background color
         fillColor: Colors.white,
         labelText: labelText,
+        labelStyle: DesignFonts.poppins.copyWith(
+          fontSize: 10,
+          fontWeight: FontWeight.w300,
+        ),
         counterStyle: DesignFonts.poppins.copyWith(
           fontSize: 10,
           fontWeight: FontWeight.w300,

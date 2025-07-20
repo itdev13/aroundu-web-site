@@ -13,6 +13,7 @@ import 'package:aroundu/views/lobby/access_request.view.dart';
 import 'package:aroundu/views/lobby/access_request_user.lobby.view.dart';
 import 'package:aroundu/views/lobby/checkout.view.lobby.dart';
 import 'package:aroundu/views/lobby/invite.lobby.view.dart';
+import 'package:aroundu/views/lobby/lobby.quick.checkout.dart';
 import 'package:aroundu/views/lobby/lobby.view.dart';
 import 'package:aroundu/views/lobby/lobby_settings_screen.dart';
 import 'package:aroundu/views/lobby/shared.lobby.extended.view.dart';
@@ -41,11 +42,11 @@ class AppRoutes {
   static const String filterResult = '/filter/results';
   static const String viewAllLobbies = '/lobby/all';
   static const String viewAllHouses = '/house/all';
+  static const String quickLobbyCheckout = '/:lobbyId/checkout/quick';
   static const String checkOutPublicLobbyView = '/checkout';
   static const String scanQrScreen = '/qr';
   static const String lobbySettings = '/lobby/settings';
-  static const String sharedAccessRequestCardExtendedView =
-      '/lobby/access-request-extended/:accessReqId';
+  static const String sharedAccessRequestCardExtendedView = '/lobby/access-request-extended/:accessReqId';
   static const String featuredConversations = '/lobby/featured-conversations';
 
   //notifications
@@ -67,10 +68,8 @@ class AppRoutes {
   static const String lobbyAccessRequest = '/lobby/access-request';
   static const String lobbyAccessRequestShare = '/lobby/access-request-share';
   static const String detailAccessRequest = '/lobby/access-request-detail';
-  static const String downloadAccessRequestData =
-      '/lobby/access-request-download';
-  static const String accessRequestFormFillView =
-      '/lobby/access-request-form-fill';
+  static const String downloadAccessRequestData = '/lobby/access-request-download';
+  static const String accessRequestFormFillView = '/lobby/access-request-form-fill';
   static const String applyOffers = '/lobby/offers/:lobbyId';
   static const String inviteExternalAttendees = '/lobby/external-attendees';
   static const String inviteFriends = '/invite/friends';
@@ -79,36 +78,16 @@ class AppRoutes {
 
   // Define all routes as GetPage objects
   static final List<GetPage> routes = [
-    GetPage(
-      name: landing,
-      page: () => AppLandingPage(),
-      transition: Transition.fadeIn,
-    ),
-    GetPage(
-      name: splash,
-      page: () => SplashView(),
-      transition: Transition.fadeIn,
-    ),
+    GetPage(name: landing, page: () => AppLandingPage(), transition: Transition.fadeIn),
+    GetPage(name: splash, page: () => SplashView(), transition: Transition.fadeIn),
     GetPage(
       name: auth,
       page: () => AuthView(destination: Get.parameters['destination'] ?? 'new'),
       transition: Transition.rightToLeftWithFade,
     ),
-    GetPage(
-      name: dashboard,
-      page: () => DashboardView(),
-      transition: Transition.rightToLeftWithFade,
-    ),
-    GetPage(
-      name: notifications,
-      page: () => NotificationsView(),
-      transition: Transition.rightToLeftWithFade,
-    ),
-    GetPage(
-      name: myProfile,
-      page: () => ProfileDetailsFollowedScreen(),
-      transition: Transition.rightToLeftWithFade,
-    ),
+    GetPage(name: dashboard, page: () => DashboardView(), transition: Transition.rightToLeftWithFade),
+    GetPage(name: notifications, page: () => NotificationsView(), transition: Transition.rightToLeftWithFade),
+    GetPage(name: myProfile, page: () => ProfileDetailsFollowedScreen(), transition: Transition.rightToLeftWithFade),
     GetPage(
       name: phoneNumber,
       page: () => PhoneNumberScreen(onContinue: Get.arguments['onContinue']),
@@ -118,38 +97,17 @@ class AppRoutes {
       name: otp,
       page:
           () => OtpScreen(
-            phoneNumber:
-                Get.arguments != null ? Get.arguments['phoneNumber'] ?? '' : '',
-            onVerify:
-                Get.arguments != null
-                    ? Get.arguments['onVerify'] ?? (String _) {}
-                    : (String _) {},
-            onResendOtp:
-                Get.arguments != null
-                    ? Get.arguments['onResendOtp'] ?? () {}
-                    : () {},
+            phoneNumber: Get.arguments != null ? Get.arguments['phoneNumber'] ?? '' : '',
+            onVerify: Get.arguments != null ? Get.arguments['onVerify'] ?? (String _) {} : (String _) {},
+            onResendOtp: Get.arguments != null ? Get.arguments['onResendOtp'] ?? () {} : () {},
           ),
       transition: Transition.rightToLeftWithFade,
     ),
-    GetPage(
-      name: search,
-      page: () => SearchView(),
-      transition: Transition.rightToLeftWithFade,
-    ),
-    GetPage(
-      name: filter,
-      page: () => LobbyFilterView(),
-      transition: Transition.rightToLeftWithFade,
-    ),
+    GetPage(name: search, page: () => SearchView(), transition: Transition.rightToLeftWithFade),
+    GetPage(name: filter, page: () => LobbyFilterView(), transition: Transition.rightToLeftWithFade),
     GetPage(
       name: filterResult,
-      page:
-          () => LobbyFilterResultView(
-            results:
-                Get.arguments != null
-                    ? Get.arguments['results']
-                    : FilterResponse(),
-          ),
+      page: () => LobbyFilterResultView(results: Get.arguments != null ? Get.arguments['results'] : FilterResponse()),
       transition: Transition.rightToLeftWithFade,
     ),
 
@@ -158,10 +116,7 @@ class AppRoutes {
       page:
           () => ViewAllLobbiesExplore(
             title: Get.arguments != null ? Get.arguments['title'] ?? "" : "",
-            lobbies:
-                Get.arguments != null
-                    ? Get.arguments['lobbies'] ?? <Lobby>[]
-                    : <Lobby>[],
+            lobbies: Get.arguments != null ? Get.arguments['lobbies'] ?? <Lobby>[] : <Lobby>[],
           ),
       transition: Transition.rightToLeftWithFade,
     ),
@@ -170,10 +125,7 @@ class AppRoutes {
       page:
           () => ViewAllHousesExplore(
             title: Get.arguments != null ? Get.arguments['title'] ?? "" : "",
-            houses:
-                Get.arguments != null
-                    ? Get.arguments['houses'] ?? <House>[]
-                    : <House>[],
+            houses: Get.arguments != null ? Get.arguments['houses'] ?? <House>[] : <House>[],
           ),
       transition: Transition.rightToLeftWithFade,
     ),
@@ -182,31 +134,20 @@ class AppRoutes {
       page:
           () => UserLobbyAccessRequest(
             lobby: Get.arguments != null ? Get.arguments['lobby'] : null,
-            isIndividual:
-                Get.arguments != null ? Get.arguments['isIndividual']?? true : true,
+            isIndividual: Get.arguments != null ? Get.arguments['isIndividual'] ?? true : true,
           ),
     ),
     GetPage(
       name: lobbyAccessRequestShare,
       page:
           () => UserLobbyAccessRequestShare(
-            friends:
-                Get.arguments != null ? Get.arguments['friends'] ?? [] : [],
+            friends: Get.arguments != null ? Get.arguments['friends'] ?? [] : [],
             squads: Get.arguments != null ? Get.arguments['squads'] ?? [] : [],
-            lobbyId:
-                Get.arguments != null ? Get.arguments['lobbyId'] ?? "" : "",
-            lobbyHasForm:
-                Get.arguments != null
-                    ? Get.arguments['lobbyHasForm'] ?? false
-                    : false,
-            lobbyIsPrivate:
-                Get.arguments != null
-                    ? Get.arguments['lobbyIsPrivate'] ?? false
-                    : false,
-            requestText:
-                Get.arguments != null ? Get.arguments['requestText'] ?? "" : "",
-            formModel:
-                Get.arguments != null ? Get.arguments['formModel'] : null,
+            lobbyId: Get.arguments != null ? Get.arguments['lobbyId'] ?? "" : "",
+            lobbyHasForm: Get.arguments != null ? Get.arguments['lobbyHasForm'] ?? false : false,
+            lobbyIsPrivate: Get.arguments != null ? Get.arguments['lobbyIsPrivate'] ?? false : false,
+            requestText: Get.arguments != null ? Get.arguments['requestText'] ?? "" : "",
+            formModel: Get.arguments != null ? Get.arguments['formModel'] : null,
           ),
       transition: Transition.rightToLeftWithFade,
     ),
@@ -227,11 +168,7 @@ class AppRoutes {
     ),
     GetPage(
       name: downloadAccessRequestData,
-      page:
-          () => FileOptionsDialog(
-            fileUrl:
-                Get.arguments != null ? Get.arguments['fileUrl'] ?? "" : "",
-          ),
+      page: () => FileOptionsDialog(fileUrl: Get.arguments != null ? Get.arguments['fileUrl'] ?? "" : ""),
       transition: Transition.rightToLeftWithFade,
     ),
     GetPage(
@@ -241,20 +178,16 @@ class AppRoutes {
     ),
     GetPage(
       name: inviteFriends,
-      page:
-          () => InviteFriendsView(
-            lobby: Get.arguments != null ? Get.arguments['lobby'] : null,
-          ),
+      page: () => InviteFriendsView(lobby: Get.arguments != null ? Get.arguments['lobby'] : null),
     ),
+    GetPage(name: quickLobbyCheckout, page: () => LobbyQuickCheckoutView(lobbyId: Get.parameters['lobbyId'] ?? "")),
     GetPage(
       name: checkOutPublicLobbyView,
       page:
           () => CheckOutPublicLobbyView(
             lobby: Get.arguments != null ? Get.arguments['lobby'] : null,
-            formModel:
-                Get.arguments != null ? Get.arguments['formModel'] : null,
-            requestText:
-                Get.arguments != null ? Get.arguments['requestText'] : "",
+            formModel: Get.arguments != null ? Get.arguments['formModel'] : null,
+            requestText: Get.arguments != null ? Get.arguments['requestText'] : "",
           ),
     ),
     GetPage(
@@ -268,41 +201,26 @@ class AppRoutes {
     GetPage(
       name: lobbyRequests,
       page:
-          () => AccessRequestsView(
-            lobbyId: Get.parameters['lobbyId'] ?? "",
-            pageTitle: Get.parameters['title'] ?? "",
-          ),
+          () => AccessRequestsView(lobbyId: Get.parameters['lobbyId'] ?? "", pageTitle: Get.parameters['title'] ?? ""),
     ),
     GetPage(
       name: lobbySettings,
-      page:
-          () => LobbySettingsScreen(
-            lobby: Get.arguments != null ? Get.arguments['lobby'] : null,
-          ),
+      page: () => LobbySettingsScreen(lobby: Get.arguments != null ? Get.arguments['lobby'] : null),
     ),
     GetPage(
       name: sharedAccessRequestCardExtendedView,
-      page:
-          () => SharedAccessRequestCardExtendedView(
-            accessReqId: Get.parameters['accessReqId'] ?? "",
-          ),
+      page: () => SharedAccessRequestCardExtendedView(accessReqId: Get.parameters['accessReqId'] ?? ""),
     ),
     GetPage(
       name: featuredConversations,
-      page:
-          () => DetailedViewOfFeaturedConversation(
-            lobby: Get.arguments != null ? Get.arguments['lobby'] : null,
-          ),
+      page: () => DetailedViewOfFeaturedConversation(lobby: Get.arguments != null ? Get.arguments['lobby'] : null),
     ),
     GetPage(
       name: onboarding,
       page:
           () => OnboardingView(
-            startingPageIndex:
-                Get.parameters != null
-                    ? int.parse(Get.parameters['startingPageIndex'] ?? "0")
-                    : 0,
-                    destination: Get.parameters != null ? Get.parameters['destination'] ?? "new" : "new",
+            startingPageIndex: Get.parameters != null ? int.parse(Get.parameters['startingPageIndex'] ?? "0") : 0,
+            destination: Get.parameters != null ? Get.parameters['destination'] ?? "new" : "new",
           ),
       transition: Transition.rightToLeftWithFade,
     ),
@@ -312,11 +230,9 @@ class AppRoutes {
           () => CashFreePaymentView(
             userId: Get.arguments != null ? Get.arguments['userId'] ?? "" : "",
             lobby: Get.arguments != null ? Get.arguments['lobby'] : null,
-            formModel:
-                Get.arguments != null ? Get.arguments['formModel'] : null,
+            formModel: Get.arguments != null ? Get.arguments['formModel'] : null,
             formList: Get.arguments != null ? Get.arguments['formList'] : [],
-            requestText:
-                Get.arguments != null ? Get.arguments['requestText'] : "",
+            requestText: Get.arguments != null ? Get.arguments['requestText'] : "",
           ),
     ),
     GetPage(
@@ -325,8 +241,7 @@ class AppRoutes {
           () => AccessRequestFormFillView(
             lobbyId: Get.arguments != null ? Get.arguments['lobbyId'] : "",
             groupId: Get.arguments != null ? Get.arguments['groupId'] : "",
-            isPrivate:
-                Get.arguments != null ? Get.arguments['isPrivate'] : true,
+            isPrivate: Get.arguments != null ? Get.arguments['isPrivate'] : true,
           ),
     ),
     // GetPage(

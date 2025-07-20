@@ -55,9 +55,8 @@ class _UserLobbyAccessRequestState
     extends ConsumerState<UserLobbyAccessRequest> {
   final groupController = Get.put(GroupController());
   final profileController = Get.put(ProfileController());
-  final DashboardController dashboardController =
-       Get.put(
-    DashboardController()
+  final DashboardController dashboardController = Get.put(
+    DashboardController(),
   );
   final TextEditingController requestedTextEditingController =
       TextEditingController();
@@ -514,6 +513,7 @@ class _UserLobbyAccessRequestState
     double sw(double size) => screenWidth * size;
 
     double sh(double size) => screenHeight * size;
+    final formState = ref.watch(formStateProvider(lobby.id));
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       onTap: () => FocusScope.of(context).unfocus(),
@@ -548,7 +548,17 @@ class _UserLobbyAccessRequestState
           ],
         ),
         bottomNavigationBar: GestureDetector(
-          onTap: () => _submitRequest(context),
+          onTap: () async {
+            formState.questions.isEmpty
+                ? await Future.delayed(const Duration(milliseconds: 2500), () {
+                  // CustomSnackBar.show(
+                  //   context: context,
+                  //   message: "Please add questions to the form",
+                  //   type: SnackBarType.error,
+                  // );
+                })
+                : _submitRequest(context);
+          },
           child: Padding(
             padding: EdgeInsets.symmetric(vertical: 16, horizontal: 16),
             child: ClipRRect(
@@ -558,17 +568,47 @@ class _UserLobbyAccessRequestState
                 height: 50,
                 color: Colors.red,
                 child: Center(
-                  child: DesignText(
-                    text:
-                        widget.isIndividual
-                            ? lobby.isPrivate
-                                ? 'Request Access'
-                                : 'Join Lobby'
-                            : "Continue",
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
-                    color: Colors.white,
-                  ),
+                  child:
+                      formState.questions.isEmpty
+                          ? FutureBuilder(
+                            future: Future.delayed(
+                              const Duration(milliseconds: 2500),
+                            ),
+                            builder: (context, snapshot) {
+                              if (snapshot.connectionState ==
+                                  ConnectionState.waiting) {
+                                return const Center(
+                                  child: CircularProgressIndicator(
+                                    color: Colors.white,
+                                    strokeWidth: 3,
+                                  ),
+                                );
+                              } else {
+                                return DesignText(
+                                  text:
+                                      widget.isIndividual
+                                          ? lobby.isPrivate
+                                              ? 'Request Access'
+                                              : 'Join Lobby'
+                                          : "Continue",
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w500,
+                                  color: Colors.white,
+                                );
+                              }
+                            },
+                          )
+                          : DesignText(
+                            text:
+                                widget.isIndividual
+                                    ? lobby.isPrivate
+                                        ? 'Request Access'
+                                        : 'Join Lobby'
+                                    : "Continue",
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                            color: Colors.white,
+                          ),
                 ),
               ),
             ),
@@ -789,8 +829,8 @@ class _UserLobbyAccessRequestState
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   RichText(
-                                    maxLines: 10,
-                                    overflow: TextOverflow.ellipsis,
+                                    maxLines: null,
+                                    overflow: TextOverflow.visible,
                                     text: TextSpan(
                                       style: TextStyle(
                                         fontFamily: 'Poppins',
@@ -799,7 +839,7 @@ class _UserLobbyAccessRequestState
                                         fontWeight: FontWeight.w500,
                                       ),
                                       children: [
-                                        TextSpan(text: question.questionText),
+                                        TextSpan(text: question.questionText.trim()),
                                         if (question.isMandatory)
                                           TextSpan(
                                             text: '   *',
@@ -858,8 +898,8 @@ class _UserLobbyAccessRequestState
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   RichText(
-                                    maxLines: 10,
-                                    overflow: TextOverflow.ellipsis,
+                                    maxLines: null,
+                                    overflow: TextOverflow.visible,
                                     text: TextSpan(
                                       style: TextStyle(
                                         fontFamily: 'Poppins',
@@ -868,7 +908,7 @@ class _UserLobbyAccessRequestState
                                         fontWeight: FontWeight.w500,
                                       ),
                                       children: [
-                                        TextSpan(text: question.questionText),
+                                        TextSpan(text: question.questionText.trim()),
                                         if (question.isMandatory)
                                           TextSpan(
                                             text: '   *',
@@ -955,9 +995,8 @@ class _UserLobbyAccessRequestShare
     extends ConsumerState<UserLobbyAccessRequestShare> {
   final controller = Get.put(ProfileController());
   // final chatController = Get.find<ChatsController>();
-  final DashboardController dashboardController =
-       Get.put(
-    DashboardController()
+  final DashboardController dashboardController = Get.put(
+    DashboardController(),
   );
 
   void _resetState() {
@@ -1086,8 +1125,8 @@ class _UserLobbyAccessRequestShare
               child: ClipRRect(
                 borderRadius: BorderRadius.all(Radius.circular(24)),
                 child: Container(
-                  width: 0.1*sw,
-                  height: 0.12*sw,
+                  width: 0.1 * sw,
+                  height: 0.12 * sw,
                   color: Colors.red,
                   child: Center(
                     child: DesignText(

@@ -1,22 +1,25 @@
-# Cache static assets for 1 year
+# === Cache static assets for 1 year ===
 /assets/*
   Cache-Control: public, max-age=31536000, immutable
 
-# Cache fonts and icons for 1 year
 /fonts/*
   Cache-Control: public, max-age=31536000, immutable
 
 /icons/*
   Cache-Control: public, max-age=31536000, immutable
 
-# Cache JavaScript and CSS files for 1 year (Flutter handles versioning)
-*.js
-  Cache-Control: public, max-age=31536000, immutable
+# === JavaScript & CSS: no-cache ===
+/*.js
+  Cache-Control: no-cache, no-store, must-revalidate
+  Pragma: no-cache
+  Expires: 0
 
-*.css
-  Cache-Control: public, max-age=31536000, immutable
+/*.css
+  Cache-Control: no-cache, no-store, must-revalidate
+  Pragma: no-cache
+  Expires: 0
 
-# Don't cache HTML files and service worker
+# === HTML files and root path: no-cache ===
 /*.html
   Cache-Control: no-cache, no-store, must-revalidate
   Pragma: no-cache
@@ -27,7 +30,7 @@
   Pragma: no-cache
   Expires: 0
 
-# Don't cache manifest and service worker files
+# === Manifest & service worker: no-cache ===
 /manifest.json
   Cache-Control: no-cache, no-store, must-revalidate
 
