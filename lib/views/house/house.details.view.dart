@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:aroundu/constants/appRoutes.dart';
 import 'package:aroundu/constants/colors_palette.dart';
 import 'package:aroundu/designs/colors.designs.dart';
 import 'package:aroundu/designs/fonts.designs.dart';
@@ -20,6 +21,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
+import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 final isLocationsExpandedProvider = StateProvider.family<bool, String>((ref, houseId) => false);
@@ -193,18 +195,247 @@ class _HouseDetailsViewState extends ConsumerState<HouseDetailsView> {
 
   Widget _buildTabBarView({required HouseDetailedModel? houseDetails}) {
     return SizedBox(
-      height: 248,
+      height: 0.8*Get.height,
       child: CustomTabBarView(
         tabs: const [
           "Current Lobbies",
           // "Past Lobbies"
         ],
         tabViews: [
-          _buildCurrentLobbiesWidget(lobbies: houseDetails?.upcomingLobbies ?? []),
+          _buildCurrentLobbiesTitleWidget(lobbies: houseDetails?.upcomingLobbies ?? []),
           // _buildPastLobbiesWidget(lobbies: houseDetails?.pastLobbies ?? []),
         ],
         mainScrollController: mainScrollController,
       ),
+    );
+  }
+
+  Widget _buildCurrentLobbiesTitleWidget({required List<Lobby> lobbies}) {
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: 12),
+      child:
+          (lobbies.isEmpty)
+              ? _buildEmptyLobbiesWidget(pastLobbies: false)
+              : _buildLobbiesSectionSmall(lobbies: lobbies),
+    );
+  }
+
+  Widget _buildLobbiesSectionSmall({required List<Lobby> lobbies}) {
+    return ListView.separated(
+      itemCount: lobbies.length,
+      separatorBuilder: (context, index) => SizedBox(height: 12),
+      itemBuilder: (context, index) {
+        final lobby = lobbies[index];
+        final memberProgress = lobby.totalMembers > 0 
+            ? (lobby.currentMembers / lobby.totalMembers) * 100 
+            : 0;
+        
+        return GestureDetector(
+          onTap: () async {
+            HapticFeedback.selectionClick();
+            await Navigator.pushNamed(context, AppRoutes.lobby.replaceAll(':lobbyId', lobby.id));
+          },
+          child: Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.08),
+                  blurRadius: 12,
+                  offset: Offset(0, 4),
+                  spreadRadius: 0,
+                ),
+              ],
+              border: Border.all(
+                color: DesignColors.accent.withOpacity(0.1),
+                width: 1,
+              ),
+            ),
+            child: Padding(
+              padding: EdgeInsets.all(16),
+              child: Column(
+                children: [
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      // Leading Image
+                      Container(
+                        width: 70,
+                        height: 70,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(12),
+                          color: DesignColors.accent.withOpacity(0.1),
+                          image: lobby.mediaUrls.isNotEmpty
+                              ? DecorationImage(
+                                  image: NetworkImage(lobby.mediaUrls.first),
+                                  fit: BoxFit.cover,
+                                )
+                              : null,
+                        ),
+                        child: lobby.mediaUrls.isEmpty
+                            ? Icon(Icons.image_outlined, 
+                                color: DesignColors.accent.withOpacity(0.6), 
+                                size: 28)
+                            : null,
+                      ),
+                      SizedBox(width: 16),
+                      // Content
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            DesignText(
+                              text: lobby.title ?? 'Untitled Lobby',
+                              fontSize: 16,
+                              fontWeight: FontWeight.w700,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                              color: DesignColors.primary,
+                            ),
+                             SizedBox(height: 4),
+                            Row(
+                              children: [
+                                Icon(
+                                  lobby.isPrivate ? Icons.lock_outline : Icons.public,
+                                  size: 14,
+                                 color: DesignColors.accent,
+                                ),
+                                SizedBox(width: 6),
+                                DesignText(
+                                  text: lobby.isPrivate ? 'Private' : 'Public',
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w500,
+                                  color:  DesignColors.accent ,
+                                ),
+                              ],
+                            ),
+                           
+                            
+                            // if (lobby.description != null && lobby.description!.isNotEmpty) ...[
+                            //   SizedBox(height: 4),
+                            //   RichTextDisplay(
+                            //     controller: TextEditingController(text: lobby.description!),
+                            //     hintText: '',
+                            //     fontSize: 8,
+                            //     maxHeight: 64,
+                            //     lobbyId: lobby.id,
+                            //   ),
+                            // ],
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 12),
+                  // Additional Details
+                  Row(
+                    children: [
+                      Icon(Icons.calendar_today, size: 14, color: DesignColors.secondary),
+                      SizedBox(width: 6),
+                      DesignText(
+                        text: lobby.filter.otherFilterInfo.dateInfo != null 
+                            ? lobby.filter.otherFilterInfo.dateInfo?.formattedDate ?? ""
+                            : 'Date TBD',
+                        fontSize: 13,
+                        fontWeight: FontWeight.w500,
+                        color: DesignColors.secondary,
+                      ),
+                      SizedBox(width: 16),
+                      Icon(Icons.location_on, size: 14, color: DesignColors.secondary),
+                      SizedBox(width: 6),
+                      Expanded(
+                        child: DesignText(
+                          text: lobby.filter.otherFilterInfo.locationInfo != null
+                                  ? lobby.filter.otherFilterInfo.locationInfo?.googleSearchResponses?.isNotEmpty ?? false
+                                      ? lobby.filter.otherFilterInfo.locationInfo?.googleSearchResponses.first.description ?? ""
+                                      : "Location TBD"
+                                  : 'Location TBD',
+                          fontSize: 13,
+                          fontWeight: FontWeight.w500,
+                          color: DesignColors.secondary,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 12),
+                  // Member Progress
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                DesignText(
+                                  text: 'Members',
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w500,
+                                  color: DesignColors.secondary,
+                                ),
+                                DesignText(
+                                  text: '${lobby.currentMembers}/${lobby.totalMembers}',
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
+                                  color: DesignColors.accent,
+                                ),
+                              ],
+                            ),
+                            SizedBox(height: 4),
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(4),
+                              child: LinearProgressIndicator(
+                                value: lobby.totalMembers > 0 
+                                    ? lobby.currentMembers / lobby.totalMembers
+                                    : 0,
+                                backgroundColor: Colors.grey.shade200,
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                  DesignColors.accent.withOpacity(0.7),
+                                ),
+                                minHeight: 4,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      SizedBox(width: 12),
+                      // Member Count Badge
+                      Container(
+                        padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                        decoration: BoxDecoration(
+                          color: DesignColors.accent.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(
+                            color: DesignColors.accent.withOpacity(0.3),
+                            width: 1,
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.people, size: 14, color: DesignColors.accent),
+                            SizedBox(width: 4),
+                            DesignText(
+                              text: '${lobby.currentMembers}',
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                              color: DesignColors.accent,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 
@@ -238,7 +469,11 @@ class _HouseDetailsViewState extends ConsumerState<HouseDetailsView> {
           mainAxisSpacing: 10,
           childAspectRatio:
               Get.width > 1344
-                  ? Get.width > 1450 ? Get.width > 1550  ?2.7:2.3 :2
+                  ? Get.width > 1450
+                      ? Get.width > 1550
+                          ? 2.7
+                          : 2.3
+                      : 2
                   : Get.width > 910
                   ? Get.width > 1000
                       ? 2.1
