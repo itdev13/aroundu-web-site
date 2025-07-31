@@ -18,7 +18,7 @@ class HouseDetailsNotifier extends StateNotifier<AsyncValue<HouseDetailedModel?>
 
       final response = await ApiService().get(
         "match/house/public",
-        queryParameters: {'houseId': houseId, 'pastLobbies': true, 'upComingLobbies': true, 'skip': 0, 'limit': 20},
+        queryParameters: {'houseId': houseId, 'pastLobbies': true, 'upcomingLobbies': true, 'skip': 0, 'limit': 20},
       );
 
       kLogger.debug('house api response: ${response.data['house']['userStatus']}');

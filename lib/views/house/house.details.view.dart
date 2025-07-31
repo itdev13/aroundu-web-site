@@ -893,7 +893,7 @@ class _HouseDetailsViewState extends ConsumerState<HouseDetailsView> {
           ),
 
           // Right side with follow status indicator (only when following)
-          _buildFollowStatusIndicator(isFollowing: isFollowing, house: house),
+          // _buildFollowStatusIndicator(isFollowing: isFollowing, house: house),
         ],
       ),
     );
