@@ -1,12 +1,11 @@
-
 import 'package:aroundu/models/lobby.dart';
 import 'package:aroundu/models/profile.model.dart';
 
 
 class HouseDetailedModel {
   House? house;
-  List<dynamic>? upcomingLobbies;
-  List<dynamic>? pastLobbies;
+  List<Lobby>? upcomingLobbies;
+  List<Lobby>? pastLobbies;
   List<dynamic>? followers;
   List<dynamic>? announcements;
   List<dynamic>? moments;
@@ -22,8 +21,8 @@ class HouseDetailedModel {
 
   HouseDetailedModel.fromJson(Map<String, dynamic> json) {
     house = json['house'] != null ? House.fromJson(json['house']) : null;
-    upcomingLobbies = json['upcomingLobbies'];
-    pastLobbies = json['pastLobbies'];
+    upcomingLobbies = (json['upcomingLobbies']!=null) ? json['upcomingLobbies'].map<Lobby>((e) => Lobby.fromJson(e)).toList() : [];
+    pastLobbies = (json['pastLobbies']!=null) ? json['pastLobbies'].map<Lobby>((e) => Lobby.fromJson(e)).toList() : [];
     followers = json['followers'];
     announcements = json['announcements'];
     moments = json['moments'];
@@ -63,8 +62,10 @@ class House {
   bool? gstVerified;
   List<UserSummary>? userSummaries;
   List<SocialMediaLink> socialMediaLinks = [];
+  List<String> admins = [];
   String? pinnedAnnouncementId;
   bool? showHostDetails;
+  Rating? rating;
 
   House({
     this.id,
@@ -88,24 +89,20 @@ class House {
     this.userSummaries,
     this.pinnedAnnouncementId,
     required this.socialMediaLinks,
+    required this.admins,
+    this.rating,
   });
 
-  House.fromJson(Map<String, dynamic> json) : socialMediaLinks = [] {
+  House.fromJson(Map<String, dynamic> json) : socialMediaLinks = [], admins = [] {
     id = json['id'];
     // announcementId = json['announcementId'];
     pinnedAnnouncementId = json['pinnedAnnouncementId'];
     name = json['name'];
     description = json['description'];
-    locationInfo =
-        json['locationInfo'] != null
-            ? LocationInfo.fromJson(json['locationInfo'])
-            : null;
+    locationInfo = json['locationInfo'] != null ? LocationInfo.fromJson(json['locationInfo']) : null;
     photos = json['photos']?.cast<String>();
     profilePhoto = json['profilePhoto'];
-    createdBy =
-        json['createdBy'] != null
-            ? CreatedBy.fromJson(json['createdBy'])
-            : null;
+    createdBy = json['createdBy'] != null ? CreatedBy.fromJson(json['createdBy']) : null;
     followerCount = json['followerCount'];
     if (json['categories'] != null) {
       categories = <Category>[];
@@ -127,16 +124,22 @@ class House {
     accountVerified = json['accountVerified'];
     panVerified = json['panVerified'];
     gstVerified = json['gstVerified'];
-    socialMediaLinks =
-        (json['socialMediaLinks'] as List?)
-            ?.map((e) => SocialMediaLink.fromJson(e))
-            .toList() ??
-        [];
+    socialMediaLinks = (json['socialMediaLinks'] as List?)?.map((e) => SocialMediaLink.fromJson(e)).toList() ?? [];
+    if (json['admins'] != null) {
+      admins = <String>[];
+      json['admins'].forEach((v) {
+        admins.add(v);
+      });
+      admins = admins.toSet().toList();
+    }
     if (json['userSummaries'] != null) {
       userSummaries = <UserSummary>[];
       json['userSummaries'].forEach((v) {
         userSummaries!.add(UserSummary.fromJson(v));
       });
+    }
+    if (json['rating'] != null) {
+      rating = Rating.fromJson(json['rating']);
     }
   }
 }
@@ -165,12 +168,10 @@ class LocationInfo {
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = <String, dynamic>{};
     if (locationResponses != null) {
-      data['locationResponses'] =
-          locationResponses!.map((v) => v.toJson()).toList();
+      data['locationResponses'] = locationResponses!.map((v) => v.toJson()).toList();
     }
     if (googleSearchResponses != null) {
-      data['googleSearchResponses'] =
-          googleSearchResponses!.map((v) => v.toJson()).toList();
+      data['googleSearchResponses'] = googleSearchResponses!.map((v) => v.toJson()).toList();
     }
     return data;
   }
@@ -182,22 +183,11 @@ class LocationResponses {
   String? areaName;
   String? formattedAddress;
 
-  LocationResponses({
-    this.exactLocation,
-    this.approxLocation,
-    this.areaName,
-    this.formattedAddress,
-  });
+  LocationResponses({this.exactLocation, this.approxLocation, this.areaName, this.formattedAddress});
 
   LocationResponses.fromJson(Map<String, dynamic> json) {
-    exactLocation =
-        json['exactLocation'] != null
-            ? ExactLocation.fromJson(json['exactLocation'])
-            : null;
-    approxLocation =
-        json['approxLocation'] != null
-            ? ExactLocation.fromJson(json['approxLocation'])
-            : null;
+    exactLocation = json['exactLocation'] != null ? ExactLocation.fromJson(json['exactLocation']) : null;
+    approxLocation = json['approxLocation'] != null ? ExactLocation.fromJson(json['approxLocation']) : null;
     areaName = json['areaName'];
     formattedAddress = json['formattedAddress'];
   }
@@ -337,8 +327,7 @@ class CreatedBy {
     isFriend = json['isFriend'];
     requestSent = json['requestSent'];
     requestReceived = json['requestReceived'];
-    location =
-        json['Location'] != null ? Locations.fromJson(json['Location']) : null;
+    location = json['Location'] != null ? Locations.fromJson(json['Location']) : null;
     active = json['active'];
   }
 

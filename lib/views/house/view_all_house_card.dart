@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:aroundu/constants/appRoutes.dart';
 import 'package:aroundu/constants/colors_palette.dart';
 import 'package:aroundu/designs/widgets/button.widget.designs.dart';
 import 'package:aroundu/designs/widgets/category.chip.dart';
@@ -9,15 +10,16 @@ import 'package:aroundu/models/house.model.dart';
 import 'package:aroundu/utils/api_service/api_service.dart' as apiService;
 import 'package:aroundu/utils/appDownloadCard.dart';
 import 'package:aroundu/utils/custome_snackbar.dart';
+import 'package:aroundu/views/house/house.details.view.dart';
 import 'package:aroundu/views/lobby/provider/save_lobby_provider.dart';
 import 'package:aroundu/views/lobby/widgets/rich_text_display.dart';
 import 'package:aroundu/views/profile/controllers/controller.groups.profiledart.dart';
 import 'package:aroundu/views/profile/controllers/controller.profile.dart';
 import 'package:aroundu/views/profile/public_profile/controller.public.profile.dart';
-import 'package:aroundu/views/temp/tempHoseDetailsView.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:share_plus/share_plus.dart';
@@ -129,7 +131,7 @@ class _ViewAllHouseCardState extends ConsumerState<ViewAllHouseCard> {
         //   },
         // );
 
-        // try {
+        try {
         // final houseDetails = await _getHouseDetailedData(houseId: houseId);
 
         // Always close the dialog regardless of the result
@@ -139,39 +141,34 @@ class _ViewAllHouseCardState extends ConsumerState<ViewAllHouseCard> {
 
         // if (houseDetails != null) {
         HapticFeedback.selectionClick();
-       FancyAppDownloadDialog.show(
-          context,
-          title: "Unlock Premium Features",
-          message:
-              "Get the full AroundU experience with exclusive features, enhanced performance, and more!",
-          appStoreUrl: "https://apps.apple.com/in/app/aroundu/id6744299663",
-          playStoreUrl:
-              "https://play.google.com/store/apps/details?id=com.polar.aroundu",
-          // cancelButtonText: "Maybe Later",
-          onCancel: () {
-            print("User chose to skip download");
-          },
-        );
-        //TODO : add this house detail page
+      //  FancyAppDownloadDialog.show(
+      //     context,
+      //     title: "Unlock Premium Features",
+      //     message:
+      //         "Get the full AroundU experience with exclusive features, enhanced performance, and more!",
+      //     appStoreUrl: "https://apps.apple.com/in/app/aroundu/id6744299663",
+      //     playStoreUrl:
+      //         "https://play.google.com/store/apps/details?id=com.polar.aroundu",
+      //     // cancelButtonText: "Maybe Later",
+      //     onCancel: () {
+      //       print("User chose to skip download");
+      //     },
+      //   );
 
-        // await Get.to(
-        //   () => HouseDetailPage(
-        //     // house: houseDetails,
-        //     houseId: houseId,
-        //   ),
-        // );
+        await Get.toNamed(AppRoutes.house.replaceAll(":houseId", houseId));
+        
         // } else {
-        //   Fluttertoast.showToast(msg: "House Not Found !!!");
+          // Fluttertoast.showToast(msg: "House Not Found !!!");
         // }
-        // } catch (e, stack) {
-        //   // Ensure dialog is closed in case of error
-        //   if (Navigator.canPop(context)) {
-        //     Navigator.of(context, rootNavigator: true).pop();
-        //   }
+        } catch (e, stack) {
+          // Ensure dialog is closed in case of error
+          if (Navigator.canPop(context)) {
+            Navigator.of(context, rootNavigator: true).pop();
+          }
 
-        //   print("Error fetching house details: $e \n $stack");
-        //   Fluttertoast.showToast(msg: "Error loading house details");
-        // }
+          print("Error fetching house details: $e \n $stack");
+          Fluttertoast.showToast(msg: "Error loading house details");
+        }
       },
       child: Card(
         shadowColor: ColorsPalette.lightGrayColor,

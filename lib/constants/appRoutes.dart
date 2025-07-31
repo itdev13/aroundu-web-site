@@ -7,6 +7,7 @@ import 'package:aroundu/views/auth/phone_number.screen.dart';
 import 'package:aroundu/views/dashboard/dashboard.view.dart';
 import 'package:aroundu/views/filters/lobbyFilter.view.dart';
 import 'package:aroundu/views/filters/lobbyFilterResult.view.dart';
+import 'package:aroundu/views/house/house.details.view.dart';
 import 'package:aroundu/views/landingPage.dart';
 import 'package:aroundu/views/lobby/access.req.expanded.view.dart';
 import 'package:aroundu/views/lobby/access_request.view.dart';
@@ -154,6 +155,11 @@ class AppRoutes {
     GetPage(
       name: lobby,
       page: () => LobbyView(lobbyId: Get.parameters['lobbyId'] ?? ""),
+      transition: Transition.rightToLeftWithFade,
+    ),
+    GetPage(
+      name: house,
+      page: () => HouseDetailsView(houseId: Get.parameters['houseId'] ?? ""),
       transition: Transition.rightToLeftWithFade,
     ),
     GetPage(
