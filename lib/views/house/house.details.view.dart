@@ -193,12 +193,15 @@ class _HouseDetailsViewState extends ConsumerState<HouseDetailsView> {
 
   Widget _buildTabBarView({required HouseDetailedModel? houseDetails}) {
     return SizedBox(
-      height: MediaQuery.of(context).size.height * 0.8,
+      height: 248,
       child: CustomTabBarView(
-        tabs: const ["Current Lobbies", "Past Lobbies"],
+        tabs: const [
+          "Current Lobbies",
+          // "Past Lobbies"
+        ],
         tabViews: [
           _buildCurrentLobbiesWidget(lobbies: houseDetails?.upcomingLobbies ?? []),
-          _buildPastLobbiesWidget(lobbies: houseDetails?.pastLobbies ?? []),
+          // _buildPastLobbiesWidget(lobbies: houseDetails?.pastLobbies ?? []),
         ],
         mainScrollController: mainScrollController,
       ),
