@@ -502,21 +502,22 @@ class _LobbyNoAuthCheckoutViewState extends ConsumerState<LobbyNoAuthCheckoutVie
                     ResponsiveAppDownloadCard(
                       appStoreUrl: "https://apps.apple.com/in/app/aroundu/id6744299663",
                       playStoreUrl: "https://play.google.com/store/apps/details?id=com.polar.aroundu",
-                      onClose: () {
-                        FancyAppDownloadDialog.show(
-                          context,
-                          title: "Unlock Premium Features",
-                          message:
-                              "Get the full AroundU experience with exclusive features, enhanced performance, and more!",
-                          appStoreUrl: "https://apps.apple.com/in/app/aroundu/id6744299663",
-                          playStoreUrl: "https://play.google.com/store/apps/details?id=com.polar.aroundu",
-                          // cancelButtonText: "Maybe Later",
-                          onCancel: () {
-                            print("User chose to skip download");
-                          },
-                        );
-                        // Get.to(()=> AppLandingPage());
-                      },
+                      description:
+                          "AroundU is more than just this event. Check out other events, join the group chat, or start your own lobby!",
+                      // onClose: () {
+                      //   FancyAppDownloadDialog.show(
+                      //     context,
+                      //     title: "Unlock Premium Features",
+                      //     message:
+                      //         "Get the full AroundU experience with exclusive features, enhanced performance, and more!",
+                      //     appStoreUrl: "https://apps.apple.com/in/app/aroundu/id6744299663",
+                      //     playStoreUrl: "https://play.google.com/store/apps/details?id=com.polar.aroundu",
+                      //     // cancelButtonText: "Maybe Later",
+                      //     onCancel: () {
+                      //       print("User chose to skip download");
+                      //     },
+                      //   );
+                      // },
                     ),
                   ],
                 ),
@@ -542,20 +543,22 @@ class _LobbyNoAuthCheckoutViewState extends ConsumerState<LobbyNoAuthCheckoutVie
           ResponsiveAppDownloadCard(
             appStoreUrl: "https://apps.apple.com/in/app/aroundu/id6744299663",
             playStoreUrl: "https://play.google.com/store/apps/details?id=com.polar.aroundu",
-            onClose: () {
-              FancyAppDownloadDialog.show(
-                context,
-                title: "Unlock Premium Features",
-                message: "Get the full AroundU experience with exclusive features, enhanced performance, and more!",
-                appStoreUrl: "https://apps.apple.com/in/app/aroundu/id6744299663",
-                playStoreUrl: "https://play.google.com/store/apps/details?id=com.polar.aroundu",
-                // cancelButtonText: "Maybe Later",
-                onCancel: () {
-                  print("User chose to skip download");
-                },
-              );
-              // Get.to(()=> AppLandingPage());
-            },
+            description:
+                "AroundU is more than just this event. Check out other events, join the group chat, or start your own lobby!",
+            // onClose: () {
+            //   FancyAppDownloadDialog.show(
+            //     context,
+            //     title: "Unlock Premium Features",
+            //     message:
+            //         "Get the full AroundU experience with exclusive features, enhanced performance, and more!",
+            //     appStoreUrl: "https://apps.apple.com/in/app/aroundu/id6744299663",
+            //     playStoreUrl: "https://play.google.com/store/apps/details?id=com.polar.aroundu",
+            //     // cancelButtonText: "Maybe Later",
+            //     onCancel: () {
+            //       print("User chose to skip download");
+            //     },
+            //   );
+            // },
           ),
           // Additional lobby details for mobile view
           _buildAdditionalLobbyDetails(context, lobbyData),
