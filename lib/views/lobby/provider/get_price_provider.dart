@@ -1,4 +1,6 @@
 import 'package:aroundu/utils/api_service/api.service.dart';
+import 'package:aroundu/views/lobby/provider/selected_tickets_provider.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 // Model class for pricing response
@@ -8,6 +10,7 @@ class PricingResponse {
   final String? message;
   final String? lobbyId;
   final int? currentMembers;
+  final int? remainingSlots;
   final double? currentPricePerSlot;
   final String? currentTierRange;
   final String? nextTierInfo;
@@ -18,6 +21,7 @@ class PricingResponse {
   final int? lockedSlots;
   final int? currentPosition;
   final String? currentProvider;
+  final List<Map<String, dynamic>> ticketSelections;
 
   PricingResponse({
     this.code,
@@ -25,6 +29,7 @@ class PricingResponse {
     this.message,
     this.lobbyId,
     this.currentMembers,
+    this.remainingSlots,
     this.currentPricePerSlot,
     this.currentTierRange,
     this.nextTierInfo,
@@ -35,6 +40,7 @@ class PricingResponse {
     this.lockedSlots,
     this.currentPosition,
     this.currentProvider,
+    this.ticketSelections = const [],
   });
 
   // Factory constructor to create a PricingResponse from JSON
@@ -45,6 +51,7 @@ class PricingResponse {
       message: json['message'],
       lobbyId: json['lobbyId'],
       currentMembers: json['currentMembers'],
+      remainingSlots: json['remainingSlots'],
       currentPricePerSlot: json['currentPricePerSlot']?.toDouble(),
       currentTierRange: json['currentTierRange'],
       nextTierInfo: json['nextTierInfo'],
@@ -55,6 +62,8 @@ class PricingResponse {
       lockedSlots: json['lockedSlots'],
       currentPosition: json['currentPosition'],
       currentProvider: json['currentProvider'],
+      ticketSelections:
+          (json['ticketSelections'] as List<dynamic>?)?.map((e) => Map<String, dynamic>.from(e)).toList() ?? [],
     );
   }
 
@@ -66,6 +75,7 @@ class PricingResponse {
       'message': message,
       'lobbyId': lobbyId,
       'currentMembers': currentMembers,
+      'remainingSlots': remainingSlots,
       'currentPricePerSlot': currentPricePerSlot,
       'currentTierRange': currentTierRange,
       'nextTierInfo': nextTierInfo,
@@ -76,6 +86,7 @@ class PricingResponse {
       'lockedSlots': lockedSlots,
       'currentPosition': currentPosition,
       'currentProvider': currentProvider,
+      'ticketSelections': ticketSelections,
     };
   }
 
@@ -86,6 +97,7 @@ class PricingResponse {
     String? message,
     String? lobbyId,
     int? currentMembers,
+    int? remainingSlots,
     double? currentPricePerSlot,
     String? currentTierRange,
     String? nextTierInfo,
@@ -96,6 +108,7 @@ class PricingResponse {
     int? lockedSlots,
     int? currentPosition,
     String? currentProvider,
+    // List<Map<String, dynamic>>? ticketSelections,
   }) {
     return PricingResponse(
       code: code ?? this.code,
@@ -103,6 +116,7 @@ class PricingResponse {
       message: message ?? this.message,
       lobbyId: lobbyId ?? this.lobbyId,
       currentMembers: currentMembers ?? this.currentMembers,
+      remainingSlots: remainingSlots,
       currentPricePerSlot: currentPricePerSlot ?? this.currentPricePerSlot,
       currentTierRange: currentTierRange ?? this.currentTierRange,
       nextTierInfo: nextTierInfo ?? this.nextTierInfo,
@@ -112,7 +126,8 @@ class PricingResponse {
       isTieredPriced: isTieredPriced ?? this.isTieredPriced,
       lockedSlots: lockedSlots ?? this.lockedSlots,
       currentPosition: currentPosition ?? this.currentPosition,
-      currentProvider: currentProvider?? this.currentProvider,
+      currentProvider: currentProvider ?? this.currentProvider,
+      ticketSelections: ticketSelections,
     );
   }
 }
@@ -123,18 +138,10 @@ class PricingState {
   final bool isLoading;
   final String? error;
 
-  PricingState({
-    this.pricingData,
-    this.isLoading = false,
-    this.error,
-  });
+  PricingState({this.pricingData, this.isLoading = false, this.error});
 
   // Create a copy of PricingState with some fields updated
-  PricingState copyWith({
-    PricingResponse? pricingData,
-    bool? isLoading,
-    String? error,
-  }) {
+  PricingState copyWith({PricingResponse? pricingData, bool? isLoading, String? error}) {
     return PricingState(
       pricingData: pricingData ?? this.pricingData,
       isLoading: isLoading ?? this.isLoading,
@@ -144,11 +151,7 @@ class PricingState {
 
   // Initial state
   factory PricingState.initial() {
-    return PricingState(
-      pricingData: null,
-      isLoading: false,
-      error: null,
-    );
+    return PricingState(pricingData: null, isLoading: false, error: null);
   }
 }
 
@@ -159,41 +162,54 @@ class PricingNotifier extends StateNotifier<PricingState> {
   PricingNotifier(this._apiService) : super(PricingState.initial());
 
   // Fetch pricing data from API
-  Future<void> fetchPricing(String lobbyId, {int? groupSize}) async {
+  Future<void> fetchPricing(
+    String lobbyId, {
+    int? groupSize,
+    List<SelectedTicket>? selectedTickets,
+    bool isPublic = false,
+  }) async {
     try {
       // Set loading state
       state = state.copyWith(isLoading: true, error: null);
 
       // Prepare query parameters
-      Map<String, dynamic>? queryParams;
+      Map<String, dynamic> body = {};
       if (groupSize != null) {
-        queryParams = {'groupSize': groupSize.toString()};
+        if (selectedTickets != null && selectedTickets.isNotEmpty) {
+          body['groupSize'] = selectedTickets.fold<int>(0, (sum, ticket) => sum + ticket.slots).toString();
+        } else {
+          body['groupSize'] = groupSize.toString();
+        }
+      }
+      if (selectedTickets != null && selectedTickets.isNotEmpty) {
+        body['ticketOptionsDTOS'] = selectedTickets.map((e) => e.toJson()).toList();
       }
 
       // Make API call
-      final response = await _apiService.get(
-        'match/lobby/$lobbyId/pricing',
-        queryParameters: queryParams,
-      );
+      Response response;
+      if (isPublic) {
+        response = await ApiService().post(
+          'match/lobby/$lobbyId/pricing',
+          body: body,
+          // queryParameters: queryParams,
+        );
+      } else {
+        response = await _apiService.post(
+          'match/lobby/$lobbyId/pricing',
+          body: body,
+          // queryParameters: queryParams,
+        );
+      }
 
       // Parse response
       if (response.statusCode == 200) {
         final pricingResponse = PricingResponse.fromJson(response.data);
-        state = state.copyWith(
-          pricingData: pricingResponse,
-          isLoading: false,
-        );
+        state = state.copyWith(pricingData: pricingResponse, isLoading: false);
       } else {
-        state = state.copyWith(
-          isLoading: false,
-          error: 'Failed to fetch pricing data: ${response.statusMessage}',
-        );
+        state = state.copyWith(isLoading: false, error: 'Failed to fetch pricing data: ${response.statusMessage}');
       }
     } catch (e) {
-      state = state.copyWith(
-        isLoading: false,
-        error: 'Error fetching pricing data: $e',
-      );
+      state = state.copyWith(isLoading: false, error: 'Error fetching pricing data: $e');
     }
   }
 
@@ -206,11 +222,14 @@ class PricingNotifier extends StateNotifier<PricingState> {
   Future<void> updateGroupSize(String lobbyId, int groupSize) async {
     await fetchPricing(lobbyId, groupSize: groupSize);
   }
+
+  void updatePricingDataInState(PricingResponse pricingData) {
+    state = state.copyWith(pricingData: pricingData);
+  }
 }
 
 // Provider for the pricing state
-final pricingProvider =
-    StateNotifierProvider.family<PricingNotifier, PricingState, String>(
+final pricingProvider = StateNotifierProvider.family<PricingNotifier, PricingState, String>(
   (ref, lobbyId) => PricingNotifier(ApiService()),
 );
 

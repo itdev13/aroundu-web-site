@@ -1,6 +1,7 @@
-
 import 'package:aroundu/utils/api_service/api.service.dart';
 import 'package:aroundu/utils/logger.utils.dart';
+import 'package:aroundu/views/lobby/provider/selected_tickets_provider.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 // Model class for lock pricing response
@@ -10,12 +11,7 @@ class LockPricingResponse {
   final String? message;
   final double? total;
 
-  LockPricingResponse({
-    this.code,
-    this.status,
-    this.message,
-    this.total,
-  });
+  LockPricingResponse({this.code, this.status, this.message, this.total});
 
   // Factory constructor to create a LockPricingResponse from JSON
   factory LockPricingResponse.fromJson(Map<String, dynamic> json) {
@@ -29,21 +25,11 @@ class LockPricingResponse {
 
   // Method to convert LockPricingResponse to JSON
   Map<String, dynamic> toJson() {
-    return {
-      'code': code,
-      'status': status,
-      'message': message,
-      'total': total,
-    };
+    return {'code': code, 'status': status, 'message': message, 'total': total};
   }
 
   // Create a copy of LockPricingResponse with some fields updated
-  LockPricingResponse copyWith({
-    int? code,
-    String? status,
-    String? message,
-    double? total,
-  }) {
+  LockPricingResponse copyWith({int? code, String? status, String? message, double? total}) {
     return LockPricingResponse(
       code: code ?? this.code,
       status: status ?? this.status,
@@ -59,18 +45,10 @@ class LockPricingState {
   final bool isLoading;
   final String? error;
 
-  LockPricingState({
-    this.lockPricingData,
-    this.isLoading = false,
-    this.error,
-  });
+  LockPricingState({this.lockPricingData, this.isLoading = false, this.error});
 
   // Create a copy of LockPricingState with some fields updated
-  LockPricingState copyWith({
-    LockPricingResponse? lockPricingData,
-    bool? isLoading,
-    String? error,
-  }) {
+  LockPricingState copyWith({LockPricingResponse? lockPricingData, bool? isLoading, String? error}) {
     return LockPricingState(
       lockPricingData: lockPricingData ?? this.lockPricingData,
       isLoading: isLoading ?? this.isLoading,
@@ -80,11 +58,7 @@ class LockPricingState {
 
   // Initial state
   factory LockPricingState.initial() {
-    return LockPricingState(
-      lockPricingData: null,
-      isLoading: false,
-      error: null,
-    );
+    return LockPricingState(lockPricingData: null, isLoading: false, error: null);
   }
 }
 
@@ -95,39 +69,60 @@ class LockPricingNotifier extends StateNotifier<LockPricingState> {
   LockPricingNotifier(this._apiService) : super(LockPricingState.initial());
 
   // Lock pricing data from API
-  Future<void> lockPricing(String lobbyId, int groupSize) async {
+  Future<void> lockPricing(String lobbyId, int groupSize, List<SelectedTicket>? selectedTickets,{ String? userId,
+    bool isPublic = false,
+  }) async {
+
     try {
       // Set loading state
       state = state.copyWith(isLoading: true, error: null);
 
       // Prepare query parameters
-      Map<String, dynamic> queryParams = {'groupSize': groupSize.toString()};
+      Map<String, dynamic> body = {};
+
+      if (groupSize != null) {
+        if (selectedTickets != null && selectedTickets.isNotEmpty) {
+          body['groupSize'] = selectedTickets.fold<int>(0, (sum, ticket) => sum + ticket.slots).toString();
+        } else {
+          body['groupSize'] = groupSize.toString();
+        }
+      }
+      if (selectedTickets != null && selectedTickets.isNotEmpty) {
+        body['ticketOptionsDTOS'] = selectedTickets.map((e) => e.toJson()).toList();
+      }
+      if (userId != null && userId.isNotEmpty) {
+
+        body['randomId'] = userId;
+      }
+
 
       // Make API call
-      final response = await _apiService.get(
-        'match/lobby/$lobbyId/pricing/lock',
-        queryParameters: queryParams,
-      );
+      Response response;
+       if (isPublic) {
+         response = await ApiService().post(
+          'match/lobby/$lobbyId/pricing/lock',
+          body: body,
+          // queryParameters: queryParams,
+        );
+      } else {
+         response = await _apiService.post(
+          'match/lobby/$lobbyId/pricing/lock',
+          body: body,
+          // queryParameters: queryParams,
+        );
+      }
+      
 
       // Parse response
       if (response.statusCode == 200) {
         final lockPricingResponse = LockPricingResponse.fromJson(response.data);
-        state = state.copyWith(
-          lockPricingData: lockPricingResponse,
-          isLoading: false,
-        );
+        state = state.copyWith(lockPricingData: lockPricingResponse, isLoading: false);
       } else {
-        state = state.copyWith(
-          isLoading: false,
-          error: 'Failed to lock pricing data: ${response.statusMessage}',
-        );
+        state = state.copyWith(isLoading: false, error: 'Failed to lock pricing data: ${response.statusMessage}');
       }
-    } catch (e,s) {
+    } catch (e, s) {
       kLogger.error("Error locking pricing data: $e \n $s");
-      state = state.copyWith(
-        isLoading: false,
-        error: 'Error locking pricing data: $e',
-      );
+      state = state.copyWith(isLoading: false, error: 'Error locking pricing data: $e');
     }
   }
 
@@ -138,8 +133,7 @@ class LockPricingNotifier extends StateNotifier<LockPricingState> {
 }
 
 // Provider for the lock pricing state
-final lockPricingProvider =
-    StateNotifierProvider.family<LockPricingNotifier, LockPricingState, String>(
+final lockPricingProvider = StateNotifierProvider.family<LockPricingNotifier, LockPricingState, String>(
   (ref, lobbyId) => LockPricingNotifier(ApiService()),
 );
 

@@ -77,13 +77,18 @@ class LobbyRegistrationState {
 class LobbyRegistrationNotifier extends StateNotifier<LobbyRegistrationState> {
   LobbyRegistrationNotifier() : super(const LobbyRegistrationState());
 
-  Future<LobbyRegistrationResponse?> registerGuest(
-    String lobbyId,
-    String name,
-    String mobile,
-    String email,
-    int slots,
-  ) async {
+  Future<LobbyRegistrationResponse?> registerGuest({
+    required String lobbyId,
+    required String name,
+    required String mobile,
+    required String email,
+    required int slots,
+    required String userId,
+    Map<String, dynamic>? form,
+    List<Map<String, dynamic>>? formList,
+    List<Map<String, dynamic>>? selectedTickets,
+    String? offerId,
+  }) async {
     try {
       // Set loading state
       state = state.copyWith(isLoading: true, error: null, response: null);
@@ -100,13 +105,24 @@ class LobbyRegistrationNotifier extends StateNotifier<LobbyRegistrationState> {
         ),
       );
 
-      dio.interceptors.add(PrettyDioLogger());
+      dio.interceptors.add(PrettyDioLogger(requestBody: true));
+      Map<String, dynamic> data = {'name': name, 'mobile': mobile, 'email': email, 'slots': slots,'randomId':userId};
+      if (form != null) {
+        data['form'] = form;
+      }
+      if (formList != null && formList.isNotEmpty) {
+        data['formList'] = formList;
+      }
+      if (selectedTickets != null && selectedTickets.isNotEmpty) {
+        data['slots'] = selectedTickets.fold<int>(0, (sum, e) => sum + (e['slots'] as int));
+        data['ticketOptionsDTOS'] = selectedTickets;
+      }
+      if(offerId != null){
+        data['offerId'] = offerId;
+      }
 
       // Make the API call
-      final response = await dio.post(
-        'payment/api/v1/guest/lobby/$lobbyId/register',
-        data: {'name': name, 'mobile': mobile, 'email': email, 'slots': slots},
-      );
+      final response = await dio.post('payment/api/v1/guest/lobby/$lobbyId/register', data: data);
 
       kLogger.debug('Lobby registration response: ${response.data}');
 

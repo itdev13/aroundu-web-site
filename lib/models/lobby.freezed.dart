@@ -48,7 +48,12 @@ mixin _$Lobby {
   List<UserSummary>? get userSummaries => throw _privateConstructorUsedError;
   Map<String, dynamic> get dateRange =>
       throw _privateConstructorUsedError; // @Default(0.0) double price,
+  LobbyRestriction? get restriction => throw _privateConstructorUsedError;
   PriceDetails get priceDetails => throw _privateConstructorUsedError;
+  bool get isAdvancedPricing => throw _privateConstructorUsedError;
+  bool get allowMultiplePricingOptions => throw _privateConstructorUsedError;
+  List<LobbyTicketOption> get ticketOptions =>
+      throw _privateConstructorUsedError;
   AccessRequestData? get accessRequestData =>
       throw _privateConstructorUsedError;
   bool get hasForm => throw _privateConstructorUsedError;
@@ -59,6 +64,7 @@ mixin _$Lobby {
   Rating get rating => throw _privateConstructorUsedError;
   List<PriceTier>? get priceTierList => throw _privateConstructorUsedError;
   bool get ratingGiven => throw _privateConstructorUsedError;
+  bool get loginNotRequired => throw _privateConstructorUsedError;
 
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
   @JsonKey(ignore: true)
@@ -95,7 +101,11 @@ abstract class $LobbyCopyWith<$Res> {
       HouseInfo? houseDetail,
       List<UserSummary>? userSummaries,
       Map<String, dynamic> dateRange,
+      LobbyRestriction? restriction,
       PriceDetails priceDetails,
+      bool isAdvancedPricing,
+      bool allowMultiplePricingOptions,
+      List<LobbyTicketOption> ticketOptions,
       AccessRequestData? accessRequestData,
       bool hasForm,
       bool hasOffer,
@@ -104,7 +114,8 @@ abstract class $LobbyCopyWith<$Res> {
       bool isRefundNotPossible,
       Rating rating,
       List<PriceTier>? priceTierList,
-      bool ratingGiven});
+      bool ratingGiven,
+      bool loginNotRequired});
 
   $FilterCopyWith<$Res> get filter;
   $AdminSummaryCopyWith<$Res> get adminSummary;
@@ -113,6 +124,7 @@ abstract class $LobbyCopyWith<$Res> {
   $SettingCopyWith<$Res>? get settings;
   $FormModelCopyWith<$Res>? get form;
   $HouseInfoCopyWith<$Res>? get houseDetail;
+  $LobbyRestrictionCopyWith<$Res>? get restriction;
   $PriceDetailsCopyWith<$Res> get priceDetails;
   $AccessRequestDataCopyWith<$Res>? get accessRequestData;
   $RatingCopyWith<$Res> get rating;
@@ -155,7 +167,11 @@ class _$LobbyCopyWithImpl<$Res, $Val extends Lobby>
     Object? houseDetail = freezed,
     Object? userSummaries = freezed,
     Object? dateRange = null,
+    Object? restriction = freezed,
     Object? priceDetails = null,
+    Object? isAdvancedPricing = null,
+    Object? allowMultiplePricingOptions = null,
+    Object? ticketOptions = null,
     Object? accessRequestData = freezed,
     Object? hasForm = null,
     Object? hasOffer = null,
@@ -165,6 +181,7 @@ class _$LobbyCopyWithImpl<$Res, $Val extends Lobby>
     Object? rating = null,
     Object? priceTierList = freezed,
     Object? ratingGiven = null,
+    Object? loginNotRequired = null,
   }) {
     return _then(_value.copyWith(
       id: null == id
@@ -263,10 +280,26 @@ class _$LobbyCopyWithImpl<$Res, $Val extends Lobby>
           ? _value.dateRange
           : dateRange // ignore: cast_nullable_to_non_nullable
               as Map<String, dynamic>,
+      restriction: freezed == restriction
+          ? _value.restriction
+          : restriction // ignore: cast_nullable_to_non_nullable
+              as LobbyRestriction?,
       priceDetails: null == priceDetails
           ? _value.priceDetails
           : priceDetails // ignore: cast_nullable_to_non_nullable
               as PriceDetails,
+      isAdvancedPricing: null == isAdvancedPricing
+          ? _value.isAdvancedPricing
+          : isAdvancedPricing // ignore: cast_nullable_to_non_nullable
+              as bool,
+      allowMultiplePricingOptions: null == allowMultiplePricingOptions
+          ? _value.allowMultiplePricingOptions
+          : allowMultiplePricingOptions // ignore: cast_nullable_to_non_nullable
+              as bool,
+      ticketOptions: null == ticketOptions
+          ? _value.ticketOptions
+          : ticketOptions // ignore: cast_nullable_to_non_nullable
+              as List<LobbyTicketOption>,
       accessRequestData: freezed == accessRequestData
           ? _value.accessRequestData
           : accessRequestData // ignore: cast_nullable_to_non_nullable
@@ -302,6 +335,10 @@ class _$LobbyCopyWithImpl<$Res, $Val extends Lobby>
       ratingGiven: null == ratingGiven
           ? _value.ratingGiven
           : ratingGiven // ignore: cast_nullable_to_non_nullable
+              as bool,
+      loginNotRequired: null == loginNotRequired
+          ? _value.loginNotRequired
+          : loginNotRequired // ignore: cast_nullable_to_non_nullable
               as bool,
     ) as $Val);
   }
@@ -380,6 +417,18 @@ class _$LobbyCopyWithImpl<$Res, $Val extends Lobby>
 
   @override
   @pragma('vm:prefer-inline')
+  $LobbyRestrictionCopyWith<$Res>? get restriction {
+    if (_value.restriction == null) {
+      return null;
+    }
+
+    return $LobbyRestrictionCopyWith<$Res>(_value.restriction!, (value) {
+      return _then(_value.copyWith(restriction: value) as $Val);
+    });
+  }
+
+  @override
+  @pragma('vm:prefer-inline')
   $PriceDetailsCopyWith<$Res> get priceDetails {
     return $PriceDetailsCopyWith<$Res>(_value.priceDetails, (value) {
       return _then(_value.copyWith(priceDetails: value) as $Val);
@@ -439,7 +488,11 @@ abstract class _$$LobbyImplCopyWith<$Res> implements $LobbyCopyWith<$Res> {
       HouseInfo? houseDetail,
       List<UserSummary>? userSummaries,
       Map<String, dynamic> dateRange,
+      LobbyRestriction? restriction,
       PriceDetails priceDetails,
+      bool isAdvancedPricing,
+      bool allowMultiplePricingOptions,
+      List<LobbyTicketOption> ticketOptions,
       AccessRequestData? accessRequestData,
       bool hasForm,
       bool hasOffer,
@@ -448,7 +501,8 @@ abstract class _$$LobbyImplCopyWith<$Res> implements $LobbyCopyWith<$Res> {
       bool isRefundNotPossible,
       Rating rating,
       List<PriceTier>? priceTierList,
-      bool ratingGiven});
+      bool ratingGiven,
+      bool loginNotRequired});
 
   @override
   $FilterCopyWith<$Res> get filter;
@@ -464,6 +518,8 @@ abstract class _$$LobbyImplCopyWith<$Res> implements $LobbyCopyWith<$Res> {
   $FormModelCopyWith<$Res>? get form;
   @override
   $HouseInfoCopyWith<$Res>? get houseDetail;
+  @override
+  $LobbyRestrictionCopyWith<$Res>? get restriction;
   @override
   $PriceDetailsCopyWith<$Res> get priceDetails;
   @override
@@ -507,7 +563,11 @@ class __$$LobbyImplCopyWithImpl<$Res>
     Object? houseDetail = freezed,
     Object? userSummaries = freezed,
     Object? dateRange = null,
+    Object? restriction = freezed,
     Object? priceDetails = null,
+    Object? isAdvancedPricing = null,
+    Object? allowMultiplePricingOptions = null,
+    Object? ticketOptions = null,
     Object? accessRequestData = freezed,
     Object? hasForm = null,
     Object? hasOffer = null,
@@ -517,6 +577,7 @@ class __$$LobbyImplCopyWithImpl<$Res>
     Object? rating = null,
     Object? priceTierList = freezed,
     Object? ratingGiven = null,
+    Object? loginNotRequired = null,
   }) {
     return _then(_$LobbyImpl(
       id: null == id
@@ -615,10 +676,26 @@ class __$$LobbyImplCopyWithImpl<$Res>
           ? _value._dateRange
           : dateRange // ignore: cast_nullable_to_non_nullable
               as Map<String, dynamic>,
+      restriction: freezed == restriction
+          ? _value.restriction
+          : restriction // ignore: cast_nullable_to_non_nullable
+              as LobbyRestriction?,
       priceDetails: null == priceDetails
           ? _value.priceDetails
           : priceDetails // ignore: cast_nullable_to_non_nullable
               as PriceDetails,
+      isAdvancedPricing: null == isAdvancedPricing
+          ? _value.isAdvancedPricing
+          : isAdvancedPricing // ignore: cast_nullable_to_non_nullable
+              as bool,
+      allowMultiplePricingOptions: null == allowMultiplePricingOptions
+          ? _value.allowMultiplePricingOptions
+          : allowMultiplePricingOptions // ignore: cast_nullable_to_non_nullable
+              as bool,
+      ticketOptions: null == ticketOptions
+          ? _value._ticketOptions
+          : ticketOptions // ignore: cast_nullable_to_non_nullable
+              as List<LobbyTicketOption>,
       accessRequestData: freezed == accessRequestData
           ? _value.accessRequestData
           : accessRequestData // ignore: cast_nullable_to_non_nullable
@@ -655,6 +732,10 @@ class __$$LobbyImplCopyWithImpl<$Res>
           ? _value.ratingGiven
           : ratingGiven // ignore: cast_nullable_to_non_nullable
               as bool,
+      loginNotRequired: null == loginNotRequired
+          ? _value.loginNotRequired
+          : loginNotRequired // ignore: cast_nullable_to_non_nullable
+              as bool,
     ));
   }
 }
@@ -688,7 +769,11 @@ class _$LobbyImpl implements _Lobby {
       this.houseDetail,
       final List<UserSummary>? userSummaries,
       final Map<String, dynamic> dateRange = const {},
+      this.restriction,
       this.priceDetails = const PriceDetails(),
+      this.isAdvancedPricing = false,
+      this.allowMultiplePricingOptions = false,
+      final List<LobbyTicketOption> ticketOptions = const <LobbyTicketOption>[],
       this.accessRequestData,
       this.hasForm = false,
       this.hasOffer = false,
@@ -697,10 +782,12 @@ class _$LobbyImpl implements _Lobby {
       this.isRefundNotPossible = false,
       this.rating = const Rating(),
       final List<PriceTier>? priceTierList = const [],
-      this.ratingGiven = false})
+      this.ratingGiven = false,
+      this.loginNotRequired = false})
       : _mediaUrls = mediaUrls,
         _userSummaries = userSummaries,
         _dateRange = dateRange,
+        _ticketOptions = ticketOptions,
         _priceTierList = priceTierList;
 
   factory _$LobbyImpl.fromJson(Map<String, dynamic> json) =>
@@ -793,8 +880,25 @@ class _$LobbyImpl implements _Lobby {
 
 // @Default(0.0) double price,
   @override
+  final LobbyRestriction? restriction;
+  @override
   @JsonKey()
   final PriceDetails priceDetails;
+  @override
+  @JsonKey()
+  final bool isAdvancedPricing;
+  @override
+  @JsonKey()
+  final bool allowMultiplePricingOptions;
+  final List<LobbyTicketOption> _ticketOptions;
+  @override
+  @JsonKey()
+  List<LobbyTicketOption> get ticketOptions {
+    if (_ticketOptions is EqualUnmodifiableListView) return _ticketOptions;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(_ticketOptions);
+  }
+
   @override
   final AccessRequestData? accessRequestData;
   @override
@@ -829,10 +933,13 @@ class _$LobbyImpl implements _Lobby {
   @override
   @JsonKey()
   final bool ratingGiven;
+  @override
+  @JsonKey()
+  final bool loginNotRequired;
 
   @override
   String toString() {
-    return 'Lobby(id: $id, createdDate: $createdDate, userId: $userId, lobbyStatus: $lobbyStatus, filter: $filter, description: $description, title: $title, mediaUrls: $mediaUrls, lobbyType: $lobbyType, totalMembers: $totalMembers, currentMembers: $currentMembers, membersRequired: $membersRequired, colorScheme: $colorScheme, gender: $gender, userStatus: $userStatus, adminSummary: $adminSummary, content: $content, setting: $setting, settings: $settings, activity: $activity, form: $form, houseDetail: $houseDetail, userSummaries: $userSummaries, dateRange: $dateRange, priceDetails: $priceDetails, accessRequestData: $accessRequestData, hasForm: $hasForm, hasOffer: $hasOffer, isSaved: $isSaved, isFormMandatory: $isFormMandatory, isRefundNotPossible: $isRefundNotPossible, rating: $rating, priceTierList: $priceTierList, ratingGiven: $ratingGiven)';
+    return 'Lobby(id: $id, createdDate: $createdDate, userId: $userId, lobbyStatus: $lobbyStatus, filter: $filter, description: $description, title: $title, mediaUrls: $mediaUrls, lobbyType: $lobbyType, totalMembers: $totalMembers, currentMembers: $currentMembers, membersRequired: $membersRequired, colorScheme: $colorScheme, gender: $gender, userStatus: $userStatus, adminSummary: $adminSummary, content: $content, setting: $setting, settings: $settings, activity: $activity, form: $form, houseDetail: $houseDetail, userSummaries: $userSummaries, dateRange: $dateRange, restriction: $restriction, priceDetails: $priceDetails, isAdvancedPricing: $isAdvancedPricing, allowMultiplePricingOptions: $allowMultiplePricingOptions, ticketOptions: $ticketOptions, accessRequestData: $accessRequestData, hasForm: $hasForm, hasOffer: $hasOffer, isSaved: $isSaved, isFormMandatory: $isFormMandatory, isRefundNotPossible: $isRefundNotPossible, rating: $rating, priceTierList: $priceTierList, ratingGiven: $ratingGiven, loginNotRequired: $loginNotRequired)';
   }
 
   @override
@@ -880,8 +987,18 @@ class _$LobbyImpl implements _Lobby {
                 .equals(other._userSummaries, _userSummaries) &&
             const DeepCollectionEquality()
                 .equals(other._dateRange, _dateRange) &&
+            (identical(other.restriction, restriction) ||
+                other.restriction == restriction) &&
             (identical(other.priceDetails, priceDetails) ||
                 other.priceDetails == priceDetails) &&
+            (identical(other.isAdvancedPricing, isAdvancedPricing) ||
+                other.isAdvancedPricing == isAdvancedPricing) &&
+            (identical(other.allowMultiplePricingOptions,
+                    allowMultiplePricingOptions) ||
+                other.allowMultiplePricingOptions ==
+                    allowMultiplePricingOptions) &&
+            const DeepCollectionEquality()
+                .equals(other._ticketOptions, _ticketOptions) &&
             (identical(other.accessRequestData, accessRequestData) ||
                 other.accessRequestData == accessRequestData) &&
             (identical(other.hasForm, hasForm) || other.hasForm == hasForm) &&
@@ -896,7 +1013,9 @@ class _$LobbyImpl implements _Lobby {
             const DeepCollectionEquality()
                 .equals(other._priceTierList, _priceTierList) &&
             (identical(other.ratingGiven, ratingGiven) ||
-                other.ratingGiven == ratingGiven));
+                other.ratingGiven == ratingGiven) &&
+            (identical(other.loginNotRequired, loginNotRequired) ||
+                other.loginNotRequired == loginNotRequired));
   }
 
   @JsonKey(ignore: true)
@@ -927,7 +1046,11 @@ class _$LobbyImpl implements _Lobby {
         houseDetail,
         const DeepCollectionEquality().hash(_userSummaries),
         const DeepCollectionEquality().hash(_dateRange),
+        restriction,
         priceDetails,
+        isAdvancedPricing,
+        allowMultiplePricingOptions,
+        const DeepCollectionEquality().hash(_ticketOptions),
         accessRequestData,
         hasForm,
         hasOffer,
@@ -936,7 +1059,8 @@ class _$LobbyImpl implements _Lobby {
         isRefundNotPossible,
         rating,
         const DeepCollectionEquality().hash(_priceTierList),
-        ratingGiven
+        ratingGiven,
+        loginNotRequired
       ]);
 
   @JsonKey(ignore: true)
@@ -979,7 +1103,11 @@ abstract class _Lobby implements Lobby {
       final HouseInfo? houseDetail,
       final List<UserSummary>? userSummaries,
       final Map<String, dynamic> dateRange,
+      final LobbyRestriction? restriction,
       final PriceDetails priceDetails,
+      final bool isAdvancedPricing,
+      final bool allowMultiplePricingOptions,
+      final List<LobbyTicketOption> ticketOptions,
       final AccessRequestData? accessRequestData,
       final bool hasForm,
       final bool hasOffer,
@@ -988,7 +1116,8 @@ abstract class _Lobby implements Lobby {
       final bool isRefundNotPossible,
       final Rating rating,
       final List<PriceTier>? priceTierList,
-      final bool ratingGiven}) = _$LobbyImpl;
+      final bool ratingGiven,
+      final bool loginNotRequired}) = _$LobbyImpl;
 
   factory _Lobby.fromJson(Map<String, dynamic> json) = _$LobbyImpl.fromJson;
 
@@ -1042,7 +1171,15 @@ abstract class _Lobby implements Lobby {
   @override
   Map<String, dynamic> get dateRange;
   @override // @Default(0.0) double price,
+  LobbyRestriction? get restriction;
+  @override
   PriceDetails get priceDetails;
+  @override
+  bool get isAdvancedPricing;
+  @override
+  bool get allowMultiplePricingOptions;
+  @override
+  List<LobbyTicketOption> get ticketOptions;
   @override
   AccessRequestData? get accessRequestData;
   @override
@@ -1061,6 +1198,8 @@ abstract class _Lobby implements Lobby {
   List<PriceTier>? get priceTierList;
   @override
   bool get ratingGiven;
+  @override
+  bool get loginNotRequired;
   @override
   @JsonKey(ignore: true)
   _$$LobbyImplCopyWith<_$LobbyImpl> get copyWith =>
@@ -2174,6 +2313,404 @@ abstract class _UserSummary implements UserSummary {
       throw _privateConstructorUsedError;
 }
 
+LobbyRestriction _$LobbyRestrictionFromJson(Map<String, dynamic> json) {
+  return _LobbyRestriction.fromJson(json);
+}
+
+/// @nodoc
+mixin _$LobbyRestriction {
+  String get genderRestriction => throw _privateConstructorUsedError;
+  AgeRange get ageRange => throw _privateConstructorUsedError;
+  int? get maxMales => throw _privateConstructorUsedError;
+  int? get maxFemales => throw _privateConstructorUsedError;
+  int? get maxOthers => throw _privateConstructorUsedError;
+
+  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
+  @JsonKey(ignore: true)
+  $LobbyRestrictionCopyWith<LobbyRestriction> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+/// @nodoc
+abstract class $LobbyRestrictionCopyWith<$Res> {
+  factory $LobbyRestrictionCopyWith(
+          LobbyRestriction value, $Res Function(LobbyRestriction) then) =
+      _$LobbyRestrictionCopyWithImpl<$Res, LobbyRestriction>;
+  @useResult
+  $Res call(
+      {String genderRestriction,
+      AgeRange ageRange,
+      int? maxMales,
+      int? maxFemales,
+      int? maxOthers});
+
+  $AgeRangeCopyWith<$Res> get ageRange;
+}
+
+/// @nodoc
+class _$LobbyRestrictionCopyWithImpl<$Res, $Val extends LobbyRestriction>
+    implements $LobbyRestrictionCopyWith<$Res> {
+  _$LobbyRestrictionCopyWithImpl(this._value, this._then);
+
+  // ignore: unused_field
+  final $Val _value;
+  // ignore: unused_field
+  final $Res Function($Val) _then;
+
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? genderRestriction = null,
+    Object? ageRange = null,
+    Object? maxMales = freezed,
+    Object? maxFemales = freezed,
+    Object? maxOthers = freezed,
+  }) {
+    return _then(_value.copyWith(
+      genderRestriction: null == genderRestriction
+          ? _value.genderRestriction
+          : genderRestriction // ignore: cast_nullable_to_non_nullable
+              as String,
+      ageRange: null == ageRange
+          ? _value.ageRange
+          : ageRange // ignore: cast_nullable_to_non_nullable
+              as AgeRange,
+      maxMales: freezed == maxMales
+          ? _value.maxMales
+          : maxMales // ignore: cast_nullable_to_non_nullable
+              as int?,
+      maxFemales: freezed == maxFemales
+          ? _value.maxFemales
+          : maxFemales // ignore: cast_nullable_to_non_nullable
+              as int?,
+      maxOthers: freezed == maxOthers
+          ? _value.maxOthers
+          : maxOthers // ignore: cast_nullable_to_non_nullable
+              as int?,
+    ) as $Val);
+  }
+
+  @override
+  @pragma('vm:prefer-inline')
+  $AgeRangeCopyWith<$Res> get ageRange {
+    return $AgeRangeCopyWith<$Res>(_value.ageRange, (value) {
+      return _then(_value.copyWith(ageRange: value) as $Val);
+    });
+  }
+}
+
+/// @nodoc
+abstract class _$$LobbyRestrictionImplCopyWith<$Res>
+    implements $LobbyRestrictionCopyWith<$Res> {
+  factory _$$LobbyRestrictionImplCopyWith(_$LobbyRestrictionImpl value,
+          $Res Function(_$LobbyRestrictionImpl) then) =
+      __$$LobbyRestrictionImplCopyWithImpl<$Res>;
+  @override
+  @useResult
+  $Res call(
+      {String genderRestriction,
+      AgeRange ageRange,
+      int? maxMales,
+      int? maxFemales,
+      int? maxOthers});
+
+  @override
+  $AgeRangeCopyWith<$Res> get ageRange;
+}
+
+/// @nodoc
+class __$$LobbyRestrictionImplCopyWithImpl<$Res>
+    extends _$LobbyRestrictionCopyWithImpl<$Res, _$LobbyRestrictionImpl>
+    implements _$$LobbyRestrictionImplCopyWith<$Res> {
+  __$$LobbyRestrictionImplCopyWithImpl(_$LobbyRestrictionImpl _value,
+      $Res Function(_$LobbyRestrictionImpl) _then)
+      : super(_value, _then);
+
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? genderRestriction = null,
+    Object? ageRange = null,
+    Object? maxMales = freezed,
+    Object? maxFemales = freezed,
+    Object? maxOthers = freezed,
+  }) {
+    return _then(_$LobbyRestrictionImpl(
+      genderRestriction: null == genderRestriction
+          ? _value.genderRestriction
+          : genderRestriction // ignore: cast_nullable_to_non_nullable
+              as String,
+      ageRange: null == ageRange
+          ? _value.ageRange
+          : ageRange // ignore: cast_nullable_to_non_nullable
+              as AgeRange,
+      maxMales: freezed == maxMales
+          ? _value.maxMales
+          : maxMales // ignore: cast_nullable_to_non_nullable
+              as int?,
+      maxFemales: freezed == maxFemales
+          ? _value.maxFemales
+          : maxFemales // ignore: cast_nullable_to_non_nullable
+              as int?,
+      maxOthers: freezed == maxOthers
+          ? _value.maxOthers
+          : maxOthers // ignore: cast_nullable_to_non_nullable
+              as int?,
+    ));
+  }
+}
+
+/// @nodoc
+
+@JsonSerializable(explicitToJson: true)
+class _$LobbyRestrictionImpl implements _LobbyRestriction {
+  const _$LobbyRestrictionImpl(
+      {this.genderRestriction = "",
+      this.ageRange = const AgeRange(),
+      this.maxMales,
+      this.maxFemales,
+      this.maxOthers});
+
+  factory _$LobbyRestrictionImpl.fromJson(Map<String, dynamic> json) =>
+      _$$LobbyRestrictionImplFromJson(json);
+
+  @override
+  @JsonKey()
+  final String genderRestriction;
+  @override
+  @JsonKey()
+  final AgeRange ageRange;
+  @override
+  final int? maxMales;
+  @override
+  final int? maxFemales;
+  @override
+  final int? maxOthers;
+
+  @override
+  String toString() {
+    return 'LobbyRestriction(genderRestriction: $genderRestriction, ageRange: $ageRange, maxMales: $maxMales, maxFemales: $maxFemales, maxOthers: $maxOthers)';
+  }
+
+  @override
+  bool operator ==(dynamic other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _$LobbyRestrictionImpl &&
+            (identical(other.genderRestriction, genderRestriction) ||
+                other.genderRestriction == genderRestriction) &&
+            (identical(other.ageRange, ageRange) ||
+                other.ageRange == ageRange) &&
+            (identical(other.maxMales, maxMales) ||
+                other.maxMales == maxMales) &&
+            (identical(other.maxFemales, maxFemales) ||
+                other.maxFemales == maxFemales) &&
+            (identical(other.maxOthers, maxOthers) ||
+                other.maxOthers == maxOthers));
+  }
+
+  @JsonKey(ignore: true)
+  @override
+  int get hashCode => Object.hash(runtimeType, genderRestriction, ageRange,
+      maxMales, maxFemales, maxOthers);
+
+  @JsonKey(ignore: true)
+  @override
+  @pragma('vm:prefer-inline')
+  _$$LobbyRestrictionImplCopyWith<_$LobbyRestrictionImpl> get copyWith =>
+      __$$LobbyRestrictionImplCopyWithImpl<_$LobbyRestrictionImpl>(
+          this, _$identity);
+
+  @override
+  Map<String, dynamic> toJson() {
+    return _$$LobbyRestrictionImplToJson(
+      this,
+    );
+  }
+}
+
+abstract class _LobbyRestriction implements LobbyRestriction {
+  const factory _LobbyRestriction(
+      {final String genderRestriction,
+      final AgeRange ageRange,
+      final int? maxMales,
+      final int? maxFemales,
+      final int? maxOthers}) = _$LobbyRestrictionImpl;
+
+  factory _LobbyRestriction.fromJson(Map<String, dynamic> json) =
+      _$LobbyRestrictionImpl.fromJson;
+
+  @override
+  String get genderRestriction;
+  @override
+  AgeRange get ageRange;
+  @override
+  int? get maxMales;
+  @override
+  int? get maxFemales;
+  @override
+  int? get maxOthers;
+  @override
+  @JsonKey(ignore: true)
+  _$$LobbyRestrictionImplCopyWith<_$LobbyRestrictionImpl> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+AgeRange _$AgeRangeFromJson(Map<String, dynamic> json) {
+  return _AgeRange.fromJson(json);
+}
+
+/// @nodoc
+mixin _$AgeRange {
+  int get minAge => throw _privateConstructorUsedError;
+  int get maxAge => throw _privateConstructorUsedError;
+
+  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
+  @JsonKey(ignore: true)
+  $AgeRangeCopyWith<AgeRange> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+/// @nodoc
+abstract class $AgeRangeCopyWith<$Res> {
+  factory $AgeRangeCopyWith(AgeRange value, $Res Function(AgeRange) then) =
+      _$AgeRangeCopyWithImpl<$Res, AgeRange>;
+  @useResult
+  $Res call({int minAge, int maxAge});
+}
+
+/// @nodoc
+class _$AgeRangeCopyWithImpl<$Res, $Val extends AgeRange>
+    implements $AgeRangeCopyWith<$Res> {
+  _$AgeRangeCopyWithImpl(this._value, this._then);
+
+  // ignore: unused_field
+  final $Val _value;
+  // ignore: unused_field
+  final $Res Function($Val) _then;
+
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? minAge = null,
+    Object? maxAge = null,
+  }) {
+    return _then(_value.copyWith(
+      minAge: null == minAge
+          ? _value.minAge
+          : minAge // ignore: cast_nullable_to_non_nullable
+              as int,
+      maxAge: null == maxAge
+          ? _value.maxAge
+          : maxAge // ignore: cast_nullable_to_non_nullable
+              as int,
+    ) as $Val);
+  }
+}
+
+/// @nodoc
+abstract class _$$AgeRangeImplCopyWith<$Res>
+    implements $AgeRangeCopyWith<$Res> {
+  factory _$$AgeRangeImplCopyWith(
+          _$AgeRangeImpl value, $Res Function(_$AgeRangeImpl) then) =
+      __$$AgeRangeImplCopyWithImpl<$Res>;
+  @override
+  @useResult
+  $Res call({int minAge, int maxAge});
+}
+
+/// @nodoc
+class __$$AgeRangeImplCopyWithImpl<$Res>
+    extends _$AgeRangeCopyWithImpl<$Res, _$AgeRangeImpl>
+    implements _$$AgeRangeImplCopyWith<$Res> {
+  __$$AgeRangeImplCopyWithImpl(
+      _$AgeRangeImpl _value, $Res Function(_$AgeRangeImpl) _then)
+      : super(_value, _then);
+
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? minAge = null,
+    Object? maxAge = null,
+  }) {
+    return _then(_$AgeRangeImpl(
+      minAge: null == minAge
+          ? _value.minAge
+          : minAge // ignore: cast_nullable_to_non_nullable
+              as int,
+      maxAge: null == maxAge
+          ? _value.maxAge
+          : maxAge // ignore: cast_nullable_to_non_nullable
+              as int,
+    ));
+  }
+}
+
+/// @nodoc
+
+@JsonSerializable(explicitToJson: true)
+class _$AgeRangeImpl implements _AgeRange {
+  const _$AgeRangeImpl({this.minAge = 0, this.maxAge = 100});
+
+  factory _$AgeRangeImpl.fromJson(Map<String, dynamic> json) =>
+      _$$AgeRangeImplFromJson(json);
+
+  @override
+  @JsonKey()
+  final int minAge;
+  @override
+  @JsonKey()
+  final int maxAge;
+
+  @override
+  String toString() {
+    return 'AgeRange(minAge: $minAge, maxAge: $maxAge)';
+  }
+
+  @override
+  bool operator ==(dynamic other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _$AgeRangeImpl &&
+            (identical(other.minAge, minAge) || other.minAge == minAge) &&
+            (identical(other.maxAge, maxAge) || other.maxAge == maxAge));
+  }
+
+  @JsonKey(ignore: true)
+  @override
+  int get hashCode => Object.hash(runtimeType, minAge, maxAge);
+
+  @JsonKey(ignore: true)
+  @override
+  @pragma('vm:prefer-inline')
+  _$$AgeRangeImplCopyWith<_$AgeRangeImpl> get copyWith =>
+      __$$AgeRangeImplCopyWithImpl<_$AgeRangeImpl>(this, _$identity);
+
+  @override
+  Map<String, dynamic> toJson() {
+    return _$$AgeRangeImplToJson(
+      this,
+    );
+  }
+}
+
+abstract class _AgeRange implements AgeRange {
+  const factory _AgeRange({final int minAge, final int maxAge}) =
+      _$AgeRangeImpl;
+
+  factory _AgeRange.fromJson(Map<String, dynamic> json) =
+      _$AgeRangeImpl.fromJson;
+
+  @override
+  int get minAge;
+  @override
+  int get maxAge;
+  @override
+  @JsonKey(ignore: true)
+  _$$AgeRangeImplCopyWith<_$AgeRangeImpl> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
 PriceDetails _$PriceDetailsFromJson(Map<String, dynamic> json) {
   return _PriceDetails.fromJson(json);
 }
@@ -2380,6 +2917,324 @@ abstract class _PriceDetails implements PriceDetails {
   @override
   @JsonKey(ignore: true)
   _$$PriceDetailsImplCopyWith<_$PriceDetailsImpl> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+LobbyTicketOption _$LobbyTicketOptionFromJson(Map<String, dynamic> json) {
+  return _LobbyTicketOption.fromJson(json);
+}
+
+/// @nodoc
+mixin _$LobbyTicketOption {
+  String get id => throw _privateConstructorUsedError;
+  String get name => throw _privateConstructorUsedError;
+  String get description => throw _privateConstructorUsedError;
+  double get price => throw _privateConstructorUsedError;
+  int get totalSlots => throw _privateConstructorUsedError;
+  int get bookedSlots => throw _privateConstructorUsedError;
+  String get currency => throw _privateConstructorUsedError;
+  int get minQuantity => throw _privateConstructorUsedError;
+  int get maxQuantity => throw _privateConstructorUsedError;
+
+  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
+  @JsonKey(ignore: true)
+  $LobbyTicketOptionCopyWith<LobbyTicketOption> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+/// @nodoc
+abstract class $LobbyTicketOptionCopyWith<$Res> {
+  factory $LobbyTicketOptionCopyWith(
+          LobbyTicketOption value, $Res Function(LobbyTicketOption) then) =
+      _$LobbyTicketOptionCopyWithImpl<$Res, LobbyTicketOption>;
+  @useResult
+  $Res call(
+      {String id,
+      String name,
+      String description,
+      double price,
+      int totalSlots,
+      int bookedSlots,
+      String currency,
+      int minQuantity,
+      int maxQuantity});
+}
+
+/// @nodoc
+class _$LobbyTicketOptionCopyWithImpl<$Res, $Val extends LobbyTicketOption>
+    implements $LobbyTicketOptionCopyWith<$Res> {
+  _$LobbyTicketOptionCopyWithImpl(this._value, this._then);
+
+  // ignore: unused_field
+  final $Val _value;
+  // ignore: unused_field
+  final $Res Function($Val) _then;
+
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? id = null,
+    Object? name = null,
+    Object? description = null,
+    Object? price = null,
+    Object? totalSlots = null,
+    Object? bookedSlots = null,
+    Object? currency = null,
+    Object? minQuantity = null,
+    Object? maxQuantity = null,
+  }) {
+    return _then(_value.copyWith(
+      id: null == id
+          ? _value.id
+          : id // ignore: cast_nullable_to_non_nullable
+              as String,
+      name: null == name
+          ? _value.name
+          : name // ignore: cast_nullable_to_non_nullable
+              as String,
+      description: null == description
+          ? _value.description
+          : description // ignore: cast_nullable_to_non_nullable
+              as String,
+      price: null == price
+          ? _value.price
+          : price // ignore: cast_nullable_to_non_nullable
+              as double,
+      totalSlots: null == totalSlots
+          ? _value.totalSlots
+          : totalSlots // ignore: cast_nullable_to_non_nullable
+              as int,
+      bookedSlots: null == bookedSlots
+          ? _value.bookedSlots
+          : bookedSlots // ignore: cast_nullable_to_non_nullable
+              as int,
+      currency: null == currency
+          ? _value.currency
+          : currency // ignore: cast_nullable_to_non_nullable
+              as String,
+      minQuantity: null == minQuantity
+          ? _value.minQuantity
+          : minQuantity // ignore: cast_nullable_to_non_nullable
+              as int,
+      maxQuantity: null == maxQuantity
+          ? _value.maxQuantity
+          : maxQuantity // ignore: cast_nullable_to_non_nullable
+              as int,
+    ) as $Val);
+  }
+}
+
+/// @nodoc
+abstract class _$$LobbyTicketOptionImplCopyWith<$Res>
+    implements $LobbyTicketOptionCopyWith<$Res> {
+  factory _$$LobbyTicketOptionImplCopyWith(_$LobbyTicketOptionImpl value,
+          $Res Function(_$LobbyTicketOptionImpl) then) =
+      __$$LobbyTicketOptionImplCopyWithImpl<$Res>;
+  @override
+  @useResult
+  $Res call(
+      {String id,
+      String name,
+      String description,
+      double price,
+      int totalSlots,
+      int bookedSlots,
+      String currency,
+      int minQuantity,
+      int maxQuantity});
+}
+
+/// @nodoc
+class __$$LobbyTicketOptionImplCopyWithImpl<$Res>
+    extends _$LobbyTicketOptionCopyWithImpl<$Res, _$LobbyTicketOptionImpl>
+    implements _$$LobbyTicketOptionImplCopyWith<$Res> {
+  __$$LobbyTicketOptionImplCopyWithImpl(_$LobbyTicketOptionImpl _value,
+      $Res Function(_$LobbyTicketOptionImpl) _then)
+      : super(_value, _then);
+
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? id = null,
+    Object? name = null,
+    Object? description = null,
+    Object? price = null,
+    Object? totalSlots = null,
+    Object? bookedSlots = null,
+    Object? currency = null,
+    Object? minQuantity = null,
+    Object? maxQuantity = null,
+  }) {
+    return _then(_$LobbyTicketOptionImpl(
+      id: null == id
+          ? _value.id
+          : id // ignore: cast_nullable_to_non_nullable
+              as String,
+      name: null == name
+          ? _value.name
+          : name // ignore: cast_nullable_to_non_nullable
+              as String,
+      description: null == description
+          ? _value.description
+          : description // ignore: cast_nullable_to_non_nullable
+              as String,
+      price: null == price
+          ? _value.price
+          : price // ignore: cast_nullable_to_non_nullable
+              as double,
+      totalSlots: null == totalSlots
+          ? _value.totalSlots
+          : totalSlots // ignore: cast_nullable_to_non_nullable
+              as int,
+      bookedSlots: null == bookedSlots
+          ? _value.bookedSlots
+          : bookedSlots // ignore: cast_nullable_to_non_nullable
+              as int,
+      currency: null == currency
+          ? _value.currency
+          : currency // ignore: cast_nullable_to_non_nullable
+              as String,
+      minQuantity: null == minQuantity
+          ? _value.minQuantity
+          : minQuantity // ignore: cast_nullable_to_non_nullable
+              as int,
+      maxQuantity: null == maxQuantity
+          ? _value.maxQuantity
+          : maxQuantity // ignore: cast_nullable_to_non_nullable
+              as int,
+    ));
+  }
+}
+
+/// @nodoc
+
+@JsonSerializable(explicitToJson: true)
+class _$LobbyTicketOptionImpl implements _LobbyTicketOption {
+  const _$LobbyTicketOptionImpl(
+      {this.id = "",
+      this.name = "",
+      this.description = "",
+      this.price = 0.0,
+      this.totalSlots = 0,
+      this.bookedSlots = 0,
+      this.currency = "INR",
+      this.minQuantity = 1,
+      this.maxQuantity = 1});
+
+  factory _$LobbyTicketOptionImpl.fromJson(Map<String, dynamic> json) =>
+      _$$LobbyTicketOptionImplFromJson(json);
+
+  @override
+  @JsonKey()
+  final String id;
+  @override
+  @JsonKey()
+  final String name;
+  @override
+  @JsonKey()
+  final String description;
+  @override
+  @JsonKey()
+  final double price;
+  @override
+  @JsonKey()
+  final int totalSlots;
+  @override
+  @JsonKey()
+  final int bookedSlots;
+  @override
+  @JsonKey()
+  final String currency;
+  @override
+  @JsonKey()
+  final int minQuantity;
+  @override
+  @JsonKey()
+  final int maxQuantity;
+
+  @override
+  String toString() {
+    return 'LobbyTicketOption(id: $id, name: $name, description: $description, price: $price, totalSlots: $totalSlots, bookedSlots: $bookedSlots, currency: $currency, minQuantity: $minQuantity, maxQuantity: $maxQuantity)';
+  }
+
+  @override
+  bool operator ==(dynamic other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _$LobbyTicketOptionImpl &&
+            (identical(other.id, id) || other.id == id) &&
+            (identical(other.name, name) || other.name == name) &&
+            (identical(other.description, description) ||
+                other.description == description) &&
+            (identical(other.price, price) || other.price == price) &&
+            (identical(other.totalSlots, totalSlots) ||
+                other.totalSlots == totalSlots) &&
+            (identical(other.bookedSlots, bookedSlots) ||
+                other.bookedSlots == bookedSlots) &&
+            (identical(other.currency, currency) ||
+                other.currency == currency) &&
+            (identical(other.minQuantity, minQuantity) ||
+                other.minQuantity == minQuantity) &&
+            (identical(other.maxQuantity, maxQuantity) ||
+                other.maxQuantity == maxQuantity));
+  }
+
+  @JsonKey(ignore: true)
+  @override
+  int get hashCode => Object.hash(runtimeType, id, name, description, price,
+      totalSlots, bookedSlots, currency, minQuantity, maxQuantity);
+
+  @JsonKey(ignore: true)
+  @override
+  @pragma('vm:prefer-inline')
+  _$$LobbyTicketOptionImplCopyWith<_$LobbyTicketOptionImpl> get copyWith =>
+      __$$LobbyTicketOptionImplCopyWithImpl<_$LobbyTicketOptionImpl>(
+          this, _$identity);
+
+  @override
+  Map<String, dynamic> toJson() {
+    return _$$LobbyTicketOptionImplToJson(
+      this,
+    );
+  }
+}
+
+abstract class _LobbyTicketOption implements LobbyTicketOption {
+  const factory _LobbyTicketOption(
+      {final String id,
+      final String name,
+      final String description,
+      final double price,
+      final int totalSlots,
+      final int bookedSlots,
+      final String currency,
+      final int minQuantity,
+      final int maxQuantity}) = _$LobbyTicketOptionImpl;
+
+  factory _LobbyTicketOption.fromJson(Map<String, dynamic> json) =
+      _$LobbyTicketOptionImpl.fromJson;
+
+  @override
+  String get id;
+  @override
+  String get name;
+  @override
+  String get description;
+  @override
+  double get price;
+  @override
+  int get totalSlots;
+  @override
+  int get bookedSlots;
+  @override
+  String get currency;
+  @override
+  int get minQuantity;
+  @override
+  int get maxQuantity;
+  @override
+  @JsonKey(ignore: true)
+  _$$LobbyTicketOptionImplCopyWith<_$LobbyTicketOptionImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }
 

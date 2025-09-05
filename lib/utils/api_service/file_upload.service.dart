@@ -1,5 +1,5 @@
 import 'dart:io';
-
+import 'dart:typed_data';
 
 import 'package:aroundu/constants/urls.dart';
 import 'package:aroundu/views/auth/auth.service.dart';
@@ -101,6 +101,21 @@ class FileUploadService {
     var formData = FormData.fromMap(
         {'file': await MultipartFile.fromFile(file.path), ...data});
     // Dio dio = Dio();
+    final response = await dio.post(
+      ApiConstants.arounduBaseUrl + url,
+      data: formData,
+      options: Options(
+        headers: await authService.getAuthHeaders(),
+      ),
+    );
+    return response;
+  }
+
+  // Web-compatible upload method using bytes
+  Future<Response> uploadBytes(
+      String url, Uint8List bytes, String filename, Map<String, dynamic> data) async {
+    var formData = FormData.fromMap(
+        {'file': MultipartFile.fromBytes(bytes, filename: filename), ...data});
     final response = await dio.post(
       ApiConstants.arounduBaseUrl + url,
       data: formData,

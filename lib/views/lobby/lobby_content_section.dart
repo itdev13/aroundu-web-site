@@ -6,11 +6,9 @@ import 'package:flutter_quill/flutter_quill.dart';
 
 class NewLobbyContentSection extends StatefulWidget {
   final ContentModel content;
+  final double? height;
 
-  const NewLobbyContentSection({
-    Key? key,
-    required this.content,
-  }) : super(key: key);
+  const NewLobbyContentSection({super.key, required this.content, this.height});
 
   @override
   State<NewLobbyContentSection> createState() => _NewLobbyContentSectionState();
@@ -66,26 +64,23 @@ class _NewLobbyContentSectionState extends State<NewLobbyContentSection> {
 
     double sh(double size) => screenHeight * size;
     if (!_isLoaded) {
-      return Center(
-        child: CircularProgressIndicator(),
-      );
+      return Center(child: CircularProgressIndicator());
     }
 
     return Container(
       padding: EdgeInsets.all(16),
+      constraints: BoxConstraints(maxHeight: widget.height ?? sh(0.5)),
+
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(
-          color: Colors.grey.shade100,
-          width: 1,
-        ),
+        border: Border.all(color: Colors.grey.shade100, width: 1),
       ),
       child: QuillEditor.basic(
         controller: _controller,
         // readOnly: true,
         config: QuillEditorConfig(
-          maxHeight: sh(0.5),
+          maxHeight: widget.height ?? sh(0.5),
           padding: EdgeInsets.zero,
           // readOnly: true,
           showCursor: false,
@@ -98,4 +93,3 @@ class _NewLobbyContentSectionState extends State<NewLobbyContentSection> {
     );
   }
 }
-

@@ -3,6 +3,7 @@ import 'package:aroundu/utils/api_service/api.service.dart';
 import 'package:aroundu/utils/logger.utils.dart';
 import 'package:aroundu/views/auth/auth.service.dart';
 import 'package:aroundu/views/lobby/lobby.view.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'dart:async';
 
@@ -28,12 +29,15 @@ class LobbyDetailsNotifier extends StateNotifier<AsyncValue<LobbyDetails?>> {
                   authService.getRefreshToken().isNotEmpty));
       kLogger.trace("is auth in lobby : $isauth");
       String endPoint = "match/lobby/api/v1/$lobbyId/detail";
+      Response? response;
       if (isauth) {
         endPoint = "match/lobby/api/v1/$lobbyId/detail";
+        response = await ApiService().get(endPoint);
       } else {
         endPoint = "match/lobby/public/$lobbyId/detail";
+        response = await ApiService().get(endPoint);
       }
-      final response = await ApiService().get(endPoint);
+      
 
       if (response.data != null) {
         kLogger.debug('Lobby details fetched successfully');

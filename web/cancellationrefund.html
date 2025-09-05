@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AroundU - Cancellation and Refund Policy</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            animation: fadeInUp 0.8s ease-out;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .header {
+            background: linear-gradient(135deg, #EC4B5D, #d63547);
+            color: white;
+            padding: 40px 30px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+            animation: pulse 4s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                transform: scale(1);
+                opacity: 0.5;
+            }
+
+            50% {
+                transform: scale(1.1);
+                opacity: 0.8;
+            }
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            font-weight: 700;
+            margin-bottom: 10px;
+            position: relative;
+            z-index: 1;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .header .subtitle {
+            font-size: 1.1em;
+            opacity: 0.9;
+            position: relative;
+            z-index: 1;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .welcome-text {
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            padding: 25px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            border-left: 4px solid #EC4B5D;
+            font-size: 1.1em;
+            line-height: 1.7;
+        }
+
+        .section {
+            margin-bottom: 35px;
+            padding: 25px;
+            background: #fafbfc;
+            border-radius: 8px;
+            border: 1px solid #e1e5e9;
+            transition: all 0.3s ease;
+        }
+
+        .section:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(236, 75, 93, 0.1);
+            border-color: #EC4B5D;
+        }
+
+        .section-title {
+            color: #EC4B5D;
+            font-size: 1.4em;
+            font-weight: 600;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+        }
+
+        .section-title::before {
+            content: '';
+            width: 4px;
+            height: 25px;
+            background: linear-gradient(135deg, #EC4B5D, #d63547);
+            margin-right: 12px;
+            border-radius: 2px;
+        }
+
+        .section-content {
+            color: #555;
+            line-height: 1.8;
+        }
+
+        .highlight {
+            background: linear-gradient(120deg, rgba(236, 75, 93, 0.1) 0%, rgba(236, 75, 93, 0.05) 100%);
+            padding: 15px;
+            border-radius: 6px;
+            margin: 15px 0;
+            border-left: 3px solid #EC4B5D;
+        }
+
+        .refund-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .refund-list li {
+            padding: 12px 0;
+            border-bottom: 1px solid #eee;
+            position: relative;
+            padding-left: 25px;
+        }
+
+        .refund-list li:last-child {
+            border-bottom: none;
+        }
+
+        .refund-list li::before {
+            content: '✓';
+            position: absolute;
+            left: 0;
+            color: #EC4B5D;
+            font-weight: bold;
+            font-size: 1.2em;
+        }
+
+        .footer {
+            background: #f8f9fa;
+            padding: 20px 40px;
+            text-align: center;
+            color: #666;
+            font-size: 0.9em;
+            border-top: 1px solid #e1e5e9;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            .header {
+                padding: 30px 20px;
+            }
+
+            .header h1 {
+                font-size: 2em;
+            }
+
+            .content {
+                padding: 25px;
+            }
+
+            .footer {
+                padding: 20px 25px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>AroundU</h1>
+            <div class="subtitle">Cancellation and Refund Policy</div>
+        </div>
+
+        <div class="content">
+            <div class="welcome-text">
+                <strong>Last Updated:</strong> 30/06/2025<br><br>
+                Welcome to AroundU! By using our services, you agree to these Terms of Service. Please read them
+                carefully.
+            </div>
+
+            <div class="section">
+                <div class="section-title">Event Cancellation</div>
+                <div class="section-content">
+                    <div class="highlight">
+                        In the event that a scheduled event is canceled by the organizer, AroundU guarantees a full
+                        refund of the ticket price without any deductions.
+                    </div>
+                    <p>The refund will be processed automatically within 5-7 business days and will be credited to the
+                        original payment method used for the transaction.</p>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-title">User-Initiated Refund Requests</div>
+                <div class="section-content">
+                    <p>If the event host (House/User) allows refunds, this option will be displayed on the AroundU app.
+                        Users can initiate a refund request up to 2 days before the event if permitted by the event
+                        host.</p>
+
+                    <ul class="refund-list">
+                        <li>If a refund request is approved, the amount will be credited back to the original payment
+                            method within the standard processing time.</li>
+                        <li>If a refund request is denied by the event host, no refund will be issued.</li>
+                        <li>AroundU does not bear responsibility for refunds in cases where the event host has
+                            explicitly disallowed them. Any disputes must be resolved between the user and the event
+                            host.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div style="text-align: center; padding: 10px; color: #666; font-size: 0.9em; position: fixed; bottom: 0; left: 0; right: 0; background-color: rgba(255, 255, 255, 0.9);">
+            &copy; 2025 AroundU. All rights reserved.<br>
+            Property of NextGen Tech &copy; 2025
+        </div>
+    </div>
+</body>
+
+</html>

@@ -47,9 +47,21 @@ _$LobbyImpl _$$LobbyImplFromJson(Map<String, dynamic> json) => _$LobbyImpl(
           ?.map((e) => UserSummary.fromJson(e as Map<String, dynamic>))
           .toList(),
       dateRange: json['dateRange'] as Map<String, dynamic>? ?? const {},
+      restriction: json['restriction'] == null
+          ? null
+          : LobbyRestriction.fromJson(
+              json['restriction'] as Map<String, dynamic>),
       priceDetails: json['priceDetails'] == null
           ? const PriceDetails()
           : PriceDetails.fromJson(json['priceDetails'] as Map<String, dynamic>),
+      isAdvancedPricing: json['isAdvancedPricing'] as bool? ?? false,
+      allowMultiplePricingOptions:
+          json['allowMultiplePricingOptions'] as bool? ?? false,
+      ticketOptions: (json['ticketOptions'] as List<dynamic>?)
+              ?.map(
+                  (e) => LobbyTicketOption.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          const <LobbyTicketOption>[],
       accessRequestData: json['accessRequestData'] == null
           ? null
           : AccessRequestData.fromJson(
@@ -67,6 +79,7 @@ _$LobbyImpl _$$LobbyImplFromJson(Map<String, dynamic> json) => _$LobbyImpl(
               .toList() ??
           const [],
       ratingGiven: json['ratingGiven'] as bool? ?? false,
+      loginNotRequired: json['loginNotRequired'] as bool? ?? false,
     );
 
 Map<String, dynamic> _$$LobbyImplToJson(_$LobbyImpl instance) =>
@@ -94,7 +107,11 @@ Map<String, dynamic> _$$LobbyImplToJson(_$LobbyImpl instance) =>
       'houseDetail': instance.houseDetail?.toJson(),
       'userSummaries': instance.userSummaries?.map((e) => e.toJson()).toList(),
       'dateRange': instance.dateRange,
+      'restriction': instance.restriction?.toJson(),
       'priceDetails': instance.priceDetails.toJson(),
+      'isAdvancedPricing': instance.isAdvancedPricing,
+      'allowMultiplePricingOptions': instance.allowMultiplePricingOptions,
+      'ticketOptions': instance.ticketOptions.map((e) => e.toJson()).toList(),
       'accessRequestData': instance.accessRequestData?.toJson(),
       'hasForm': instance.hasForm,
       'hasOffer': instance.hasOffer,
@@ -104,6 +121,7 @@ Map<String, dynamic> _$$LobbyImplToJson(_$LobbyImpl instance) =>
       'rating': instance.rating.toJson(),
       'priceTierList': instance.priceTierList?.map((e) => e.toJson()).toList(),
       'ratingGiven': instance.ratingGiven,
+      'loginNotRequired': instance.loginNotRequired,
     };
 
 _$RatingImpl _$$RatingImplFromJson(Map<String, dynamic> json) => _$RatingImpl(
@@ -199,6 +217,40 @@ Map<String, dynamic> _$$UserSummaryImplToJson(_$UserSummaryImpl instance) =>
       'dob': instance.dob,
     };
 
+_$LobbyRestrictionImpl _$$LobbyRestrictionImplFromJson(
+        Map<String, dynamic> json) =>
+    _$LobbyRestrictionImpl(
+      genderRestriction: json['genderRestriction'] as String? ?? "",
+      ageRange: json['ageRange'] == null
+          ? const AgeRange()
+          : AgeRange.fromJson(json['ageRange'] as Map<String, dynamic>),
+      maxMales: (json['maxMales'] as num?)?.toInt(),
+      maxFemales: (json['maxFemales'] as num?)?.toInt(),
+      maxOthers: (json['maxOthers'] as num?)?.toInt(),
+    );
+
+Map<String, dynamic> _$$LobbyRestrictionImplToJson(
+        _$LobbyRestrictionImpl instance) =>
+    <String, dynamic>{
+      'genderRestriction': instance.genderRestriction,
+      'ageRange': instance.ageRange.toJson(),
+      'maxMales': instance.maxMales,
+      'maxFemales': instance.maxFemales,
+      'maxOthers': instance.maxOthers,
+    };
+
+_$AgeRangeImpl _$$AgeRangeImplFromJson(Map<String, dynamic> json) =>
+    _$AgeRangeImpl(
+      minAge: (json['minAge'] as num?)?.toInt() ?? 0,
+      maxAge: (json['maxAge'] as num?)?.toInt() ?? 100,
+    );
+
+Map<String, dynamic> _$$AgeRangeImplToJson(_$AgeRangeImpl instance) =>
+    <String, dynamic>{
+      'minAge': instance.minAge,
+      'maxAge': instance.maxAge,
+    };
+
 _$PriceDetailsImpl _$$PriceDetailsImplFromJson(Map<String, dynamic> json) =>
     _$PriceDetailsImpl(
       price: (json['price'] as num?)?.toDouble() ?? 0.0,
@@ -213,6 +265,34 @@ Map<String, dynamic> _$$PriceDetailsImplToJson(_$PriceDetailsImpl instance) =>
       'originalPrice': instance.originalPrice,
       'currency': instance.currency,
       'isRefundAllowed': instance.isRefundAllowed,
+    };
+
+_$LobbyTicketOptionImpl _$$LobbyTicketOptionImplFromJson(
+        Map<String, dynamic> json) =>
+    _$LobbyTicketOptionImpl(
+      id: json['id'] as String? ?? "",
+      name: json['name'] as String? ?? "",
+      description: json['description'] as String? ?? "",
+      price: (json['price'] as num?)?.toDouble() ?? 0.0,
+      totalSlots: (json['totalSlots'] as num?)?.toInt() ?? 0,
+      bookedSlots: (json['bookedSlots'] as num?)?.toInt() ?? 0,
+      currency: json['currency'] as String? ?? "INR",
+      minQuantity: (json['minQuantity'] as num?)?.toInt() ?? 1,
+      maxQuantity: (json['maxQuantity'] as num?)?.toInt() ?? 1,
+    );
+
+Map<String, dynamic> _$$LobbyTicketOptionImplToJson(
+        _$LobbyTicketOptionImpl instance) =>
+    <String, dynamic>{
+      'id': instance.id,
+      'name': instance.name,
+      'description': instance.description,
+      'price': instance.price,
+      'totalSlots': instance.totalSlots,
+      'bookedSlots': instance.bookedSlots,
+      'currency': instance.currency,
+      'minQuantity': instance.minQuantity,
+      'maxQuantity': instance.maxQuantity,
     };
 
 _$AccessRequestDataImpl _$$AccessRequestDataImplFromJson(

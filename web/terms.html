@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="/favicon.png" />
+    <title>AroundU - Terms of Service</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.7;
+            background: #ffffff;
+            min-height: 100vh;
+            color: #2d3748;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+            animation: fadeInUp 0.8s ease-out;
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #EC4B5D, #ff6b7a);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 1rem;
+            text-shadow: 0 4px 20px rgba(236, 75, 93, 0.3);
+        }
+
+        .header .subtitle {
+            font-size: 1.2rem;
+            color: #64748b;
+            font-weight: 500;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            padding: 3rem;
+            box-shadow:
+                0 20px 40px rgba(0, 0, 0, 0.1),
+                0 0 0 1px rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            animation: fadeInUp 0.8s ease-out 0.2s both;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #EC4B5D, #ff6b7a, #EC4B5D);
+            background-size: 200% 100%;
+            animation: shimmer 3s ease-in-out infinite;
+        }
+
+        .last-updated {
+            display: inline-block;
+            background: linear-gradient(135deg, #EC4B5D, #ff6b7a);
+            color: white;
+            padding: 0.5rem 1.5rem;
+            border-radius: 50px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 15px rgba(236, 75, 93, 0.3);
+        }
+
+        .intro {
+            font-size: 1.1rem;
+            color: #4a5568;
+            margin-bottom: 3rem;
+            padding: 2rem;
+            background: linear-gradient(135deg, rgba(236, 75, 93, 0.05), rgba(255, 107, 122, 0.05));
+            border-radius: 16px;
+            border-left: 4px solid #EC4B5D;
+        }
+
+        .section {
+            margin-bottom: 2.5rem;
+            padding: 2rem;
+            background: rgba(248, 250, 252, 0.8);
+            border-radius: 16px;
+            border: 1px solid rgba(226, 232, 240, 0.6);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(236, 75, 93, 0.05), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .section:hover::before {
+            left: 100%;
+        }
+
+        .section:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            border-color: rgba(236, 75, 93, 0.3);
+        }
+
+        .section-number {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #EC4B5D, #ff6b7a);
+            color: white;
+            border-radius: 50%;
+            font-weight: 700;
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 4px 15px rgba(236, 75, 93, 0.3);
+        }
+
+        .section h3 {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #1a202c;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .section p {
+            color: #4a5568;
+            font-size: 1rem;
+            line-height: 1.7;
+            margin-bottom: 1rem;
+        }
+
+        .section p:last-child {
+            margin-bottom: 0;
+        }
+
+        .highlight-section {
+            background: linear-gradient(135deg, rgba(236, 75, 93, 0.1), rgba(255, 107, 122, 0.1));
+            border-color: rgba(236, 75, 93, 0.3);
+        }
+
+        .contact-section {
+            background: linear-gradient(135deg, #EC4B5D, #ff6b7a);
+            color: white;
+            text-align: center;
+            padding: 2.5rem;
+            border-radius: 20px;
+            margin-top: 3rem;
+            box-shadow: 0 20px 40px rgba(236, 75, 93, 0.3);
+            animation: fadeInUp 0.8s ease-out 0.4s both;
+        }
+
+        .contact-section h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: white;
+        }
+
+        .email-link {
+            color: white;
+            text-decoration: none;
+            font-weight: 600;
+            padding: 0.75rem 2rem;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50px;
+            display: inline-block;
+            margin-top: 1rem;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .email-link:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        .company-name {
+            color: #EC4B5D;
+            font-weight: 700;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes shimmer {
+            0% {
+                background-position: -200% 0;
+            }
+
+            100% {
+                background-position: 200% 0;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            .header h1 {
+                font-size: 2.2rem;
+            }
+
+            .card {
+                padding: 2rem 1.5rem;
+            }
+
+            .section {
+                padding: 1.5rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Terms of Service</h1>
+            <p class="subtitle">Please read these terms carefully</p>
+        </div>
+
+        <div class="card">
+            <div class="last-updated">Last Updated: 30/06/2025</div>
+
+            <div class="intro">
+                Welcome to <span class="company-name">NEXTGEN TECH</span>! By using our services, you agree to these
+                Terms of Service. Please read them carefully.
+            </div>
+
+            <div class="section">
+                <h3><span class="section-number">1</span>Acceptance of Terms</h3>
+                <p>By accessing or using AroundU, you agree to be bound by these terms and our Privacy Policy.</p>
+            </div>
+
+            <div class="section">
+                <h3><span class="section-number">2</span>User Accounts</h3>
+                <p>You must create an account to use certain features of our platform.</p>
+                <p>You are responsible for maintaining the confidentiality of your account information and for all
+                    activities that occur under your account.</p>
+            </div>
+
+            <div class="section">
+                <h3><span class="section-number">3</span>Use of Our Services</h3>
+                <p>You agree to use our services only for lawful purposes and in accordance with these Terms.</p>
+                <p>You agree not to use our services in any way that could damage, disable, overburden, or impair our
+                    platform.</p>
+            </div>
+
+            <div class="section">
+                <h3><span class="section-number">4</span>Content</h3>
+                <p>You are responsible for the content you post on AroundU. You must ensure that your content does not
+                    violate any laws or infringe on the rights of others.</p>
+                <p>We reserve the right to remove any content that we deem inappropriate or in violation of these Terms.
+                </p>
+            </div>
+
+            <div class="section">
+                <h3><span class="section-number">5</span>Intellectual Property</h3>
+                <p>All intellectual property rights in our platform and services are owned by us or our licensors.</p>
+                <p>You may not use our intellectual property without our prior written consent.</p>
+            </div>
+
+            <div class="section">
+                <h3><span class="section-number">6</span>Termination</h3>
+                <p>We may terminate or suspend your account and access to our services at any time, without prior notice
+                    or liability, for any reason, including if you breach these Terms.</p>
+            </div>
+
+            <div class="section">
+                <h3><span class="section-number">7</span>Limitation of Liability</h3>
+                <p>To the maximum extent permitted by law, AroundU shall not be liable for any indirect, incidental,
+                    special, consequential, or punitive damages, or any loss of profits or revenues, whether incurred
+                    directly or indirectly.</p>
+            </div>
+
+            <div class="section">
+                <h3><span class="section-number">8</span>Governing Law</h3>
+                <p>These Terms shall be governed and construed in accordance with the laws of Bengaluru, Karnataka,
+                    India, without regard to its conflict of law provisions.</p>
+            </div>
+
+            <div class="section highlight-section">
+                <h3><span class="section-number">9</span>Refund Policy</h3>
+                <p>Refunds depend on the policies of our partners, including merchants and event organizers. We will
+                    make sure you are fully informed about these policies before you make any payment.</p>
+                <p>If an event is canceled, we will process your refund promptly once the event organizer requests it.
+                </p>
+            </div>
+
+            <div class="section">
+                <h3><span class="section-number">10</span>Changes to Terms</h3>
+                <p>We may modify these Terms from time to time. If we make changes, we will provide notice through our
+                    services or by other means, to provide you the opportunity to review the changes before they become
+                    effective.</p>
+            </div>
+        </div>
+
+        <div class="contact-section">
+            <h3>Questions?</h3>
+            <p>If you have any questions about these Terms, please contact us at</p>
+            <a href="mailto:contact@aroundu.in" class="email-link">contact@aroundu.in</a>
+        </div>
+    </div>
+    <div style="text-align: center; padding: 10px; color: #666; font-size: 0.9em; position: fixed; bottom: 0; left: 0; right: 0; background-color: rgba(255, 255, 255, 0.9);">
+        &copy; 2025 AroundU. All rights reserved.<br>
+        Property of NextGen Tech &copy; 2025
+    </div>
+</body>
+
+</html>

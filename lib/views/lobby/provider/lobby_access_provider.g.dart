@@ -6,7 +6,7 @@ part of 'lobby_access_provider.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$handleLobbyAccessHash() => r'6a171477c945a8187ebed31e1b415bdbb983b263';
+String _$handleLobbyAccessHash() => r'332ba365ba82d003c85f3b0717d95c22b9f34f3e';
 
 /// Copied from Dart SDK
 class _SystemHash {
@@ -49,6 +49,8 @@ class HandleLobbyAccessFamily extends Family<AsyncValue<Map<String, dynamic>>> {
     Map<String, dynamic> form = const {},
     List<Map<String, dynamic>> formList = const [],
     int? slots,
+    String? offerId,
+    List<SelectedTicket>? selectedTickets,
   }) {
     return HandleLobbyAccessProvider(
       lobbyId,
@@ -60,6 +62,8 @@ class HandleLobbyAccessFamily extends Family<AsyncValue<Map<String, dynamic>>> {
       form: form,
       formList: formList,
       slots: slots,
+      offerId: offerId,
+      selectedTickets: selectedTickets,
     );
   }
 
@@ -77,6 +81,8 @@ class HandleLobbyAccessFamily extends Family<AsyncValue<Map<String, dynamic>>> {
       form: provider.form,
       formList: provider.formList,
       slots: provider.slots,
+      offerId: provider.offerId,
+      selectedTickets: provider.selectedTickets,
     );
   }
 
@@ -109,6 +115,8 @@ class HandleLobbyAccessProvider
     Map<String, dynamic> form = const {},
     List<Map<String, dynamic>> formList = const [],
     int? slots,
+    String? offerId,
+    List<SelectedTicket>? selectedTickets,
   }) : this._internal(
           (ref) => handleLobbyAccess(
             ref as HandleLobbyAccessRef,
@@ -121,6 +129,8 @@ class HandleLobbyAccessProvider
             form: form,
             formList: formList,
             slots: slots,
+            offerId: offerId,
+            selectedTickets: selectedTickets,
           ),
           from: handleLobbyAccessProvider,
           name: r'handleLobbyAccessProvider',
@@ -140,6 +150,8 @@ class HandleLobbyAccessProvider
           form: form,
           formList: formList,
           slots: slots,
+          offerId: offerId,
+          selectedTickets: selectedTickets,
         );
 
   HandleLobbyAccessProvider._internal(
@@ -158,6 +170,8 @@ class HandleLobbyAccessProvider
     required this.form,
     required this.formList,
     required this.slots,
+    required this.offerId,
+    required this.selectedTickets,
   }) : super.internal();
 
   final String lobbyId;
@@ -169,6 +183,8 @@ class HandleLobbyAccessProvider
   final Map<String, dynamic> form;
   final List<Map<String, dynamic>> formList;
   final int? slots;
+  final String? offerId;
+  final List<SelectedTicket>? selectedTickets;
 
   @override
   Override overrideWith(
@@ -193,6 +209,8 @@ class HandleLobbyAccessProvider
         form: form,
         formList: formList,
         slots: slots,
+        offerId: offerId,
+        selectedTickets: selectedTickets,
       ),
     );
   }
@@ -213,7 +231,9 @@ class HandleLobbyAccessProvider
         other.text == text &&
         other.form == form &&
         other.formList == formList &&
-        other.slots == slots;
+        other.slots == slots &&
+        other.offerId == offerId &&
+        other.selectedTickets == selectedTickets;
   }
 
   @override
@@ -228,6 +248,8 @@ class HandleLobbyAccessProvider
     hash = _SystemHash.combine(hash, form.hashCode);
     hash = _SystemHash.combine(hash, formList.hashCode);
     hash = _SystemHash.combine(hash, slots.hashCode);
+    hash = _SystemHash.combine(hash, offerId.hashCode);
+    hash = _SystemHash.combine(hash, selectedTickets.hashCode);
 
     return _SystemHash.finish(hash);
   }
@@ -263,6 +285,12 @@ mixin HandleLobbyAccessRef
 
   /// The parameter `slots` of this provider.
   int? get slots;
+
+  /// The parameter `offerId` of this provider.
+  String? get offerId;
+
+  /// The parameter `selectedTickets` of this provider.
+  List<SelectedTicket>? get selectedTickets;
 }
 
 class _HandleLobbyAccessProviderElement
@@ -289,6 +317,11 @@ class _HandleLobbyAccessProviderElement
       (origin as HandleLobbyAccessProvider).formList;
   @override
   int? get slots => (origin as HandleLobbyAccessProvider).slots;
+  @override
+  String? get offerId => (origin as HandleLobbyAccessProvider).offerId;
+  @override
+  List<SelectedTicket>? get selectedTickets =>
+      (origin as HandleLobbyAccessProvider).selectedTickets;
 }
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package

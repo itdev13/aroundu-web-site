@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:aroundu/constants/urls.dart';
 import 'package:aroundu/designs/colors.designs.dart';
@@ -101,19 +102,23 @@ class ExternalAttendeeNotifier extends StateNotifier<ExternalAttendeeState> {
       FilePickerResult? result = await FilePicker.platform.pickFiles(
         type: FileType.custom,
         allowedExtensions: ['xlsx', 'xls', 'csv'],
+        withData: true, // Required for web
       );
 
-      if (result != null) {
-        File file = File(result.files.single.path!);
+      if (result != null && result.files.single.bytes != null) {
+        final file = result.files.single;
+        final bytes = file.bytes!;
+        final filename = file.name;
 
         final uploadBody = {
           'lobbyId': lobbyId,
           'type': 'external_attendees',
         };
 
-        final response = await FileUploadService().upload(
+        final response = await FileUploadService().uploadBytes(
           ApiConstants.uploadFile, // API endpoint
-          file,
+          bytes,
+          filename,
           uploadBody,
         );
 

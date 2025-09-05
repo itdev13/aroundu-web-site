@@ -21,14 +21,13 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../designs/colors.designs.dart';
 import '../../designs/widgets/button.widget.designs.dart';
 
-final permissionAccessRequestProvider = FutureProvider.autoDispose.family<
-  Map<String, dynamic>,
-  Map<String, dynamic>
->((ref, body) async {
+final permissionAccessRequestProvider = FutureProvider.autoDispose.family<Map<String, dynamic>, Map<String, dynamic>>((
+  ref,
+  body,
+) async {
   try {
     // Construct URL with ID
-    String url =
-        'match/lobby/api/v1/accept-access-requests'; // Replace with your endpoint
+    String url = 'match/lobby/api/v1/accept-access-requests'; // Replace with your endpoint
 
     // Make GET request (or POST if required)
     final response = await ApiService().post(
@@ -48,9 +47,7 @@ final permissionAccessRequestProvider = FutureProvider.autoDispose.family<
 });
 
 final selectAllProvider = StateProvider.autoDispose<bool>((ref) => false);
-final selectedRequestsProvider = StateProvider.autoDispose<Set<String>>(
-  (ref) => {},
-);
+final selectedRequestsProvider = StateProvider.autoDispose<Set<String>>((ref) => {});
 
 class AccessRequestsView extends ConsumerWidget {
   // final LobbyDetails lobbyDetail;
@@ -69,21 +66,11 @@ class AccessRequestsView extends ConsumerWidget {
           children: [
             Icon(icon, size: 14, color: const Color(0xFF3E79A1)),
             SizedBox(width: 4),
-            DesignText(
-              text: label,
-              fontSize: 10,
-              fontWeight: FontWeight.w400,
-              color: Colors.black54,
-            ),
+            DesignText(text: label, fontSize: 10, fontWeight: FontWeight.w400, color: Colors.black54),
           ],
         ),
         SizedBox(height: 2),
-        DesignText(
-          text: value,
-          fontSize: 14,
-          fontWeight: FontWeight.w600,
-          color: Colors.black,
-        ),
+        DesignText(text: value, fontSize: 14, fontWeight: FontWeight.w600, color: Colors.black),
       ],
     );
   }
@@ -91,17 +78,13 @@ class AccessRequestsView extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     // final lobby = lobbyDetail.lobby;
-    final accessRequestsAsync = ref.watch(
-      accessRequestsNotifierProvider(lobbyId),
-    );
+    final accessRequestsAsync = ref.watch(accessRequestsNotifierProvider(lobbyId));
     final isSelectAll = ref.watch(selectAllProvider);
     final selectedRequests = ref.watch(selectedRequestsProvider);
 
     // Add refresh capability
     Future<void> onRefresh() async {
-      ref
-          .read(accessRequestsNotifierProvider(lobbyId).notifier)
-          .refresh(lobbyId);
+      ref.read(accessRequestsNotifierProvider(lobbyId).notifier).refresh(lobbyId);
     }
 
     double screenWidth = MediaQuery.of(context).size.width;
@@ -112,11 +95,7 @@ class AccessRequestsView extends ConsumerWidget {
     double sh(double size) => screenHeight * size;
     return Scaffold(
       appBar: AppBar(
-        title: DesignText(
-          text: pageTitle ?? "",
-          fontSize: 16,
-          fontWeight: FontWeight.w500,
-        ),
+        title: DesignText(text: pageTitle ?? "", fontSize: 16, fontWeight: FontWeight.w500),
         centerTitle: true,
         backgroundColor: Colors.white,
         scrolledUnderElevation: 0,
@@ -125,10 +104,7 @@ class AccessRequestsView extends ConsumerWidget {
             data:
                 (accessRequests) =>
                     accessRequests.isEmpty
-                        ? IconButton(
-                          icon: const Icon(Icons.refresh),
-                          onPressed: onRefresh,
-                        )
+                        ? IconButton(icon: const Icon(Icons.refresh), onPressed: onRefresh)
                         : IconButton(
                           icon: const Icon(Icons.download),
                           onPressed: () {
@@ -141,11 +117,7 @@ class AccessRequestsView extends ConsumerWidget {
                                   elevation: 4,
                                   title: Row(
                                     children: [
-                                      Icon(
-                                        Icons.download_outlined,
-                                        color: DesignColors.accent,
-                                        size: 20,
-                                      ),
+                                      Icon(Icons.download_outlined, color: DesignColors.accent, size: 20),
                                       SizedBox(width: 8),
                                       Text(
                                         "Download Response Data",
@@ -159,60 +131,31 @@ class AccessRequestsView extends ConsumerWidget {
                                   ),
                                   content: Text(
                                     "This will download response data for all attendees in excel sheet format.",
-                                    style: TextStyle(
-                                      fontSize: 14,
-                                      color: Colors.black54,
-                                      height: 1.4,
-                                    ),
+                                    style: TextStyle(fontSize: 14, color: Colors.black54, height: 1.4),
                                   ),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(16),
-                                  ),
-                                  contentPadding: EdgeInsets.fromLTRB(
-                                    24,
-                                    16,
-                                    24,
-                                    0,
-                                  ),
-                                  actionsPadding: EdgeInsets.fromLTRB(
-                                    16,
-                                    12,
-                                    16,
-                                    8,
-                                  ),
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                                  contentPadding: EdgeInsets.fromLTRB(24, 16, 24, 0),
+                                  actionsPadding: EdgeInsets.fromLTRB(16, 12, 16, 8),
                                   actions: [
                                     Row(
                                       children: [
                                         // Cancel button - takes up half the space
                                         Expanded(
                                           child: Padding(
-                                            padding: EdgeInsets.symmetric(
-                                              horizontal: 4,
-                                            ),
+                                            padding: EdgeInsets.symmetric(horizontal: 4),
                                             child: TextButton(
                                               onPressed: () {
-                                                Navigator.of(
-                                                  context,
-                                                ).pop(); // Close dialog without action
+                                                Navigator.of(context).pop(); // Close dialog without action
                                               },
                                               style: TextButton.styleFrom(
-                                                backgroundColor:
-                                                    Colors.grey.shade100,
+                                                backgroundColor: Colors.grey.shade100,
                                                 foregroundColor: Colors.black87,
-                                                shape: RoundedRectangleBorder(
-                                                  borderRadius:
-                                                      BorderRadius.circular(8),
-                                                ),
-                                                padding: EdgeInsets.symmetric(
-                                                  vertical: 12,
-                                                ),
+                                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                                                padding: EdgeInsets.symmetric(vertical: 12),
                                               ),
                                               child: Text(
                                                 "Cancel",
-                                                style: TextStyle(
-                                                  fontWeight: FontWeight.w500,
-                                                  fontSize: 14,
-                                                ),
+                                                style: TextStyle(fontWeight: FontWeight.w500, fontSize: 14),
                                               ),
                                             ),
                                           ),
@@ -221,37 +164,21 @@ class AccessRequestsView extends ConsumerWidget {
                                         // Download button - takes up half the space
                                         Expanded(
                                           child: Padding(
-                                            padding: EdgeInsets.symmetric(
-                                              horizontal: 4,
-                                            ),
+                                            padding: EdgeInsets.symmetric(horizontal: 4),
                                             child: TextButton(
                                               onPressed: () async {
-                                                Navigator.of(
-                                                  context,
-                                                ).pop(); // Close dialog
-                                                await _handleFileDownload(
-                                                  context,
-                                                  lobbyId,
-                                                );
+                                                Navigator.of(context).pop(); // Close dialog
+                                                await _handleFileDownload(context, lobbyId);
                                               },
                                               style: TextButton.styleFrom(
-                                                backgroundColor:
-                                                    DesignColors.accent,
+                                                backgroundColor: DesignColors.accent,
                                                 foregroundColor: Colors.white,
-                                                shape: RoundedRectangleBorder(
-                                                  borderRadius:
-                                                      BorderRadius.circular(8),
-                                                ),
-                                                padding: EdgeInsets.symmetric(
-                                                  vertical: 12,
-                                                ),
+                                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                                                padding: EdgeInsets.symmetric(vertical: 12),
                                               ),
                                               child: Text(
                                                 "Download",
-                                                style: TextStyle(
-                                                  fontWeight: FontWeight.w500,
-                                                  fontSize: 14,
-                                                ),
+                                                style: TextStyle(fontWeight: FontWeight.w500, fontSize: 14),
                                               ),
                                             ),
                                           ),
@@ -264,16 +191,8 @@ class AccessRequestsView extends ConsumerWidget {
                             );
                           },
                         ),
-            error:
-                (error, stackTrace) => IconButton(
-                  icon: const Icon(Icons.refresh),
-                  onPressed: onRefresh,
-                ),
-            loading:
-                () => IconButton(
-                  icon: const Icon(Icons.refresh),
-                  onPressed: onRefresh,
-                ),
+            error: (error, stackTrace) => IconButton(icon: const Icon(Icons.refresh), onPressed: onRefresh),
+            loading: () => IconButton(icon: const Icon(Icons.refresh), onPressed: onRefresh),
           ),
         ],
       ),
@@ -287,12 +206,7 @@ class AccessRequestsView extends ConsumerWidget {
                       : Column(
                         children: [
                           if (accessRequests.first.accessRequests.isNotEmpty &&
-                              accessRequests
-                                      .first
-                                      .accessRequests
-                                      .first
-                                      .lobbyType ==
-                                  'PRIVATE')
+                              accessRequests.first.accessRequests.first.lobbyType == 'PRIVATE')
                             Padding(
                               padding: EdgeInsets.all(16),
                               child: Row(
@@ -301,42 +215,22 @@ class AccessRequestsView extends ConsumerWidget {
                                   Checkbox(
                                     value: isSelectAll,
                                     onChanged: (bool? value) {
-                                      ref
-                                          .read(selectAllProvider.notifier)
-                                          .state = value ?? false;
+                                      ref.read(selectAllProvider.notifier).state = value ?? false;
                                       if (value ?? false) {
                                         // Select all requests
                                         final allIds =
                                             accessRequests
-                                                .expand(
-                                                  (request) =>
-                                                      request.accessRequests,
-                                                )
-                                                .map(
-                                                  (request) =>
-                                                      request.accessRequestId,
-                                                )
+                                                .expand((request) => request.accessRequests)
+                                                .map((request) => request.accessRequestId)
                                                 .toSet();
-                                        ref
-                                            .read(
-                                              selectedRequestsProvider.notifier,
-                                            )
-                                            .state = allIds;
+                                        ref.read(selectedRequestsProvider.notifier).state = allIds;
                                       } else {
                                         // Deselect all
-                                        ref
-                                            .read(
-                                              selectedRequestsProvider.notifier,
-                                            )
-                                            .state = {};
+                                        ref.read(selectedRequestsProvider.notifier).state = {};
                                       }
                                     },
                                   ),
-                                  DesignText(
-                                    text: "Select all",
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w400,
-                                  ),
+                                  DesignText(text: "Select all", fontSize: 14, fontWeight: FontWeight.w400),
                                 ],
                               ),
                             ),
@@ -352,125 +246,75 @@ class AccessRequestsView extends ConsumerWidget {
                                   children: List.generate(requests.length, (i) {
                                     final request = requests[i];
                                     final isGroup = request.groupData != null;
-                                    final isSelected = selectedRequests
-                                        .contains(request.accessRequestId);
+                                    final isSelected = selectedRequests.contains(request.accessRequestId);
                                     return GestureDetector(
                                       onTap:
-                                          () => Get.toNamed(
-                                            AppRoutes.detailAccessRequest,
-                                            arguments: {
-                                              'request': request,
-                                              'lobbyId': lobbyId,
-                                              'isGroup': isGroup,
-                                            },
-                                          ),
+                                          () {
+                                          //   Get.toNamed(
+                                          //   AppRoutes.detailAccessRequest,
+                                          //   arguments: {'request': request, 'lobbyId': lobbyId, 'isGroup': isGroup},
+                                          // );
+                                           Get.to(AccessRequestPage(request: request, lobbyId: lobbyId, isGroup: isGroup));
+                                          },
                                       child: Padding(
-                                        padding: EdgeInsets.only(
-                                          left: 8,
-                                          right: 8,
-                                          top: 0,
-                                          bottom: 16,
-                                        ),
+                                        padding: EdgeInsets.only(left: 8, right: 8, top: 0, bottom: 16),
                                         child: Container(
                                           //  margin: EdgeInsets.only(top: 12),
-                                          padding: EdgeInsets.symmetric(
-                                            horizontal: 10,
-                                            vertical: 8,
-                                          ),
+                                          padding: EdgeInsets.symmetric(horizontal: 10, vertical: 8),
                                           decoration: BoxDecoration(
                                             color: const Color(0xFFF5F7F9),
-                                            borderRadius: BorderRadius.circular(
-                                              8,
-                                            ),
-                                            border: Border.all(
-                                              color: Colors.grey.withOpacity(
-                                                0.15,
-                                              ),
-                                            ),
+                                            borderRadius: BorderRadius.circular(8),
+                                            border: Border.all(color: Colors.grey.withOpacity(0.15)),
                                           ),
                                           child: Column(
                                             children: [
                                               Row(
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment.start,
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.center,
+                                                mainAxisAlignment: MainAxisAlignment.start,
+                                                crossAxisAlignment: CrossAxisAlignment.center,
                                                 children: [
                                                   // Profile Picture
                                                   CircleAvatar(
                                                     radius: 24,
-                                                    backgroundColor:
-                                                        const Color(0xFFEAEFF2),
+                                                    backgroundColor: const Color(0xFFEAEFF2),
                                                     child: ClipOval(
                                                       child: Image.network(
-                                                        request.profilePictureUrl ??
-                                                            "",
+                                                        request.profilePictureUrl ?? "",
                                                         fit: BoxFit.cover,
                                                         width: 48,
                                                         height: 48,
                                                         errorBuilder:
-                                                            (
-                                                              context,
-                                                              error,
-                                                              stackTrace,
-                                                            ) => Icon(
-                                                              Icons.person,
-                                                              size: 24,
-                                                              color:
-                                                                  Colors.grey,
-                                                            ),
+                                                            (context, error, stackTrace) =>
+                                                                Icon(Icons.person, size: 24, color: Colors.grey),
                                                         loadingBuilder:
-                                                            (
-                                                              context,
-                                                              child,
-                                                              loadingProgress,
-                                                            ) =>
-                                                                loadingProgress ==
-                                                                        null
+                                                            (context, child, loadingProgress) =>
+                                                                loadingProgress == null
                                                                     ? child
                                                                     : const Center(
                                                                       child: CircularProgressIndicator(
-                                                                        color:
-                                                                            DesignColors.accent,
+                                                                        color: DesignColors.accent,
                                                                       ),
                                                                     ),
                                                       ),
                                                     ),
                                                   ),
-                                                  SizedBox(
-                                                    width: 12,
-                                                  ), // Space between profile picture and text
+                                                  SizedBox(width: 12), // Space between profile picture and text
                                                   // Name and Request Text
                                                   isGroup
                                                       ? Expanded(
                                                         child: Column(
-                                                          crossAxisAlignment:
-                                                              CrossAxisAlignment
-                                                                  .start,
+                                                          crossAxisAlignment: CrossAxisAlignment.start,
                                                           children: [
                                                             DesignText(
-                                                              text:
-                                                                  request
-                                                                      .groupData!
-                                                                      .userInfos
-                                                                      .first
-                                                                      .name,
+                                                              text: request.groupData!.userInfos.first.name,
                                                               fontSize: 12,
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .w500,
-                                                              color:
-                                                                  Colors.black,
+                                                              fontWeight: FontWeight.w500,
+                                                              color: Colors.black,
                                                             ),
                                                             DesignText(
-                                                              text:
-                                                                  "Group of ${(request.groupData!.userInfos.length)}",
+                                                              text: "Group of ${(request.groupData!.userInfos.length)}",
                                                               fontSize: 12,
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .w300,
-                                                              color:
-                                                                  Colors.black,
+                                                              fontWeight: FontWeight.w300,
+                                                              color: Colors.black,
                                                             ),
                                                           ],
                                                         ),
@@ -478,338 +322,211 @@ class AccessRequestsView extends ConsumerWidget {
                                                       : Expanded(
                                                         child: RichText(
                                                           maxLines: 2,
-                                                          overflow:
-                                                              TextOverflow
-                                                                  .ellipsis, // Handle overflow
+                                                          overflow: TextOverflow.ellipsis, // Handle overflow
                                                           text: TextSpan(
                                                             children: [
                                                               TextSpan(
-                                                                text:
-                                                                    request
-                                                                        .name, // Name part
+                                                                text: request.name, // Name part
                                                                 style: TextStyle(
                                                                   fontSize: 12,
-                                                                  fontWeight:
-                                                                      FontWeight
-                                                                          .w500, // w500 for name
-                                                                  fontFamily:
-                                                                      'Poppins', // Apply Poppins font
-                                                                  color:
-                                                                      Colors
-                                                                          .black, // Set your desired color
+                                                                  fontWeight: FontWeight.w500, // w500 for name
+                                                                  fontFamily: 'Poppins', // Apply Poppins font
+                                                                  color: Colors.black, // Set your desired color
                                                                 ),
                                                               ),
                                                               TextSpan(
                                                                 text:
-                                                                    request.lobbyType ==
-                                                                            'PRIVATE'
+                                                                    request.lobbyType == 'PRIVATE'
                                                                         ? " requested to join lobby"
                                                                         : " joined lobby", // Rest of the text
                                                                 style: TextStyle(
                                                                   fontSize: 12,
-                                                                  fontWeight:
-                                                                      FontWeight
-                                                                          .w300, // w300 for the rest
-                                                                  fontFamily:
-                                                                      'Poppins', // Apply Poppins font
-                                                                  color:
-                                                                      Colors
-                                                                          .black, // Set your desired color
+                                                                  fontWeight: FontWeight.w300, // w300 for the rest
+                                                                  fontFamily: 'Poppins', // Apply Poppins font
+                                                                  color: Colors.black, // Set your desired color
                                                                 ),
                                                               ),
                                                             ],
                                                           ),
                                                         ),
                                                       ),
-                                                  SizedBox(
-                                                    width: 12,
-                                                  ), // Space between text and buttons
+                                                  SizedBox(width: 12), // Space between text and buttons
                                                   // Buttons
                                                   isSelectAll
                                                       ? Checkbox(
                                                         value: isSelected,
-                                                        onChanged: (
-                                                          bool? value,
-                                                        ) {
-                                                          final currentSelected =
-                                                              ref.read(
-                                                                selectedRequestsProvider,
-                                                              );
+                                                        onChanged: (bool? value) {
+                                                          final currentSelected = ref.read(selectedRequestsProvider);
                                                           if (value ?? false) {
-                                                            ref
-                                                                .read(
-                                                                  selectedRequestsProvider
-                                                                      .notifier,
-                                                                )
-                                                                .state = {
+                                                            ref.read(selectedRequestsProvider.notifier).state = {
                                                               ...currentSelected,
-                                                              request
-                                                                  .accessRequestId,
+                                                              request.accessRequestId,
                                                             };
                                                           } else {
-                                                            currentSelected.remove(
-                                                              request
-                                                                  .accessRequestId,
-                                                            );
-                                                            ref
-                                                                .read(
-                                                                  selectedRequestsProvider
-                                                                      .notifier,
-                                                                )
-                                                                .state = {
+                                                            currentSelected.remove(request.accessRequestId);
+                                                            ref.read(selectedRequestsProvider.notifier).state = {
                                                               ...currentSelected,
                                                             };
                                                           }
                                                         },
                                                       )
-                                                      : request.lobbyType ==
-                                                          'PRIVATE'
+                                                      : request.lobbyType == 'PRIVATE'
                                                       ? Row(
                                                         mainAxisSize:
-                                                            MainAxisSize
-                                                                .min, // Prevent buttons from expanding
+                                                            MainAxisSize.min, // Prevent buttons from expanding
                                                         children: [
                                                           ElevatedButton(
                                                             style: ElevatedButton.styleFrom(
-                                                              backgroundColor:
-                                                                  const Color(
-                                                                    0xFFEC4B5D,
-                                                                  ),
-                                                              padding:
-                                                                  EdgeInsets.symmetric(
-                                                                    horizontal:
-                                                                        12,
-                                                                    vertical: 8,
-                                                                  ), // Button padding
+                                                              backgroundColor: const Color(0xFFEC4B5D),
+                                                              padding: EdgeInsets.symmetric(
+                                                                horizontal: 12,
+                                                                vertical: 8,
+                                                              ), // Button padding
                                                             ),
                                                             onPressed: () async {
                                                               final body = {
-                                                                "lobbyId":
-                                                                    lobbyId,
+                                                                "lobbyId": lobbyId,
                                                                 "requestAccessDTOList": [
                                                                   {
-                                                                    "responses":
-                                                                        "",
-                                                                    "accessRequestId":
-                                                                        request
-                                                                            .accessRequestId,
-                                                                    "isAccepted":
-                                                                        true,
+                                                                    "responses": "",
+                                                                    "accessRequestId": request.accessRequestId,
+                                                                    "isAccepted": true,
                                                                   },
                                                                 ],
                                                               };
-                                                              final res =
-                                                                  await ref.read(
-                                                                    permissionAccessRequestProvider(
-                                                                      body,
-                                                                    ).future,
-                                                                  );
-                                                              if (res['status'] ==
-                                                                  'SUCCESS') {
+                                                              final res = await ref.read(
+                                                                permissionAccessRequestProvider(body).future,
+                                                              );
+                                                              if (res['status'] == 'SUCCESS') {
                                                                 CustomSnackBar.show(
-                                                                  context:
-                                                                      context,
-                                                                  message:
-                                                                      "${res['status']} ${res['message']}",
-                                                                  type:
-                                                                      SnackBarType
-                                                                          .success,
+                                                                  context: context,
+                                                                  message: "${res['status']} ${res['message']}",
+                                                                  type: SnackBarType.success,
                                                                 );
                                                               } else {
                                                                 CustomSnackBar.show(
-                                                                  context:
-                                                                      context,
-                                                                  message:
-                                                                      "${res['status']} ${res['message']}",
-                                                                  type:
-                                                                      SnackBarType
-                                                                          .error,
+                                                                  context: context,
+                                                                  message: "${res['status']} ${res['message']}",
+                                                                  type: SnackBarType.error,
                                                                 );
                                                               }
 
                                                               ref
                                                                   .read(
-                                                                    accessRequestsNotifierProvider(
-                                                                      lobbyId,
-                                                                    ).notifier,
+                                                                    accessRequestsNotifierProvider(lobbyId).notifier,
                                                                   )
-                                                                  .refresh(
-                                                                    lobbyId,
-                                                                  );
+                                                                  .refresh(lobbyId);
                                                             },
                                                             child: DesignText(
                                                               text: "Confirm",
                                                               fontSize: 12,
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .w500,
-                                                              color:
-                                                                  Colors.white,
+                                                              fontWeight: FontWeight.w500,
+                                                              color: Colors.white,
                                                             ),
                                                           ),
-                                                          SizedBox(
-                                                            width: 8,
-                                                          ), // Space between buttons
+                                                          SizedBox(width: 8), // Space between buttons
                                                           ElevatedButton(
                                                             style: ElevatedButton.styleFrom(
-                                                              backgroundColor:
-                                                                  Colors.white,
+                                                              backgroundColor: Colors.white,
                                                               side: const BorderSide(
-                                                                width:
-                                                                    1.0, // 1px border width
-                                                                color: Color(
-                                                                  0xFF3E79A1,
-                                                                ), // Border color
+                                                                width: 1.0, // 1px border width
+                                                                color: Color(0xFF3E79A1), // Border color
                                                               ),
-                                                              padding:
-                                                                  EdgeInsets.symmetric(
-                                                                    horizontal:
-                                                                        12,
-                                                                    vertical: 8,
-                                                                  ), // Button padding
+                                                              padding: EdgeInsets.symmetric(
+                                                                horizontal: 12,
+                                                                vertical: 8,
+                                                              ), // Button padding
                                                             ),
                                                             onPressed: () async {
-                                                              await showCustomBottomSheet(
-                                                                context,
-                                                              );
+                                                              await showCustomBottomSheet(context);
                                                               final body = {
-                                                                "lobbyId":
-                                                                    lobbyId,
+                                                                "lobbyId": lobbyId,
                                                                 "requestAccessDTOList": [
                                                                   {
-                                                                    "responses":
-                                                                        ref
-                                                                            .read(
-                                                                              textControllerProvider,
-                                                                            )
-                                                                            .text,
-                                                                    "accessRequestId":
-                                                                        request
-                                                                            .accessRequestId,
-                                                                    "isAccepted":
-                                                                        false,
+                                                                    "responses": ref.read(textControllerProvider).text,
+                                                                    "accessRequestId": request.accessRequestId,
+                                                                    "isAccepted": false,
                                                                   },
                                                                 ],
                                                               };
-                                                              final res =
-                                                                  await ref.read(
-                                                                    permissionAccessRequestProvider(
-                                                                      body,
-                                                                    ).future,
-                                                                  );
-                                                              if (res['status'] ==
-                                                                  'SUCCESS') {
+                                                              final res = await ref.read(
+                                                                permissionAccessRequestProvider(body).future,
+                                                              );
+                                                              if (res['status'] == 'SUCCESS') {
                                                                 CustomSnackBar.show(
-                                                                  context:
-                                                                      context,
-                                                                  message:
-                                                                      "${res['status']} ${res['message']}",
-                                                                  type:
-                                                                      SnackBarType
-                                                                          .success,
+                                                                  context: context,
+                                                                  message: "${res['status']} ${res['message']}",
+                                                                  type: SnackBarType.success,
                                                                 );
                                                               } else {
                                                                 CustomSnackBar.show(
-                                                                  context:
-                                                                      context,
-                                                                  message:
-                                                                      "${res['status']} ${res['message']}",
-                                                                  type:
-                                                                      SnackBarType
-                                                                          .error,
+                                                                  context: context,
+                                                                  message: "${res['status']} ${res['message']}",
+                                                                  type: SnackBarType.error,
                                                                 );
                                                               }
                                                               ref
                                                                   .read(
-                                                                    accessRequestsNotifierProvider(
-                                                                      lobbyId,
-                                                                    ).notifier,
+                                                                    accessRequestsNotifierProvider(lobbyId).notifier,
                                                                   )
-                                                                  .refresh(
-                                                                    lobbyId,
-                                                                  );
+                                                                  .refresh(lobbyId);
                                                             },
                                                             child: DesignText(
                                                               text: "Delete",
                                                               fontSize: 12,
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .w500,
-                                                              color:
-                                                                  const Color(
-                                                                    0xFF3E79A1,
-                                                                  ),
+                                                              fontWeight: FontWeight.w500,
+                                                              color: const Color(0xFF3E79A1),
                                                             ),
                                                           ),
                                                         ],
                                                       )
                                                       : ElevatedButton(
                                                         style: ElevatedButton.styleFrom(
-                                                          backgroundColor:
-                                                              Colors.white,
+                                                          backgroundColor: Colors.white,
                                                           side: const BorderSide(
-                                                            width:
-                                                                1.0, // 1px border width
-                                                            color: Color(
-                                                              0xFF3E79A1,
-                                                            ), // Border color
+                                                            width: 1.0, // 1px border width
+                                                            color: Color(0xFF3E79A1), // Border color
                                                           ),
-                                                          padding:
-                                                              EdgeInsets.symmetric(
-                                                                horizontal: 12,
-                                                                vertical: 8,
-                                                              ), // Button padding
+                                                          padding: EdgeInsets.symmetric(
+                                                            horizontal: 12,
+                                                            vertical: 8,
+                                                          ), // Button padding
                                                         ),
                                                         onPressed: () {
-                                                          Get.toNamed(
-                                                            AppRoutes
-                                                                .detailAccessRequest,
-                                                            arguments: {
-                                                              'request':
-                                                                  request,
-                                                              'lobbyId':
-                                                                  lobbyId,
-                                                              'isGroup':
-                                                                  isGroup,
-                                                            },
-                                                          );
+                                                          kLogger.trace('AccessRequestPage onPressed');
+                                                          Get.to(AccessRequestPage(request: request, lobbyId: lobbyId,isGroup: isGroup,));
+
+                                                          // Get.toNamed(
+                                                          //   '/lobby/access-request-detail',
+                                                          //   arguments: {
+                                                          //     'request': request,
+                                                          //     'lobbyId': lobbyId,
+                                                          //     'isGroup': isGroup,
+                                                          //   },
+                                                          // );
                                                         },
                                                         child: DesignText(
                                                           text: "View",
                                                           fontSize: 12,
-                                                          fontWeight:
-                                                              FontWeight.w500,
-                                                          color: const Color(
-                                                            0xFF3E79A1,
-                                                          ),
+                                                          fontWeight: FontWeight.w500,
+                                                          color: const Color(0xFF3E79A1),
                                                         ),
                                                       ),
                                                 ],
                                               ),
                                               Space.h(height: 8),
                                               // Improved attendance stats section with better layout
-                                              if (request
-                                                          .attendanceStats
-                                                          .totalRsvps >=
-                                                      0 ||
-                                                  request
-                                                          .attendanceStats
-                                                          .totalAttended >=
-                                                      0)
+                                              if (request.attendanceStats.totalRsvps >= 0 ||
+                                                  request.attendanceStats.totalAttended >= 0)
                                                 Row(
-                                                  mainAxisAlignment:
-                                                      MainAxisAlignment
-                                                          .spaceBetween,
+                                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                                   children: [
                                                     // Title
                                                     DesignText(
                                                       text: "Attendance",
                                                       fontSize: 11,
-                                                      fontWeight:
-                                                          FontWeight.w500,
-                                                      color: const Color(
-                                                        0xFF3E79A1,
-                                                      ),
+                                                      fontWeight: FontWeight.w500,
+                                                      color: const Color(0xFF3E79A1),
                                                     ),
 
                                                     // Stats
@@ -826,18 +543,13 @@ class AccessRequestsView extends ConsumerWidget {
                                                         Container(
                                                           height: 24,
                                                           width: 1,
-                                                          margin:
-                                                              EdgeInsets.symmetric(
-                                                                horizontal: 12,
-                                                              ),
-                                                          color: Colors.grey
-                                                              .withOpacity(0.3),
+                                                          margin: EdgeInsets.symmetric(horizontal: 12),
+                                                          color: Colors.grey.withOpacity(0.3),
                                                         ),
 
                                                         // Attended Stats
                                                         _buildStatItem(
-                                                          Icons
-                                                              .check_circle_outline,
+                                                          Icons.check_circle_outline,
                                                           "Attended",
                                                           "${request.attendanceStats.totalAttended}",
                                                         ),
@@ -877,15 +589,10 @@ class AccessRequestsView extends ConsumerWidget {
                       ElevatedButton(
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color(0xFFEC4B5D),
-                          padding: EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 8,
-                          ), // Button padding
+                          padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8), // Button padding
                         ),
                         onPressed: () async {
-                          final selectedIds = ref.read(
-                            selectedRequestsProvider,
-                          );
+                          final selectedIds = ref.read(selectedRequestsProvider);
 
                           final body = {
                             "lobbyId": lobbyId,
@@ -900,9 +607,7 @@ class AccessRequestsView extends ConsumerWidget {
                                     )
                                     .toList(),
                           };
-                          final res = await ref.read(
-                            permissionAccessRequestProvider(body).future,
-                          );
+                          final res = await ref.read(permissionAccessRequestProvider(body).future);
                           if (res['status'] == 'SUCCESS') {
                             CustomSnackBar.show(
                               context: context,
@@ -916,13 +621,7 @@ class AccessRequestsView extends ConsumerWidget {
                               type: SnackBarType.error,
                             );
                           }
-                          ref
-                              .read(
-                                accessRequestsNotifierProvider(
-                                  lobbyId,
-                                ).notifier,
-                              )
-                              .refresh(lobbyId);
+                          ref.read(accessRequestsNotifierProvider(lobbyId).notifier).refresh(lobbyId);
                         },
                         child: DesignText(
                           text: "Accept all",
@@ -939,16 +638,11 @@ class AccessRequestsView extends ConsumerWidget {
                             width: 1.0, // 1px border width
                             color: Color(0xFF3E79A1), // Border color
                           ),
-                          padding: EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 8,
-                          ), // Button padding
+                          padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8), // Button padding
                         ),
                         onPressed: () async {
                           await showCustomBottomSheet(context);
-                          final selectedIds = ref.read(
-                            selectedRequestsProvider,
-                          );
+                          final selectedIds = ref.read(selectedRequestsProvider);
 
                           final body = {
                             "lobbyId": lobbyId,
@@ -956,19 +650,14 @@ class AccessRequestsView extends ConsumerWidget {
                                 selectedIds
                                     .map(
                                       (id) => {
-                                        "responses":
-                                            ref
-                                                .read(textControllerProvider)
-                                                .text, // Empty for confirm
+                                        "responses": ref.read(textControllerProvider).text, // Empty for confirm
                                         "accessRequestId": id,
                                         "isAccepted": false,
                                       },
                                     )
                                     .toList(),
                           };
-                          final res = await ref.read(
-                            permissionAccessRequestProvider(body).future,
-                          );
+                          final res = await ref.read(permissionAccessRequestProvider(body).future);
                           if (res['status'] == 'SUCCESS') {
                             CustomSnackBar.show(
                               context: context,
@@ -982,13 +671,7 @@ class AccessRequestsView extends ConsumerWidget {
                               type: SnackBarType.error,
                             );
                           }
-                          ref
-                              .read(
-                                accessRequestsNotifierProvider(
-                                  lobbyId,
-                                ).notifier,
-                              )
-                              .refresh(lobbyId);
+                          ref.read(accessRequestsNotifierProvider(lobbyId).notifier).refresh(lobbyId);
                         },
                         child: DesignText(
                           text: "Deny all ",
@@ -1013,17 +696,13 @@ class AccessRequestsView extends ConsumerWidget {
       barrierDismissible: false,
       builder: (BuildContext ctx) {
         dialogContext = ctx;
-        return const Center(
-          child: CircularProgressIndicator(color: DesignColors.accent),
-        );
+        return const Center(child: CircularProgressIndicator(color: DesignColors.accent));
       },
     );
 
     try {
       // Call the download API
-      final response = await ApiService().get(
-        'match/lobby/$lobbyId/download/access',
-      );
+      final response = await ApiService().get('match/lobby/$lobbyId/download/access');
 
       // Close the loading dialog using the stored dialog context
       if (dialogContext != null) {
@@ -1043,12 +722,7 @@ class AccessRequestsView extends ConsumerWidget {
 
         // Show the FileOptionsDialog as a separate route
 
-        Get.toNamed(
-          AppRoutes.downloadAccessRequestData,
-          arguments: {
-            'fileUrl': fileUrl,
-          },
-        );
+        Get.toNamed(AppRoutes.downloadAccessRequestData, arguments: {'fileUrl': fileUrl});
       } else {
         throw Exception('Failed to download: ${response.statusCode}');
       }
@@ -1086,9 +760,7 @@ void _launchUrlInBrowser(String url, BuildContext context) async {
     final Uri uri = Uri.parse(url);
     // Create a new URI with the sheet parameter if it doesn't exist
     final modifiedUrl =
-        uri.toString().contains('sheet=')
-            ? uri
-            : Uri.parse('$url${url.contains('?') ? '&' : '?'}sheet=2');
+        uri.toString().contains('sheet=') ? uri : Uri.parse('$url${url.contains('?') ? '&' : '?'}sheet=2');
 
     if (await canLaunchUrl(modifiedUrl)) {
       await launchUrl(modifiedUrl, mode: LaunchMode.externalApplication);
@@ -1096,12 +768,9 @@ void _launchUrlInBrowser(String url, BuildContext context) async {
       throw Exception('Could not launch $modifiedUrl');
     }
   } catch (e) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Error opening URL: $e'),
-        backgroundColor: Colors.red,
-      ),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text('Error opening URL: $e'), backgroundColor: Colors.red));
   }
 }
 
@@ -1114,10 +783,7 @@ void _downloadFile(String url, BuildContext context) async {
 
     if (directory != null) {
       // Extract filename from URL or use a default name
-      final fileName =
-          url.split('/').last.isNotEmpty
-              ? url.split('/').last
-              : 'access_requests.xlsx';
+      final fileName = url.split('/').last.isNotEmpty ? url.split('/').last : 'access_requests.xlsx';
 
       final savePath = '${directory.path}/$fileName';
 
@@ -1126,18 +792,12 @@ void _downloadFile(String url, BuildContext context) async {
         context: context,
         barrierDismissible: false,
         builder: (BuildContext context) {
-          return AlertDialog(
-            title: Text('Downloading...'),
-            content: LinearProgressIndicator(),
-          );
+          return AlertDialog(title: Text('Downloading...'), content: LinearProgressIndicator());
         },
       );
 
       // Add sheet parameter to URL to ensure all sheets are accessible
-      final downloadUrl =
-          url.contains('sheet=')
-              ? url
-              : '$url${url.contains('?') ? '&' : '?'}sheet=all';
+      final downloadUrl = url.contains('sheet=') ? url : '$url${url.contains('?') ? '&' : '?'}sheet=all';
 
       await dio.download(
         downloadUrl,
@@ -1170,12 +830,7 @@ void _downloadFile(String url, BuildContext context) async {
                 ),
               ],
             ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: Text('OK'),
-              ),
-            ],
+            actions: [TextButton(onPressed: () => Navigator.pop(context), child: Text('OK'))],
           );
         },
       );
@@ -1183,12 +838,9 @@ void _downloadFile(String url, BuildContext context) async {
       throw Exception('Could not access storage directory');
     }
   } catch (e) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Error downloading file: $e'),
-        backgroundColor: Colors.red,
-      ),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text('Error downloading file: $e'), backgroundColor: Colors.red));
   }
 }
 
@@ -1197,19 +849,13 @@ void _copyUrlToClipboard(String url, BuildContext context) {
   try {
     // Import 'package:flutter/services.dart' at the top
     Clipboard.setData(ClipboardData(text: url));
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('URL copied to clipboard'),
-        backgroundColor: DesignColors.accent,
-      ),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text('URL copied to clipboard'), backgroundColor: DesignColors.accent));
   } catch (e) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Error copying URL: $e'),
-        backgroundColor: Colors.red,
-      ),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text('Error copying URL: $e'), backgroundColor: Colors.red));
   }
 }
 
@@ -1245,25 +891,13 @@ class CustomBottomSheet extends ConsumerWidget {
     final characterCount = ref.watch(characterCountProvider);
     textController.clear();
     return Container(
-      padding: EdgeInsets.only(
-        bottom: MediaQuery.of(context).viewInsets.bottom,
-        left: 16,
-        right: 16,
-        top: 16,
-      ),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-      ),
+      padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom, left: 16, right: 16, top: 16),
+      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.vertical(top: Radius.circular(16))),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          DesignText(
-            text: 'Add note (Optional)',
-            fontSize: 16,
-            fontWeight: FontWeight.w500,
-          ),
+          DesignText(text: 'Add note (Optional)', fontSize: 16, fontWeight: FontWeight.w500),
           SizedBox(height: 8),
           Stack(
             children: [
@@ -1272,33 +906,24 @@ class CustomBottomSheet extends ConsumerWidget {
                 maxLength: 400,
                 maxLines: 3,
                 decoration: InputDecoration(
-                  hintText:
-                      'Eg. "This lobby is fully booked", "Host is no longer accepting access request"',
+                  hintText: 'Eg. "This lobby is fully booked", "Host is no longer accepting access request"',
                   border: const OutlineInputBorder(),
                   contentPadding: EdgeInsets.all(12),
                   counterText: '', // Hide the default counter
                 ),
                 onChanged: (value) {
-                  ref.read(characterCountProvider.notifier).state =
-                      value.length;
+                  ref.read(characterCountProvider.notifier).state = value.length;
                 },
               ),
               Positioned(
                 right: 12,
                 bottom: 12,
-                child: Text(
-                  '$characterCount/400',
-                  style: TextStyle(color: Colors.grey[600], fontSize: 12),
-                ),
+                child: Text('$characterCount/400', style: TextStyle(color: Colors.grey[600], fontSize: 12)),
               ),
             ],
           ),
           SizedBox(height: 8),
-          DesignText(
-            text: 'This message will be visible to the requester',
-            color: Colors.grey[600],
-            fontSize: 12,
-          ),
+          DesignText(text: 'This message will be visible to the requester', color: Colors.grey[600], fontSize: 12),
           SizedBox(height: 16),
           Row(
             children: [
@@ -1307,9 +932,7 @@ class CustomBottomSheet extends ConsumerWidget {
                   onPressed: () => Navigator.pop(context),
                   style: OutlinedButton.styleFrom(
                     padding: EdgeInsets.symmetric(vertical: 12),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                   ),
                   child: DesignText(text: 'Deny all', fontSize: 14),
                 ),
@@ -1321,9 +944,7 @@ class CustomBottomSheet extends ConsumerWidget {
                   style: FilledButton.styleFrom(
                     backgroundColor: Colors.red,
                     padding: EdgeInsets.symmetric(vertical: 12),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                   ),
                   child: DesignText(text: 'Confirm all', fontSize: 14),
                 ),
@@ -1365,19 +986,13 @@ class FileOptionsDialog extends StatelessWidget {
             onTap: () {}, // Prevent taps from closing the dialog
             child: Dialog(
               backgroundColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               child: Padding(
                 padding: EdgeInsets.all(16),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    DesignText(
-                      text: "File Ready",
-                      fontSize: 16,
-                      fontWeight: FontWeight.w500,
-                    ),
+                    DesignText(text: "File Ready", fontSize: 16, fontWeight: FontWeight.w500),
                     SizedBox(height: 12),
                     DesignText(
                       text: "Choose what you want to do with the file:",
@@ -1387,10 +1002,7 @@ class FileOptionsDialog extends StatelessWidget {
                     ),
                     SizedBox(height: 24),
                     DesignButton(
-                      padding: EdgeInsets.symmetric(
-                        vertical: 8,
-                        horizontal: 16,
-                      ),
+                      padding: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
                       title: "Open in Browser",
                       onPress: () {
                         Navigator.of(context).pop();
@@ -1400,10 +1012,7 @@ class FileOptionsDialog extends StatelessWidget {
                     ),
                     SizedBox(height: 12),
                     DesignButton(
-                      padding: EdgeInsets.symmetric(
-                        vertical: 8,
-                        horizontal: 16,
-                      ),
+                      padding: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
                       title: "Download File",
                       onPress: () {
                         Navigator.of(context).pop();
@@ -1413,10 +1022,7 @@ class FileOptionsDialog extends StatelessWidget {
                     ),
                     SizedBox(height: 12),
                     DesignButton(
-                      padding: EdgeInsets.symmetric(
-                        vertical: 8,
-                        horizontal: 16,
-                      ),
+                      padding: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
                       title: "Copy URL",
                       onPress: () {
                         Navigator.of(context).pop();
@@ -1441,12 +1047,9 @@ class FileOptionsDialog extends StatelessWidget {
       await launchUrl(uri, mode: LaunchMode.externalApplication);
     } else {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Could not launch URL'),
-            backgroundColor: Colors.red,
-          ),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Could not launch URL'), backgroundColor: Colors.red));
       }
     }
   }
@@ -1458,12 +1061,9 @@ class FileOptionsDialog extends StatelessWidget {
       await launchUrl(uri);
     } else {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Could not download file'),
-            backgroundColor: Colors.red,
-          ),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Could not download file'), backgroundColor: Colors.red));
       }
     }
   }
@@ -1471,12 +1071,9 @@ class FileOptionsDialog extends StatelessWidget {
   void _copyUrlToClipboard(String url, BuildContext context) async {
     await Clipboard.setData(ClipboardData(text: url));
     if (context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('URL copied to clipboard'),
-          backgroundColor: Colors.green,
-        ),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('URL copied to clipboard'), backgroundColor: Colors.green));
     }
   }
 }
@@ -1489,17 +1086,13 @@ Future<void> _handleFileDownload(BuildContext context, String lobbyId) async {
     barrierDismissible: false,
     builder: (BuildContext ctx) {
       dialogContext = ctx;
-      return const Center(
-        child: CircularProgressIndicator(color: DesignColors.accent),
-      );
+      return const Center(child: CircularProgressIndicator(color: DesignColors.accent));
     },
   );
 
   try {
     // Call the download API
-    final response = await ApiService().get(
-      'match/lobby/$lobbyId/download/access',
-    );
+    final response = await ApiService().get('match/lobby/$lobbyId/download/access');
 
     // Close the loading dialog using the stored dialog context
     if (dialogContext != null) {
@@ -1519,12 +1112,9 @@ Future<void> _handleFileDownload(BuildContext context, String lobbyId) async {
 
       // Show the FileOptionsDialog as a separate route
       if (context.mounted) {
-        Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (context) => FileOptionsDialog(fileUrl: fileUrl),
-            fullscreenDialog: true,
-          ),
-        );
+        Navigator.of(
+          context,
+        ).push(MaterialPageRoute(builder: (context) => FileOptionsDialog(fileUrl: fileUrl), fullscreenDialog: true));
       }
     } else {
       throw Exception('Failed to download: ${response.statusCode}');

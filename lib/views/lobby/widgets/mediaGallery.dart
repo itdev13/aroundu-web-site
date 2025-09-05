@@ -5,6 +5,7 @@ import 'package:video_player/video_player.dart';
 import 'package:video_thumbnail/video_thumbnail.dart';
 import 'package:path_provider/path_provider.dart';
 import 'dart:io';
+import 'dart:async';
 
 // Media source abstraction
 class MediaSource {
@@ -22,54 +23,285 @@ class MediaSource {
   bool get isNetworkSource => url != null;
 }
 
-class MediaGallery extends StatelessWidget {
-  MediaGallery({super.key, required this.mediaSources});
-
+class MediaGallery extends StatefulWidget {
   final List<MediaSource> mediaSources;
+  final bool autoScroll;
+  final Duration autoScrollDuration;
 
-  MediaGallery.fromUrls(List<String> urls, {super.key})
-      : mediaSources = urls.map((url) => MediaSource.fromUrl(url)).toList();
+  MediaGallery({
+    super.key, 
+    required this.mediaSources,
+    this.autoScroll = true,
+    this.autoScrollDuration = const Duration(seconds: 3),
+  });
 
-  MediaGallery.fromFiles(List<File> files, {super.key})
-      : mediaSources = files.map((file) => MediaSource.fromFile(file)).toList();
+  MediaGallery.fromUrls(
+    List<String> urls, {
+    super.key,
+    bool autoScroll = true,
+    Duration autoScrollDuration = const Duration(seconds: 3),
+  }) : mediaSources = urls.map((url) => MediaSource.fromUrl(url)).toList(),
+       autoScroll = autoScroll,
+       autoScrollDuration = autoScrollDuration;
+
+  MediaGallery.fromFiles(
+    List<File> files, {
+    super.key,
+    bool autoScroll = true,
+    Duration autoScrollDuration = const Duration(seconds: 3),
+  }) : mediaSources = files.map((file) => MediaSource.fromFile(file)).toList(),
+       autoScroll = autoScroll,
+       autoScrollDuration = autoScrollDuration;
+
+  @override
+  State<MediaGallery> createState() => _MediaGalleryState();
+}
+
+class _MediaGalleryState extends State<MediaGallery> {
+  late PageController _pageController;
+  late Timer _autoScrollTimer;
+  int _currentPage = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _pageController = PageController();
+    if (widget.autoScroll && widget.mediaSources.length > 1) {
+      _startAutoScroll();
+    }
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    _autoScrollTimer?.cancel();
+    super.dispose();
+  }
+
+  void _startAutoScroll() {
+    _autoScrollTimer = Timer.periodic(widget.autoScrollDuration, (timer) {
+      if (_currentPage < widget.mediaSources.length - 1) {
+        _currentPage++;
+      } else {
+        _currentPage = 0;
+      }
+      _pageController.animateToPage(
+        _currentPage,
+        duration: const Duration(milliseconds: 500),
+        curve: Curves.easeInOut,
+      );
+    });
+  }
+
+  void _nextPage() {
+    if (_currentPage < widget.mediaSources.length - 1) {
+      _currentPage++;
+      _pageController.animateToPage(
+        _currentPage,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+      );
+    }
+  }
+
+  void _previousPage() {
+    if (_currentPage > 0) {
+      _currentPage--;
+      _pageController.animateToPage(
+        _currentPage,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    double screenWidth = MediaQuery.of(context).size.width;
-    double screenHeight = MediaQuery.of(context).size.height;
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // Use maximum available width with responsive height
+        double containerWidth = constraints.maxWidth;
+        double containerHeight = (containerWidth * 800) / 1430; // 1430:800 aspect ratio (width:height)
+        
+        // Use full available width to eliminate extra space
+        containerWidth = constraints.maxWidth;
+        containerHeight = (containerWidth * 900) / 1430; // Increased height for better visibility
 
-    double sw(double size) => screenWidth * size;
-
-    double sh(double size) => screenHeight * size;
-    return GestureDetector(
-      onTap: () {
-        Get.to(() => SwipeMediaScreen(mediaSources: mediaSources));
+        return Center(
+          child: Container(
+            width: containerWidth,
+            height: containerHeight,
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                GestureDetector(
+                  onTap: () {
+                    Get.to(() => SwipeMediaScreen(mediaSources: widget.mediaSources));
+                  },
+                  child: Container(
+                    width: containerWidth,
+                    height: containerHeight,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(12),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.1),
+                          blurRadius: 8,
+                          offset: Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(12),
+                      child: PageView.builder(
+                        controller: _pageController,
+                        itemCount: widget.mediaSources.length,
+                        onPageChanged: (index) {
+                          setState(() {
+                            _currentPage = index;
+                          });
+                        },
+                        itemBuilder: (context, index) {
+                          return buildMediaWidget(
+                            widget.mediaSources[index], 
+                            width: containerWidth,
+                            height: containerHeight,
+                          );
+                        },
+                      ),
+                    ),
+                  ),
+                ),
+            if (widget.mediaSources.length > 1) ...[
+              // Navigation buttons for desktop/web
+              Positioned(
+                left: 12,
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.black.withOpacity(0.4),
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.2),
+                        blurRadius: 4,
+                        offset: Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: IconButton(
+                    icon: Icon(Icons.chevron_left, size: 28, color: Colors.white),
+                    onPressed: _previousPage,
+                    padding: EdgeInsets.all(8),
+                    constraints: BoxConstraints(),
+                  ),
+                ),
+              ),
+              Positioned(
+                right: 12,
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.black.withOpacity(0.4),
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.2),
+                        blurRadius: 4,
+                        offset: Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: IconButton(
+                    icon: Icon(Icons.chevron_right, size: 28, color: Colors.white),
+                    onPressed: _nextPage,
+                    padding: EdgeInsets.all(8),
+                    constraints: BoxConstraints(),
+                  ),
+                ),
+              ),
+              // Page indicators
+              Positioned(
+                bottom: 16,
+                child: Container(
+                  padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: Colors.black.withOpacity(0.3),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: List.generate(
+                      widget.mediaSources.length,
+                      (index) => Container(
+                        margin: EdgeInsets.symmetric(horizontal: 3),
+                        width: _currentPage == index ? 20 : 8,
+                        height: 8,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(4),
+                          color: _currentPage == index 
+                            ? Colors.white 
+                            : Colors.white.withOpacity(0.5),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ],
+        )));
       },
-      child: PageView.builder(
-        itemCount: mediaSources.length,
-        itemBuilder: (context, index) {
-          return buildMediaWidget(mediaSources[index], height: sh(0.3));
-        },
-      ),
     );
   }
 
   Widget buildMediaWidget(MediaSource source, {double? height, double? width}) {
     return ClipRRect(
-      borderRadius: BorderRadius.circular(8.0),
+      borderRadius: BorderRadius.circular(12.0),
       child: Container(
         height: height,
         width: width,
-        color: Colors.grey[300],
+        color: Colors.grey[200],
         child: source.isVideo
             ? FutureBuilder<String?>(
                 future: _generateVideoThumbnail(
                     source.isNetworkSource ? source.url! : source.file!.path),
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
-                    return Center(child: CircularProgressIndicator());
+                    return Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          CircularProgressIndicator(
+                            valueColor: AlwaysStoppedAnimation<Color>(Colors.blue),
+                            strokeWidth: 3,
+                          ),
+                          SizedBox(height: 8),
+                          Text(
+                            'Loading...',
+                            style: TextStyle(
+                              color: Colors.grey[600],
+                              fontSize: 12,
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
                   } else if (snapshot.hasError || !snapshot.hasData) {
-                    return Center(child: Icon(Icons.error, color: Colors.red));
+                    return Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.videocam_off, color: Colors.grey[400], size: 48),
+                          SizedBox(height: 8),
+                          Text(
+                            'Video preview unavailable',
+                            style: TextStyle(
+                              color: Colors.grey[600],
+                              fontSize: 12,
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
                   } else {
                     return Stack(
                       fit: StackFit.expand,
@@ -77,14 +309,26 @@ class MediaGallery extends StatelessWidget {
                         Image.file(
                           File(snapshot.data!),
                           fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) {
+                            return Center(
+                              child: Icon(Icons.videocam_off, color: Colors.grey[400], size: 48),
+                            );
+                          },
                         ),
                         Positioned(
-                          bottom: 8,
-                          right: 8,
-                          child: Icon(
-                            Icons.play_circle_outline,
-                            color: Colors.white,
-                            size: 24,
+                          bottom: 12,
+                          right: 12,
+                          child: Container(
+                            padding: EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: Colors.black.withOpacity(0.6),
+                              shape: BoxShape.circle,
+                            ),
+                            child: Icon(
+                              Icons.play_circle_outline,
+                              color: Colors.white,
+                              size: 28,
+                            ),
                           ),
                         ),
                       ],
@@ -96,10 +340,73 @@ class MediaGallery extends StatelessWidget {
                 ? Image.network(
                     source.url!,
                     fit: BoxFit.cover,
+                    loadingBuilder: (context, child, loadingProgress) {
+                      if (loadingProgress == null) {
+                        return child;
+                      }
+                      return Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            CircularProgressIndicator(
+                              value: loadingProgress.expectedTotalBytes != null
+                                  ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes!
+                                  : null,
+                              valueColor: AlwaysStoppedAnimation<Color>(Colors.blue),
+                              strokeWidth: 3,
+                            ),
+                            SizedBox(height: 8),
+                            Text(
+                              'Loading image...',
+                              style: TextStyle(
+                                color: Colors.grey[600],
+                                fontSize: 12,
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                    errorBuilder: (context, error, stackTrace) {
+                      return Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.broken_image, color: Colors.grey[400], size: 48),
+                            SizedBox(height: 8),
+                            Text(
+                              'Image failed to load',
+                              style: TextStyle(
+                                color: Colors.grey[600],
+                                fontSize: 12,
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
                   )
                 : Image.file(
                     source.file!,
                     fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) {
+                      return Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.broken_image, color: Colors.grey[400], size: 48),
+                            SizedBox(height: 8),
+                            Text(
+                              'Image failed to load',
+                              style: TextStyle(
+                                color: Colors.grey[600],
+                                fontSize: 12,
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
                   ),
       ),
     );

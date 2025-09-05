@@ -1,0 +1,25 @@
+# Serve static HTML pages first (if you have any)
+/terms.html    /terms.html    200
+/privacy.html  /privacy.html  200
+/deleteAccount.html     /deleteAccount.html     200
+
+# Handle deep links and well-known files
+/.well-known/assetlinks.json    /.well-known/assetlinks.json    200
+/.well-known/apple-app-site-association    /.well-known/apple-app-site-association    200
+
+# Handle static assets (don't redirect these to index.html)
+/assets/*    /assets/:splat    200
+/icons/*     /icons/:splat     200
+/favicon.*   /favicon.:splat   200
+/*.js        /:splat.js        200
+/*.css       /:splat.css       200
+/*.png       /:splat.png       200
+/*.jpg       /:splat.jpg       200
+/*.svg       /:splat.svg       200
+/*.ico       /:splat.ico       200
+/*.json      /:splat.json      200
+/*.xml       /:splat.xml       200
+/*.txt       /:splat.txt       200
+
+# Flutter web app routes (catch-all for SPA routing)
+/*    /index.html   200

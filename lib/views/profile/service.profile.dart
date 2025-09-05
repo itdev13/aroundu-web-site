@@ -1,5 +1,5 @@
 import 'dart:io';
-
+import 'dart:typed_data';
 
 import 'package:aroundu/models/profile.model.dart';
 import 'package:aroundu/utils/api_service/api.service.dart';
@@ -148,6 +148,44 @@ class ProfileService {
     } else {
       // No file was selected
       Get.snackbar('No File Selected', 'Please select a file to upload.');
+    }
+  }
+
+  // Web-compatible file upload method
+  Future<String?> uploadFileBytes(Uint8List bytes, String filename, String userId) async {
+    try {
+      final uploadBody = {
+        'userId': userId,
+        'someOtherData': 'Chat Attachment',
+      };
+
+      final result = await FileUploadService().uploadBytes(
+        "user/upload/api/v1/file",
+        bytes,
+        filename,
+        uploadBody,
+      );
+
+      if (result.statusCode == 200) {
+        String fileUrl = result.data['imageUrl'];
+        
+        // Make a POST request to the new API endpoint with the file URL in the body
+        final postResult = await apiService.post(
+          "user/api/v1/updateProfileMedia?type=PROFILE_PIC&url=$fileUrl",
+          body: {},
+        );
+
+        if (postResult.statusCode == 200) {
+          return fileUrl;
+        } else {
+          throw Exception('Failed to post file URL to the new API');
+        }
+      } else {
+        throw Exception('Failed to upload $filename');
+      }
+    } catch (e) {
+      Get.snackbar('Upload Failed', 'Error: $e');
+      return null;
     }
   }
 

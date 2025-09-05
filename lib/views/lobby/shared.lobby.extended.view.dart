@@ -7,6 +7,7 @@ import 'package:aroundu/designs/widgets/textfield.widget.designs.dart';
 import 'package:aroundu/models/access_request_details.lobby.model.dart';
 import 'package:aroundu/models/lobby.dart';
 import 'package:aroundu/utils/api_service/api.service.dart';
+import 'package:aroundu/utils/api_service/file_upload.service.dart';
 import 'package:aroundu/utils/custome_snackbar.dart';
 import 'package:aroundu/utils/logger.utils.dart';
 import 'package:aroundu/views/lobby/access_request_user.lobby.view.dart';
@@ -15,6 +16,7 @@ import 'package:aroundu/views/lobby/lobby.view.dart';
 import 'package:aroundu/views/profile/controllers/controller.groups.profiledart.dart';
 import 'package:aroundu/views/profile/controllers/controller.profile.dart';
 import 'package:aroundu/views/profile/user_profile_followed_view.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -462,6 +464,8 @@ class SharedAccessRequestCardExtendedView extends ConsumerWidget {
                                   'lobbyIsPrivate':
                                       accessRequest.lobbyType == 'PRIVATE',
                                   'requestText': "",
+                                  // 'selectedTickets': widget.selectedTickets,
+
                                 },
                               );
                             },
@@ -875,7 +879,7 @@ class _AccessRequestFormFillViewState
   @override
   void initState() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(formStateProvider(widget.lobbyId).notifier).reloadFormData();
+      ref.read(formStateProvider(widget.lobbyId).notifier).reloadFormData([]);
     });
     super.initState();
   }
@@ -893,7 +897,7 @@ class _AccessRequestFormFillViewState
     if (mounted) {
       print('resetState called in mounted');
       ref.read(requestTextProvider.notifier).state = '';
-      ref.invalidate(lobbyFormAutofillProvider(widget.lobbyId));
+      ref.invalidate(lobbyFormAutofillProvider((lobbyId:widget.lobbyId, selectedTicketIds: [])));
       ref.read(formStateProvider(widget.lobbyId).notifier).resetForm();
       ref.invalidate(formStateProvider(widget.lobbyId));
     }
@@ -1235,8 +1239,7 @@ class _AccessRequestFormFillViewState
 
                       // Text question
                       if (question.questionType == 'text') {
-                        final controller = formNotifier
-                            .getControllerForQuestion(question.id);
+                        final controller = formNotifier.getControllerForQuestion(question.id);
 
                         if (controller == null) {
                           return const SizedBox.shrink();
@@ -1254,18 +1257,13 @@ class _AccessRequestFormFillViewState
                             elevation: 6,
                             color: Colors.white,
                             child: Padding(
-                              padding: EdgeInsets.only(
-                                bottom: 18,
-                                top: 12,
-                                left: 12,
-                                right: 12,
-                              ),
+                              padding: EdgeInsets.only(bottom: 18, top: 12, left: 12, right: 12),
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   RichText(
-                                    maxLines: 10,
-                                    overflow: TextOverflow.ellipsis,
+                                    maxLines: null,
+                                    overflow: TextOverflow.visible,
                                     text: TextSpan(
                                       style: TextStyle(
                                         fontFamily: 'Poppins',
@@ -1274,14 +1272,9 @@ class _AccessRequestFormFillViewState
                                         fontWeight: FontWeight.w500,
                                       ),
                                       children: [
-                                        TextSpan(text: question.questionText),
+                                        TextSpan(text: question.questionText.trim()),
                                         if (question.isMandatory)
-                                          TextSpan(
-                                            text: '   *',
-                                            style: TextStyle(
-                                              color: Color(0xFFEC4B5D),
-                                            ),
-                                          ),
+                                          TextSpan(text: '   *', style: TextStyle(color: Color(0xFFEC4B5D))),
                                       ],
                                     ),
                                   ),
@@ -1289,25 +1282,654 @@ class _AccessRequestFormFillViewState
                                   DesignTextField(
                                     controller: controller,
                                     hintText: "Answer",
-                                    // maxLines: 5,
                                     fontSize: 12,
-                                    onChanged:
-                                        (val) => formNotifier.updateAnswer(
-                                          question.id,
-                                          val!,
-                                        ),
+                                    onChanged: (val) => formNotifier.updateAnswer(question.id, val!),
                                     borderRadius: 16,
                                   ),
-                                  // const SizedBox(height: 8),
-                                  // TextFormField(
-                                  //   controller: controller,
-                                  //   decoration: const InputDecoration(
-                                  //     labelText: "Answer",
-                                  //     border: OutlineInputBorder(),
-                                  //   ),
-                                  //   onChanged: (val) => formNotifier.updateAnswer(
-                                  //       question.id, val,),
-                                  // ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        );
+                      }
+                      // Number question
+                      else if (question.questionType == 'number') {
+                        final controller = formNotifier.getControllerForQuestion(question.id);
+
+                        if (controller == null) {
+                          return const SizedBox.shrink();
+                        }
+
+                        // Make sure controller has the latest value
+                        if (controller.text != question.answer) {
+                          controller.text = question.answer;
+                        }
+
+                        return Padding(
+                          padding: EdgeInsets.only(bottom: 24),
+                          child: Card(
+                            shadowColor: Color(0x143E79A1),
+                            elevation: 6,
+                            color: Colors.white,
+                            child: Padding(
+                              padding: EdgeInsets.only(bottom: 18, top: 12, left: 12, right: 12),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  RichText(
+                                    maxLines: null,
+                                    overflow: TextOverflow.visible,
+                                    text: TextSpan(
+                                      style: TextStyle(
+                                        fontFamily: 'Poppins',
+                                        fontSize: 12,
+                                        color: Color(0xFF323232),
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                      children: [
+                                        TextSpan(text: question.questionText.trim()),
+                                        if (question.isMandatory)
+                                          TextSpan(text: '   *', style: TextStyle(color: Color(0xFFEC4B5D))),
+                                      ],
+                                    ),
+                                  ),
+                                  Space.h(height: 12),
+                                  DesignTextField(
+                                    controller: controller,
+                                    hintText: "Enter a number",
+                                    fontSize: 12,
+                                    inputType: TextInputType.number,
+                                    onEditingComplete: () {
+                                      if (controller.text != null) {
+                                        if (controller.text.isEmpty || RegExp(r'^\d+$').hasMatch(controller.text)) {
+                                          formNotifier.updateAnswer(question.id, controller.text);
+                                        } else {
+                                          // Revert to previous valid value
+                                          controller.text = question.answer;
+                                          controller.selection = TextSelection.fromPosition(
+                                            TextPosition(offset: controller.text.length),
+                                          );
+                                          // Show error message
+                                          Fluttertoast.showToast(
+                                            msg: "Please enter digits only",
+                                            toastLength: Toast.LENGTH_SHORT,
+                                            gravity: ToastGravity.BOTTOM,
+                                            backgroundColor: Colors.red,
+                                            textColor: Colors.white,
+                                          );
+                                        }
+                                      }
+                                    },
+                                    onChanged: (val) {
+                                      // Validate: only allow digits
+                                      if (val != null) {
+                                        if (val.isEmpty || RegExp(r'^\d+$').hasMatch(val)) {
+                                          formNotifier.updateAnswer(question.id, val);
+                                        } else {
+                                          // Revert to previous valid value
+                                          controller.text = question.answer;
+                                          controller.selection = TextSelection.fromPosition(
+                                            TextPosition(offset: controller.text.length),
+                                          );
+                                          // Show error message
+                                          // Fluttertoast.showToast(
+                                          //   msg: "Please enter digits only",
+                                          //   toastLength: Toast.LENGTH_SHORT,
+                                          //   gravity: ToastGravity.BOTTOM,
+                                          //   backgroundColor: Colors.red,
+                                          //   textColor: Colors.white,
+                                          // );
+                                        }
+                                      }
+                                    },
+                                    borderRadius: 16,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        );
+                      }
+                      // Email question
+                      else if (question.questionType == 'email') {
+                        final controller = formNotifier.getControllerForQuestion(question.id);
+
+                        if (controller == null) {
+                          return const SizedBox.shrink();
+                        }
+
+                        // Make sure controller has the latest value
+                        if (controller.text != question.answer) {
+                          controller.text = question.answer;
+                        }
+
+                        return Padding(
+                          padding: EdgeInsets.only(bottom: 24),
+                          child: Card(
+                            shadowColor: Color(0x143E79A1),
+                            elevation: 6,
+                            color: Colors.white,
+                            child: Padding(
+                              padding: EdgeInsets.only(bottom: 18, top: 12, left: 12, right: 12),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  RichText(
+                                    maxLines: null,
+                                    overflow: TextOverflow.visible,
+                                    text: TextSpan(
+                                      style: TextStyle(
+                                        fontFamily: 'Poppins',
+                                        fontSize: 12,
+                                        color: Color(0xFF323232),
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                      children: [
+                                        TextSpan(text: question.questionText.trim()),
+                                        if (question.isMandatory)
+                                          TextSpan(text: '   *', style: TextStyle(color: Color(0xFFEC4B5D))),
+                                      ],
+                                    ),
+                                  ),
+                                  Space.h(height: 12),
+                                  DesignTextField(
+                                    controller: controller,
+                                    hintText: "Enter your email",
+                                    fontSize: 12,
+                                    inputType: TextInputType.emailAddress,
+                                    onEditingComplete: () {
+                                      if (controller.text.isNotEmpty &&
+                                          !RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(controller.text)) {
+                                        // Show warning but don't revert the text
+                                        Fluttertoast.showToast(
+                                          msg: "Please enter a valid email address",
+                                          toastLength: Toast.LENGTH_SHORT,
+                                          gravity: ToastGravity.BOTTOM,
+                                          backgroundColor: Colors.orange,
+                                          textColor: Colors.white,
+                                        );
+                                      }
+                                    },
+                                    onChanged: (val) {
+                                      if (val != null) {
+                                        // Update the answer regardless of validation
+                                        formNotifier.updateAnswer(question.id, val);
+
+                                        // Validate email format if not empty
+                                        if (val.isNotEmpty &&
+                                            !RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(val)) {
+                                          // Show warning but don't revert the text
+                                          // Fluttertoast.showToast(
+                                          //   msg: "Please enter a valid email address",
+                                          //   toastLength: Toast.LENGTH_SHORT,
+                                          //   gravity: ToastGravity.BOTTOM,
+                                          //   backgroundColor: Colors.orange,
+                                          //   textColor: Colors.white,
+                                          // );
+                                        }
+                                      }
+                                    },
+                                    borderRadius: 16,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        );
+                      }
+                      // Date question
+                      else if (question.questionType == 'date') {
+                        final controller = formNotifier.getControllerForQuestion(question.id);
+
+                        if (controller == null) {
+                          return const SizedBox.shrink();
+                        }
+
+                        // Make sure controller has the latest value
+                        if (controller.text != question.answer) {
+                          controller.text = question.answer;
+                        }
+
+                        return Padding(
+                          padding: EdgeInsets.only(bottom: 24),
+                          child: Card(
+                            shadowColor: Color(0x143E79A1),
+                            elevation: 6,
+                            color: Colors.white,
+                            child: Padding(
+                              padding: EdgeInsets.only(bottom: 18, top: 12, left: 12, right: 12),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  RichText(
+                                    maxLines: null,
+                                    overflow: TextOverflow.visible,
+                                    text: TextSpan(
+                                      style: TextStyle(
+                                        fontFamily: 'Poppins',
+                                        fontSize: 12,
+                                        color: Color(0xFF323232),
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                      children: [
+                                        TextSpan(text: question.questionText.trim()),
+                                        if (question.isMandatory)
+                                          TextSpan(text: '   *', style: TextStyle(color: Color(0xFFEC4B5D))),
+                                      ],
+                                    ),
+                                  ),
+                                  Space.h(height: 12),
+                                  InkWell(
+                                    onTap: () async {
+                                      final DateTime? picked = await showDatePicker(
+                                        context: context,
+                                        initialDate:
+                                            controller.text.isNotEmpty
+                                                ? DateTime.parse(controller.text)
+                                                : DateTime.now(),
+                                        firstDate: DateTime(1900),
+                                        lastDate: DateTime(2100),
+                                        builder: (context, child) {
+                                          return Theme(
+                                            data: Theme.of(context).copyWith(
+                                              colorScheme: ColorScheme.light(
+                                                primary: DesignColors.accent,
+                                                onPrimary: Colors.white,
+                                                surface: Colors.white,
+                                                onSurface: Color(0xFF262933),
+                                              ),
+                                              textButtonTheme: TextButtonThemeData(
+                                                style: TextButton.styleFrom(
+                                                  foregroundColor: DesignColors.accent,
+                                                  textStyle: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+                                                ),
+                                              ),
+                                            ),
+                                            child: child!,
+                                          );
+                                        },
+                                      );
+
+                                      if (picked != null) {
+                                        // Format date as ISO string for storage
+                                        final formattedDate = picked.toIso8601String();
+                                        controller.text = formattedDate;
+                                        formNotifier.updateAnswer(question.id, formattedDate);
+                                      }
+                                    },
+                                    child: Container(
+                                      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                                      decoration: BoxDecoration(
+                                        border: Border.all(color: DesignColors.border),
+                                        borderRadius: BorderRadius.circular(16),
+                                        color: Colors.white,
+                                      ),
+                                      child: Row(
+                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Text(
+                                            controller.text.isNotEmpty ? _formatDate(controller.text) : "Select a date",
+                                            style: TextStyle(
+                                              color: controller.text.isNotEmpty ? Colors.black : Colors.grey,
+                                              fontSize: 12,
+                                              fontFamily: 'Poppins',
+                                            ),
+                                          ),
+                                          Icon(Icons.calendar_today, size: 20, color: Colors.grey),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        );
+                      }
+                      // File question
+                      else if (question.questionType == 'file') {
+                        final controller = formNotifier.getControllerForQuestion(question.id);
+
+                        if (controller == null) {
+                          return const SizedBox.shrink();
+                        }
+
+                        // Make sure controller has the latest value
+                        if (controller.text != question.answer) {
+                          controller.text = question.answer;
+                        }
+
+                        return Padding(
+                          padding: EdgeInsets.only(bottom: 24),
+                          child: Card(
+                            shadowColor: Color(0x143E79A1),
+                            elevation: 6,
+                            color: Colors.white,
+                            child: Padding(
+                              padding: EdgeInsets.only(bottom: 18, top: 12, left: 12, right: 12),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  RichText(
+                                    maxLines: null,
+                                    overflow: TextOverflow.visible,
+                                    text: TextSpan(
+                                      style: TextStyle(
+                                        fontFamily: 'Poppins',
+                                        fontSize: 12,
+                                        color: Color(0xFF323232),
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                      children: [
+                                        TextSpan(text: question.questionText.trim()),
+                                        if (question.isMandatory)
+                                          TextSpan(text: '   *', style: TextStyle(color: Color(0xFFEC4B5D))),
+                                      ],
+                                    ),
+                                  ),
+                                  Space.h(height: 8),
+                                  Text(
+                                    "Accepts PDF, PNG, JPG, MP4 files (Max 50MB)",
+                                    style: TextStyle(fontSize: 10, color: Colors.grey, fontFamily: 'Poppins'),
+                                  ),
+                                  Space.h(height: 12),
+                                  InkWell(
+                                    onTap: () async {
+                                      try {
+                                        FilePickerResult? result = await FilePicker.platform.pickFiles(
+                                          type: FileType.custom,
+                                          allowedExtensions: ['pdf', 'png', 'jpg', 'jpeg', 'mp4'],
+                                          withData: true, // Required for web
+                                        );
+
+                                        if (result != null && result.files.single.bytes != null) {
+                                          // Get file data for web
+                                          final file = result.files.single;
+                                          final bytes = file.bytes!;
+                                          final filename = file.name;
+
+                                          // Check file size (50MB = 50 * 1024 * 1024 bytes)
+                                          if (bytes.length > 50 * 1024 * 1024) {
+                                            Fluttertoast.showToast(
+                                              msg: "File size exceeds 50MB limit",
+                                              toastLength: Toast.LENGTH_SHORT,
+                                              gravity: ToastGravity.BOTTOM,
+                                              backgroundColor: Colors.red,
+                                              textColor: Colors.white,
+                                            );
+                                            return;
+                                          }
+
+                                          // Show loading indicator
+                                          showDialog(
+                                            context: context,
+                                            barrierDismissible: false,
+                                            builder: (BuildContext context) {
+                                              return AlertDialog(
+                                                backgroundColor: Colors.transparent,
+                                                content: Column(
+                                                  mainAxisSize: MainAxisSize.min,
+                                                  children: [
+                                                    CircularProgressIndicator(color: DesignColors.accent),
+                                                    SizedBox(height: 16),
+                                                    Text("Uploading file...", style: TextStyle(color: Colors.white)),
+                                                  ],
+                                                ),
+                                              );
+                                            },
+                                          );
+
+                                          // Upload file
+                                          try {
+                                            final uploadBody = {
+                                              'userId': await GetStorage().read("userUID") ?? '',
+                                              'lobbyId': lobbyId,
+                                              'questionId': question.id,
+                                            };
+
+                                            final result = await FileUploadService().uploadBytes(
+                                              "user/upload/api/v1/file",
+                                              bytes,
+                                              filename,
+                                              uploadBody,
+                                            );
+
+                                            // Close loading dialog
+                                            Navigator.pop(context);
+
+                                            if (result.statusCode == 200) {
+                                              String fileUrl = result.data['imageUrl'];
+                                              controller.text = fileUrl;
+                                              formNotifier.updateAnswer(question.id, fileUrl);
+
+                                              Fluttertoast.showToast(
+                                                msg: "File uploaded successfully",
+                                                toastLength: Toast.LENGTH_SHORT,
+                                                gravity: ToastGravity.BOTTOM,
+                                                backgroundColor: Colors.green,
+                                                textColor: Colors.white,
+                                              );
+                                            } else {
+                                              Fluttertoast.showToast(
+                                                msg: "Failed to upload file",
+                                                toastLength: Toast.LENGTH_SHORT,
+                                                gravity: ToastGravity.BOTTOM,
+                                                backgroundColor: Colors.red,
+                                                textColor: Colors.white,
+                                              );
+                                            }
+                                          } catch (e) {
+                                            // Close loading dialog
+                                            Navigator.pop(context);
+                                            Fluttertoast.showToast(
+                                              msg: "Error uploading file: $e",
+                                              toastLength: Toast.LENGTH_SHORT,
+                                              gravity: ToastGravity.BOTTOM,
+                                              backgroundColor: Colors.red,
+                                              textColor: Colors.white,
+                                            );
+                                          }
+                                        }
+                                      } catch (e, s) {
+                                        kLogger.error("Error selecting file:", error: e, stackTrace: s);
+                                        Fluttertoast.showToast(
+                                          msg: "Error selecting file: $e",
+                                          toastLength: Toast.LENGTH_SHORT,
+                                          gravity: ToastGravity.BOTTOM,
+                                          backgroundColor: Colors.red,
+                                          textColor: Colors.white,
+                                        );
+                                      }
+                                    },
+                                    child: Container(
+                                      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                                      decoration: BoxDecoration(
+                                        border: Border.all(color: DesignColors.border),
+                                        borderRadius: BorderRadius.circular(16),
+                                        color: Colors.white,
+                                      ),
+                                      child:
+                                          controller.text.isEmpty
+                                              ? Container(
+                                                padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                                                decoration: BoxDecoration(
+                                                  color: Colors.white,
+                                                  borderRadius: BorderRadius.circular(12),
+                                                  border: Border.all(color: Colors.grey.shade300, width: 1),
+                                                  boxShadow: [
+                                                    BoxShadow(
+                                                      color: Colors.black.withOpacity(0.05),
+                                                      blurRadius: 5,
+                                                      offset: Offset(0, 2),
+                                                    ),
+                                                  ],
+                                                ),
+                                                child: Row(
+                                                  children: [
+                                                    Icon(
+                                                      Icons.cloud_upload_outlined,
+                                                      color: Colors.grey.shade600,
+                                                      size: 24,
+                                                    ),
+                                                    SizedBox(width: 12),
+                                                    Expanded(
+                                                      child: Text(
+                                                        "Upload File",
+                                                        style: TextStyle(
+                                                          color: Colors.grey.shade700,
+                                                          fontSize: 14,
+                                                          fontWeight: FontWeight.w500,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                    Container(
+                                                      padding: EdgeInsets.all(8),
+                                                      decoration: BoxDecoration(
+                                                        color: Colors.grey.shade100,
+                                                        borderRadius: BorderRadius.circular(8),
+                                                      ),
+                                                      child: Icon(Icons.add, color: Colors.grey.shade600, size: 20),
+                                                    ),
+                                                  ],
+                                                ),
+                                              )
+                                              : Column(
+                                                children: [
+                                                  Stack(
+                                                    alignment: Alignment.topRight,
+                                                    children: [
+                                                      if (_isImageFile(controller.text))
+                                                        ClipRRect(
+                                                          borderRadius: BorderRadius.circular(8),
+                                                          child: Image.network(
+                                                            controller.text,
+                                                            height: 120,
+                                                            width: double.infinity,
+                                                            fit: BoxFit.cover,
+                                                            errorBuilder:
+                                                                (context, error, stackTrace) =>
+                                                                    Icon(Icons.image, size: 50, color: Colors.grey),
+                                                          ),
+                                                        )
+                                                      else if (_isPdfFile(controller.text))
+                                                        Icon(Icons.picture_as_pdf, size: 50, color: Colors.red)
+                                                      else if (_isVideoFile(controller.text))
+                                                        Icon(Icons.video_file, size: 50, color: Colors.blue),
+                                                      IconButton(
+                                                        style: IconButton.styleFrom(
+                                                          backgroundColor: Colors.white,
+                                                          minimumSize: Size(32, 32),
+                                                          maximumSize: Size(32, 32),
+                                                        ),
+                                                        icon: Icon(Icons.close, color: Colors.black, size: 16),
+                                                        onPressed: () {
+                                                          controller.clear();
+                                                          formNotifier.updateAnswer(question.id, '');
+                                                        },
+                                                      ),
+                                                    ],
+                                                  ),
+                                                  SizedBox(height: 8),
+                                                  Text(
+                                                    _getFileNameFromUrl(controller.text),
+                                                    style: TextStyle(
+                                                      color: Colors.black,
+                                                      fontSize: 12,
+                                                      fontFamily: 'Poppins',
+                                                      overflow: TextOverflow.ellipsis,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        );
+                      }
+                      // URL question
+                      else if (question.questionType == 'url') {
+                        final controller = formNotifier.getControllerForQuestion(question.id);
+
+                        if (controller == null) {
+                          return const SizedBox.shrink();
+                        }
+
+                        // Make sure controller has the latest value
+                        if (controller.text != question.answer) {
+                          controller.text = question.answer;
+                        }
+
+                        return Padding(
+                          padding: EdgeInsets.only(bottom: 24),
+                          child: Card(
+                            shadowColor: Color(0x143E79A1),
+                            elevation: 6,
+                            color: Colors.white,
+                            child: Padding(
+                              padding: EdgeInsets.only(bottom: 18, top: 12, left: 12, right: 12),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  RichText(
+                                    maxLines: null,
+                                    overflow: TextOverflow.visible,
+                                    text: TextSpan(
+                                      style: TextStyle(
+                                        fontFamily: 'Poppins',
+                                        fontSize: 12,
+                                        color: Color(0xFF323232),
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                      children: [
+                                        TextSpan(text: question.questionText.trim()),
+                                        if (question.isMandatory)
+                                          TextSpan(text: '   *', style: TextStyle(color: Color(0xFFEC4B5D))),
+                                      ],
+                                    ),
+                                  ),
+                                  Space.h(height: 12),
+                                  DesignTextField(
+                                    controller: controller,
+                                    hintText: "Enter URL",
+                                    fontSize: 12,
+                                    inputType: TextInputType.url,
+                                    onEditingComplete: () {
+                                      kLogger.trace(isValidUrl(controller.text).toString());
+                                      // Validate URL format if not empty
+                                      if (controller.text.isNotEmpty && !isValidUrl(controller.text)) {
+                                        // Show warning but don't revert the text
+                                        Fluttertoast.showToast(
+                                          msg: "Please enter a valid URL",
+                                          toastLength: Toast.LENGTH_SHORT,
+                                          gravity: ToastGravity.BOTTOM,
+                                          backgroundColor: Colors.orange,
+                                          textColor: Colors.white,
+                                        );
+                                      }
+                                    },
+                                    onChanged: (val) {
+                                      if (val != null) {
+                                        // Update the answer regardless of validation
+                                        formNotifier.updateAnswer(question.id, val);
+
+                                        // Validate URL format if not empty
+                                        // if (val.isNotEmpty && !_isValidUrl(val)) {
+                                        //   // Show warning but don't revert the text
+                                        //   Fluttertoast.showToast(
+                                        //     msg: "Please enter a valid URL",
+                                        //     toastLength: Toast.LENGTH_SHORT,
+                                        //     gravity: ToastGravity.BOTTOM,
+                                        //     backgroundColor: Colors.orange,
+                                        //     textColor: Colors.white,
+                                        //   );
+                                        // }
+                                      }
+                                    },
+                                    borderRadius: 16,
+                                  ),
                                 ],
                               ),
                             ),
@@ -1323,18 +1945,13 @@ class _AccessRequestFormFillViewState
                             elevation: 6,
                             color: Colors.white,
                             child: Padding(
-                              padding: EdgeInsets.only(
-                                bottom: 18,
-                                top: 12,
-                                left: 12,
-                                right: 12,
-                              ),
+                              padding: EdgeInsets.only(bottom: 18, top: 12, left: 12, right: 12),
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   RichText(
-                                    maxLines: 10,
-                                    overflow: TextOverflow.ellipsis,
+                                    maxLines: null,
+                                    overflow: TextOverflow.visible,
                                     text: TextSpan(
                                       style: TextStyle(
                                         fontFamily: 'Poppins',
@@ -1343,14 +1960,9 @@ class _AccessRequestFormFillViewState
                                         fontWeight: FontWeight.w500,
                                       ),
                                       children: [
-                                        TextSpan(text: question.questionText),
+                                        TextSpan(text: question.questionText.trim()),
                                         if (question.isMandatory)
-                                          TextSpan(
-                                            text: '   *',
-                                            style: TextStyle(
-                                              color: Color(0xFFEC4B5D),
-                                            ),
-                                          ),
+                                          TextSpan(text: '   *', style: TextStyle(color: Color(0xFFEC4B5D))),
                                       ],
                                     ),
                                   ),
@@ -1366,20 +1978,13 @@ class _AccessRequestFormFillViewState
                                       value: question.answer == option,
                                       onChanged: (val) {
                                         if (val != null && val) {
-                                          formNotifier.updateAnswer(
-                                            question.id,
-                                            option,
-                                          );
+                                          formNotifier.updateAnswer(question.id, option);
                                         }
                                       },
-                                      contentPadding:
-                                          const EdgeInsets.symmetric(
-                                            horizontal: 0,
-                                          ),
+                                      contentPadding: const EdgeInsets.symmetric(horizontal: 0),
                                       activeColor: const Color(0xFFEC4B5D),
                                       checkColor: Colors.white,
-                                      controlAffinity:
-                                          ListTileControlAffinity.leading,
+                                      controlAffinity: ListTileControlAffinity.leading,
                                       dense: true,
                                     );
                                   }),
@@ -1397,5 +2002,356 @@ class _AccessRequestFormFillViewState
         ),
       ],
     );
+  }
+    // Helper method to format date for display
+  String _formatDate(String isoString) {
+    try {
+      final date = DateTime.parse(isoString);
+      return "${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}";
+    } catch (e) {
+      return isoString; // Return original string if parsing fails
+    }
+  }
+
+  // Helper method to extract file name from URL
+  String _getFileNameFromUrl(String url) {
+    try {
+      return url.split('/').last;
+    } catch (e) {
+      return url; // Return original URL if extraction fails
+    }
+  }
+
+  bool isValidUrl(String url) {
+    if (url.isEmpty || url.trim().isEmpty) return false;
+
+    String cleanUrl = url.trim();
+
+    // Basic sanity checks
+    if (cleanUrl.length < 3 ||
+        cleanUrl.contains(' ') ||
+        cleanUrl.contains('\n') ||
+        cleanUrl.contains('\t') ||
+        cleanUrl.contains('\r')) {
+      return false;
+    }
+
+    // Remove protocol if present to check the domain part
+    String domainPart = cleanUrl;
+    bool hasProtocol = false;
+
+    if (cleanUrl.startsWith('http://')) {
+      domainPart = cleanUrl.substring(7);
+      hasProtocol = true;
+    } else if (cleanUrl.startsWith('https://')) {
+      domainPart = cleanUrl.substring(8);
+      hasProtocol = true;
+    }
+
+    // Remove path, query, and fragment to isolate domain
+    domainPart = domainPart.split('/')[0].split('?')[0].split('#')[0];
+
+    // Handle port
+    String domain = domainPart.split(':')[0];
+
+    // Domain must not be empty after all parsing
+    if (domain.isEmpty) return false;
+
+    // Validate the domain structure BEFORE trying Uri.parse
+    if (!_isValidDomainStructure(domain)) {
+      return false;
+    }
+
+    // Now try to parse with https if no protocol
+    String urlToParse = hasProtocol ? cleanUrl : 'https://$cleanUrl';
+
+    // Additional attempt with www if needed
+    if (!hasProtocol && !cleanUrl.startsWith('www.') && !_isIpAddress(domain)) {
+      String urlWithWww = 'https://www.$cleanUrl';
+      Uri? uriWithWww = Uri.tryParse(urlWithWww);
+      if (uriWithWww != null && _isValidParsedUri(uriWithWww)) {
+        return true;
+      }
+    }
+
+    Uri? uri = Uri.tryParse(urlToParse);
+    return uri != null && _isValidParsedUri(uri);
+  }
+
+  bool _isValidDomainStructure(String domain) {
+    if (domain.isEmpty || domain.length > 253) return false;
+
+    // Handle localhost
+    if (domain == 'localhost') return true;
+
+    // Check if it's an IP address
+    if (_isIpAddress(domain)) {
+      return _isValidIpAddress(domain);
+    }
+
+    // For domain names, must contain at least one dot
+    if (!domain.contains('.')) return false;
+
+    // Cannot start or end with dot or hyphen
+    if (domain.startsWith('.') || domain.endsWith('.') || domain.startsWith('-') || domain.endsWith('-')) {
+      return false;
+    }
+
+    // Cannot contain consecutive dots
+    if (domain.contains('..')) return false;
+
+    // Split into labels and validate each
+    final labels = domain.split('.');
+    if (labels.length < 2) return false;
+
+    for (int i = 0; i < labels.length; i++) {
+      final label = labels[i];
+      if (!_isValidDomainLabel(label, i == labels.length - 1)) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  bool _isValidDomainLabel(String label, bool isTLD) {
+    if (label.isEmpty || label.length > 63) return false;
+
+    // Cannot start or end with hyphen
+    if (label.startsWith('-') || label.endsWith('-')) return false;
+
+    // Must contain only alphanumeric characters and hyphens
+    if (!RegExp(r'^[a-zA-Z0-9-]+$').hasMatch(label)) return false;
+
+    // If it's a TLD (last label), additional validation
+    if (isTLD) {
+      // TLD must be at least 2 characters
+      if (label.length < 2) return false;
+
+      // TLD should contain at least one letter
+      if (!RegExp(r'[a-zA-Z]').hasMatch(label)) return false;
+
+      // Common valid TLD patterns - reject obvious random strings
+      if (!_isValidTLD(label)) return false;
+    } else {
+      // Non-TLD labels cannot be all hyphens or have weird patterns
+      if (RegExp(r'^-+$').hasMatch(label)) return false;
+    }
+
+    return true;
+  }
+
+  bool _isValidTLD(String tld) {
+    // Convert to lowercase for checking
+    String lowerTLD = tld.toLowerCase();
+
+    // List of definitely invalid TLDs (random letter combinations)
+    final obviouslyInvalid = {
+      'aa',
+      'bb',
+      'cc',
+      'dd',
+      'ee',
+      'ff',
+      'gg',
+      'hh',
+      'ii',
+      'jj',
+      'kk',
+      'll',
+      'mm',
+      'nn',
+      'oo',
+      'pp',
+      'qq',
+      'rr',
+      'ss',
+      'tt',
+      'uu',
+      'vv',
+      'ww',
+      'xx',
+      'yy',
+      'zz',
+      'aaa',
+      'bbb',
+      'ccc',
+      'ddd',
+      'eee',
+      'fff',
+      'ggg',
+      'hhh',
+      'iii',
+      'jjj',
+      'kkk',
+      'lll',
+      'mmm',
+      'nnn',
+      'ooo',
+      'ppp',
+      'qqq',
+      'rrr',
+      'sss',
+      'ttt',
+      'uuu',
+      'vvv',
+      'www',
+      'xxx',
+      'yyy',
+      'zzz',
+    };
+
+    if (obviouslyInvalid.contains(lowerTLD)) return false;
+
+    // Check for common valid TLD patterns
+    // Real TLDs usually have meaningful patterns
+    final commonValidTLDs = {
+      'com',
+      'org',
+      'net',
+      'gov',
+      'edu',
+      'mil',
+      'int',
+      'co',
+      'io',
+      'ai',
+      'me',
+      'uk',
+      'us',
+      'ca',
+      'au',
+      'de',
+      'fr',
+      'jp',
+      'cn',
+      'in',
+      'br',
+      'mx',
+      'ru',
+      'info',
+      'biz',
+      'name',
+      'pro',
+      'aero',
+      'asia',
+      'cat',
+      'coop',
+      'jobs',
+      'mobi',
+      'museum',
+      'post',
+      'tel',
+      'travel',
+      'xxx',
+      'app',
+      'dev',
+      'tech',
+      'online',
+      'site',
+      'website',
+      'store',
+      'blog',
+      'news',
+      'today',
+      'world',
+    };
+
+    // If it's a common valid TLD, accept it
+    if (commonValidTLDs.contains(lowerTLD)) return true;
+
+    // For other TLDs, check if they look reasonable
+    // Real TLDs typically:
+    // 1. Are not random character sequences
+    // 2. Have vowels and consonants mixed reasonably
+    // 3. Don't have repeating patterns
+
+    // Check for reasonable letter distribution
+    if (lowerTLD.length >= 3) {
+      // Count vowels
+      int vowels = 0;
+      for (int i = 0; i < lowerTLD.length; i++) {
+        if ('aeiou'.contains(lowerTLD[i])) vowels++;
+      }
+
+      // Should have at least one vowel for longer TLDs
+      if (vowels == 0 && lowerTLD.length > 3) return false;
+
+      // Check for excessive repetition
+      if (RegExp(r'(.)\1{2,}').hasMatch(lowerTLD)) return false;
+    }
+
+    // If it passes basic checks and isn't obviously invalid, accept it
+    return true;
+  }
+
+  bool _isIpAddress(String host) {
+    // IPv4 pattern
+    if (RegExp(r'^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$').hasMatch(host)) {
+      return true;
+    }
+
+    // Basic IPv6 pattern (simplified)
+    if (host.contains(':') && RegExp(r'^[0-9a-fA-F:]+$').hasMatch(host)) {
+      return true;
+    }
+
+    return false;
+  }
+
+  bool _isValidIpAddress(String host) {
+    // IPv4 validation
+    final ipv4Pattern = RegExp(r'^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$');
+    final match = ipv4Pattern.firstMatch(host);
+
+    if (match != null) {
+      for (int i = 1; i <= 4; i++) {
+        final octet = int.tryParse(match.group(i)!);
+        if (octet == null || octet < 0 || octet > 255) {
+          return false;
+        }
+      }
+      return true;
+    }
+
+    // IPv6 basic validation
+    if (host.contains(':')) {
+      final parts = host.split(':');
+      if (parts.length > 8) return false;
+
+      for (final part in parts) {
+        if (part.isNotEmpty && (part.length > 4 || !RegExp(r'^[0-9a-fA-F]+$').hasMatch(part))) {
+          return false;
+        }
+      }
+      return true;
+    }
+
+    return false;
+  }
+
+  bool _isValidParsedUri(Uri uri) {
+    // Must be http or https
+    if (uri.scheme != 'http' && uri.scheme != 'https') return false;
+
+    // Must have a valid host
+    if (uri.host.isEmpty) return false;
+
+    // Final validation of the host
+    return _isValidDomainStructure(uri.host);
+  }
+
+  // Helper functions to check file types
+  bool _isImageFile(String url) {
+    final ext = url.toLowerCase().split('.').last;
+    return ['png', 'jpg', 'jpeg'].contains(ext);
+  }
+
+  bool _isPdfFile(String url) {
+    return url.toLowerCase().endsWith('.pdf');
+  }
+
+  bool _isVideoFile(String url) {
+    return url.toLowerCase().endsWith('.mp4');
   }
 }

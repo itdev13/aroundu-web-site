@@ -14,7 +14,9 @@ import 'package:aroundu/views/lobby/access_request.view.dart';
 import 'package:aroundu/views/lobby/access_request_user.lobby.view.dart';
 import 'package:aroundu/views/lobby/checkout.view.lobby.dart';
 import 'package:aroundu/views/lobby/invite.lobby.view.dart';
+import 'package:aroundu/views/lobby/lobby.noAuth.checkout.view.dart';
 import 'package:aroundu/views/lobby/lobby.quick.checkout.dart';
+import 'package:aroundu/views/lobby/lobby.transaction.status.view.dart';
 import 'package:aroundu/views/lobby/lobby.view.dart';
 import 'package:aroundu/views/lobby/lobby_settings_screen.dart';
 import 'package:aroundu/views/lobby/shared.lobby.extended.view.dart';
@@ -43,8 +45,11 @@ class AppRoutes {
   static const String filterResult = '/filter/results';
   static const String viewAllLobbies = '/lobby/all';
   static const String viewAllHouses = '/house/all';
-  static const String quickLobbyCheckout = '/:lobbyId/checkout/quick';
+  static const String quickLobbyCheckout = '/lobby/:lobbyId/checkout/quick';
   static const String checkOutPublicLobbyView = '/checkout';
+  static const String noAuthCheckoutLobbyView = '/lobby/:lobbyId/checkout/simple';
+
+  static const String transactionStatus = "/lobby/:lobbyId/status/:transactionId";
   static const String scanQrScreen = '/qr';
   static const String lobbySettings = '/lobby/settings';
   static const String sharedAccessRequestCardExtendedView = '/lobby/access-request-extended/:accessReqId';
@@ -136,6 +141,7 @@ class AppRoutes {
           () => UserLobbyAccessRequest(
             lobby: Get.arguments != null ? Get.arguments['lobby'] : null,
             isIndividual: Get.arguments != null ? Get.arguments['isIndividual'] ?? true : true,
+            selectedTickets: Get.arguments != null ? Get.arguments['selectedTickets'] : [],
           ),
     ),
     GetPage(
@@ -149,6 +155,7 @@ class AppRoutes {
             lobbyIsPrivate: Get.arguments != null ? Get.arguments['lobbyIsPrivate'] ?? false : false,
             requestText: Get.arguments != null ? Get.arguments['requestText'] ?? "" : "",
             formModel: Get.arguments != null ? Get.arguments['formModel'] : null,
+            selectedTickets: Get.arguments != null ? Get.arguments['selectedTickets'] : [],
           ),
       transition: Transition.rightToLeftWithFade,
     ),
@@ -188,14 +195,28 @@ class AppRoutes {
     ),
     GetPage(name: quickLobbyCheckout, page: () => LobbyQuickCheckoutView(lobbyId: Get.parameters['lobbyId'] ?? "")),
     GetPage(
+      name: noAuthCheckoutLobbyView,
+      page: () => LobbyNoAuthCheckoutView(lobbyId: Get.parameters['lobbyId'] ?? ""),
+    ),
+    GetPage(
       name: checkOutPublicLobbyView,
       page:
           () => CheckOutPublicLobbyView(
             lobby: Get.arguments != null ? Get.arguments['lobby'] : null,
             formModel: Get.arguments != null ? Get.arguments['formModel'] : null,
             requestText: Get.arguments != null ? Get.arguments['requestText'] : "",
+            selectedTickets: Get.arguments != null ? Get.arguments['selectedTickets'] : [],
           ),
     ),
+    GetPage(
+      name: transactionStatus,
+      page:
+          () => LobbytransactionStatusView(
+            lobbyId: Get.parameters['lobbyId'] ?? "",
+            transactionId: Get.parameters['transactionId'] ?? "",
+          ),
+    ),
+
     GetPage(
       name: scanQrScreen,
       page:
@@ -239,6 +260,7 @@ class AppRoutes {
             formModel: Get.arguments != null ? Get.arguments['formModel'] : null,
             formList: Get.arguments != null ? Get.arguments['formList'] : [],
             requestText: Get.arguments != null ? Get.arguments['requestText'] : "",
+            // selectedTickets: Get.arguments != null ? Get.arguments['selectedTickets'] : [],
           ),
     ),
     GetPage(

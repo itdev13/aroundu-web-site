@@ -39,7 +39,11 @@ class Lobby with _$Lobby {
     List<UserSummary>? userSummaries,
     @Default({}) Map<String, dynamic> dateRange,
     // @Default(0.0) double price,
+     LobbyRestriction? restriction,
     @Default(PriceDetails()) PriceDetails priceDetails,
+    @Default(false) bool isAdvancedPricing,
+    @Default(false) bool allowMultiplePricingOptions,
+    @Default(<LobbyTicketOption>[]) List<LobbyTicketOption> ticketOptions,
     AccessRequestData? accessRequestData,
     @Default(false) bool hasForm,
     @Default(false) bool hasOffer,
@@ -49,6 +53,7 @@ class Lobby with _$Lobby {
     @Default(Rating()) Rating rating,
     @Default([]) List<PriceTier>? priceTierList,
     @Default(false) bool ratingGiven,
+    @Default(false) bool loginNotRequired,
     
   }) = _Lobby;
 
@@ -122,6 +127,28 @@ class UserSummary with _$UserSummary {
 }
 
 @freezed
+class LobbyRestriction with _$LobbyRestriction {
+  @JsonSerializable(explicitToJson: true)
+  const factory LobbyRestriction({
+    @Default("") String genderRestriction,
+    @Default(AgeRange()) AgeRange ageRange,
+    int? maxMales,
+    int? maxFemales,
+    int? maxOthers,
+  }) = _LobbyRestriction;
+
+  factory LobbyRestriction.fromJson(Map<String, dynamic> json) => _$LobbyRestrictionFromJson(json);
+}
+
+@freezed
+class AgeRange with _$AgeRange {
+  @JsonSerializable(explicitToJson: true)
+  const factory AgeRange({@Default(0) int minAge, @Default(100) int maxAge}) = _AgeRange;
+
+  factory AgeRange.fromJson(Map<String, dynamic> json) => _$AgeRangeFromJson(json);
+}
+
+@freezed
 class PriceDetails with _$PriceDetails {
   @JsonSerializable(explicitToJson: true)
   const factory PriceDetails({
@@ -133,6 +160,24 @@ class PriceDetails with _$PriceDetails {
 
   factory PriceDetails.fromJson(Map<String, dynamic> json) =>
       _$PriceDetailsFromJson(json);
+}
+
+@freezed
+class LobbyTicketOption with _$LobbyTicketOption {
+  @JsonSerializable(explicitToJson: true)
+  const factory LobbyTicketOption({
+    @Default("") String id,
+    @Default("") String name,
+    @Default("") String description,
+    @Default(0.0) double price,
+    @Default(0) int totalSlots,
+    @Default(0) int bookedSlots,
+    @Default("INR") String currency,
+    @Default(1) int minQuantity,
+    @Default(1) int maxQuantity, // per person
+  }) = _LobbyTicketOption;
+
+  factory LobbyTicketOption.fromJson(Map<String, dynamic> json) => _$LobbyTicketOptionFromJson(json);
 }
 
 @freezed

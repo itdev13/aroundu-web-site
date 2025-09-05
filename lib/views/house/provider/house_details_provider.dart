@@ -1,6 +1,7 @@
 import 'package:aroundu/models/house.model.dart';
 import 'package:aroundu/utils/api_service/api.service.dart' show ApiService;
 import 'package:aroundu/utils/logger.utils.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class HouseDetailsNotifier extends StateNotifier<AsyncValue<HouseDetailedModel?>> {
@@ -17,6 +18,7 @@ class HouseDetailsNotifier extends StateNotifier<AsyncValue<HouseDetailedModel?>
       // });
 
       final response = await ApiService().get(
+
         "match/house/public",
         queryParameters: {'houseId': houseId, 'pastLobbies': true, 'upcomingLobbies': true, 'skip': 0, 'limit': 20},
       );

@@ -22,6 +22,7 @@ import 'package:aroundu/views/lobby/access_request.view.dart';
 import 'package:aroundu/views/lobby/add_tier_pricing.dart';
 import 'package:aroundu/views/lobby/lobby_settings_screen.dart';
 import 'package:aroundu/views/lobby/lobby_content_section.dart';
+import 'package:aroundu/views/lobby/lobby_ticket_options_attendee.view.dart';
 import 'package:aroundu/views/lobby/markdown_editor.dart';
 import 'package:aroundu/views/lobby/provider/activate_lobby_provider.dart';
 import 'package:aroundu/views/lobby/provider/get_price_provider.dart';
@@ -29,6 +30,7 @@ import 'package:aroundu/views/lobby/provider/lobbies_providers.dart';
 import 'package:aroundu/views/lobby/provider/lobby_access_provider.dart';
 import 'package:aroundu/views/lobby/provider/lobby_details_provider.dart';
 import 'package:aroundu/views/lobby/provider/save_lobby_provider.dart';
+import 'package:aroundu/views/lobby/provider/selected_tickets_provider.dart';
 import 'package:aroundu/views/lobby/shared.lobby.extended.view.dart';
 import 'package:aroundu/views/lobby/widgets/featured_Conversation.dart';
 import 'package:aroundu/views/lobby/widgets/feedback.dart';
@@ -213,11 +215,30 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
     }
     // If user is VISITOR and lobby is private, show request options
     else if (lobby.userStatus == "VISITOR") {
+      List<SelectedTicket> selectedTickets = [];
       if (lobby.isPrivate) {
         await JoinOptionsModal.show(
           context,
           onJoinWithFriends: () async {
             final GlobalKey<State> dialogKey = GlobalKey<State>();
+
+            if (lobby.isAdvancedPricing) {
+              // ['selectedTickets']
+              final ticket = await Get.to(
+                () => TicketOptionsForAttendee(
+                  ticketOptions: lobby.ticketOptions,
+                  lobbyTitle: lobby.title,
+                  isMultiplePricing: lobby.allowMultiplePricingOptions,
+                  lobbyId: lobby.id,
+                ),
+              );
+              if (ticket == null || ticket['shouldProceed'] == false) {
+                ref.read(selectedTicketsProvider.notifier).clearAll();
+                return;
+              } else {
+                selectedTickets = ticket['selectedTickets'] as List<SelectedTicket>;
+              }
+            }
 
             // Show loading dialog
             showDialog(
@@ -242,19 +263,65 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                 Navigator.pop(dialogKey.currentContext!);
               }
             }
-            await Get.toNamed(AppRoutes.lobbyAccessRequest, arguments: {'lobby': lobby, 'isIndividual': false});
+            await Get.toNamed(
+              AppRoutes.lobbyAccessRequest,
+              arguments: {'lobby': lobby, 'isIndividual': false, 'selectedTickets': selectedTickets},
+            );
+
             ref.read(lobbyDetailsProvider(lobby.id).notifier).reset();
             await ref.read(lobbyDetailsProvider(lobby.id).notifier).fetchLobbyDetails(lobby.id);
           },
           onJoinAsIndividual: () async {
-            await Get.toNamed(AppRoutes.lobbyAccessRequest, arguments: {'lobby': lobby});
+            if (lobby.isAdvancedPricing) {
+              // ['selectedTickets']
+              final ticket = await Get.to(
+                () => TicketOptionsForAttendee(
+                  ticketOptions: lobby.ticketOptions,
+                  lobbyTitle: lobby.title,
+                  isMultiplePricing: lobby.allowMultiplePricingOptions,
+                  lobbyId: lobby.id,
+                ),
+              );
+              if (ticket == null || ticket['shouldProceed'] == false) {
+                ref.read(selectedTicketsProvider.notifier).clearAll();
+                return;
+              } else {
+                selectedTickets = ticket['selectedTickets'] as List<SelectedTicket>;
+              }
+            }
+            await Get.toNamed(
+              AppRoutes.lobbyAccessRequest,
+              arguments: {'lobby': lobby, 'selectedTickets': selectedTickets},
+            );
+
             ref.read(lobbyDetailsProvider(lobby.id).notifier).reset();
             await ref.read(lobbyDetailsProvider(lobby.id).notifier).fetchLobbyDetails(lobby.id);
           },
         );
       } else {
+        if (lobby.isAdvancedPricing) {
+          // ['selectedTickets']
+          final ticket = await Get.to(
+            () => TicketOptionsForAttendee(
+              ticketOptions: lobby.ticketOptions,
+              lobbyTitle: lobby.title,
+              isMultiplePricing: lobby.allowMultiplePricingOptions,
+              lobbyId: lobby.id,
+            ),
+          );
+          if (ticket == null || ticket['shouldProceed'] == false) {
+            ref.read(selectedTicketsProvider.notifier).clearAll();
+            return;
+          } else {
+            selectedTickets = ticket['selectedTickets'] as List<SelectedTicket>;
+          }
+        }
         if (lobby.hasForm) {
-          await Get.toNamed(AppRoutes.lobbyAccessRequest, arguments: {'lobby': lobby});
+          await Get.toNamed(
+            AppRoutes.lobbyAccessRequest,
+            arguments: {'lobby': lobby, 'selectedTickets': selectedTickets},
+          );
+
           ref.read(lobbyDetailsProvider(lobby.id).notifier).reset();
           await ref.read(lobbyDetailsProvider(lobby.id).notifier).fetchLobbyDetails(lobby.id);
         } else {
@@ -277,7 +344,9 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
             );
 
             // Fetch pricing data
-            await ref.read(pricingProvider(lobby.id).notifier).fetchPricing(lobby.id, groupSize: 1);
+            await ref
+                .read(pricingProvider(lobby.id).notifier)
+                .fetchPricing(lobby.id, groupSize: 1, selectedTickets: selectedTickets);
 
             // Close the loading dialog
             Navigator.of(context, rootNavigator: true).pop();
@@ -286,7 +355,11 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
             final pricingData = pricingState.pricingData;
 
             if (pricingData != null && pricingData.status == 'SUCCESS') {
-              await Get.toNamed(AppRoutes.checkOutPublicLobbyView, arguments: {'lobby': lobby});
+              await Get.toNamed(
+                AppRoutes.checkOutPublicLobbyView,
+                arguments: {'lobby': lobby, 'selectedTickets': selectedTickets},
+              );
+
               ref.read(lobbyDetailsProvider(lobby.id).notifier).reset();
               await ref.read(lobbyDetailsProvider(lobby.id).notifier).fetchLobbyDetails(lobby.id);
             } else {
@@ -599,21 +672,36 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                         color: const Color(0xFF323232),
                       ),
                       onTap: () async {
-                        showModalBottomSheet(
-                          backgroundColor: Colors.white,
-                          context: context,
-                          // constraints: BoxConstraints(
-                          //   minHeight: 0.9.sh,
-                          // ),
-                          isScrollControlled: true,
-                          useSafeArea: true,
-                          builder: (BuildContext context) {
-                            return Padding(
-                              padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
-                              child: LobbySmallEditSheet(lobby: lobbyData.lobby),
-                            );
-                          },
-                        );
+                        if (lobbyData.lobby.isAdvancedPricing) {
+                          FancyAppDownloadDialog.show(
+                            context,
+                            title: "Unlock Premium Features",
+                            message:
+                                "Get the full AroundU experience with exclusive features, enhanced performance, and more!",
+                            appStoreUrl: "https://apps.apple.com/in/app/aroundu/id6744299663",
+                            playStoreUrl: "https://play.google.com/store/apps/details?id=com.polar.aroundu",
+                            // cancelButtonText: "Maybe Later",
+                            onCancel: () {
+                              print("User chose to skip download");
+                            },
+                          );
+                        } else {
+                          showModalBottomSheet(
+                            backgroundColor: Colors.white,
+                            context: context,
+                            // constraints: BoxConstraints(
+                            //   minHeight: 0.9.sh,
+                            // ),
+                            isScrollControlled: true,
+                            useSafeArea: true,
+                            builder: (BuildContext context) {
+                              return Padding(
+                                padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+                                child: LobbySmallEditSheet(lobby: lobbyData.lobby),
+                              );
+                            },
+                          );
+                        }
                       },
                     ),
                     Space.h(height: 8),
@@ -2304,6 +2392,7 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                       ],
                     ),
                   ),
+
               Space.h(height: 34),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 0.0, vertical: 5),
@@ -2341,6 +2430,22 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                   ),
                 ),
               ),
+              Space.h(height: 34),
+              Row(
+                children: [
+                   if (lobbyData.lobby.content != null)
+                    DesignText(
+                      text: lobbyData.lobby.content?.title ?? "Guidelines",
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  
+                ],
+              ),
+              if (lobbyData.lobby.content != null) ...[
+                Space.h(height: 16),
+                NewLobbyContentSection(content: lobbyData.lobby.content!, height: 356),
+              ],
               Space.h(height: 16),
               ResponsiveAppDownloadCard(
                 appStoreUrl: "https://apps.apple.com/in/app/aroundu/id6744299663",
@@ -2641,7 +2746,7 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: [
                       ConstrainedBox(
-                        constraints: BoxConstraints(maxHeight: 0.45 * sh),
+                        constraints: BoxConstraints(maxHeight: 0.55 * sh),
                         child: Stack(
                           children: [
                             MediaGallery.fromUrls(
@@ -2920,6 +3025,22 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                           ),
                         ),
                       ),
+                      Space.h(height: 34),
+                      Row(
+                        children: [
+                          if (lobbyData.lobby.content != null)
+                            DesignText(
+                              text: lobbyData.lobby.content?.title ?? "Guidelines",
+                              fontSize: 18,
+                              fontWeight: FontWeight.w600,
+                            ),
+                        ],
+                      ),
+                      if (lobbyData.lobby.content != null) ...[
+                        Space.h(height: 16),
+                        NewLobbyContentSection(content: lobbyData.lobby.content!, height: 356),
+                      ],
+                      Space.h(height: 16),
                     ],
                   ),
                 ),
@@ -2956,7 +3077,8 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                             case "ADMIN_PAST":
                               return SizedBox.shrink();
                             case "ADMIN":
-                              if (lobbyData.lobby.priceDetails.originalPrice > 0.0) {
+                              if (lobbyData.lobby.priceDetails.originalPrice > 0.0 &&
+                                  !lobbyData.lobby.isAdvancedPricing) {
                                 return Column(
                                   children: [
                                     GestureDetector(
@@ -3018,7 +3140,8 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                           case "ADMIN_PAST":
                             return SizedBox.shrink();
                           case "ADMIN":
-                            if (lobbyData.lobby.priceDetails.originalPrice > 0.0) {
+                            if (lobbyData.lobby.priceDetails.originalPrice > 0.0 &&
+                                !lobbyData.lobby.isAdvancedPricing) {
                               return Column(
                                 children: [
                                   GestureDetector(
@@ -3971,6 +4094,8 @@ class _LobbyViewState extends ConsumerState<LobbyView> {
                             lobby: lobbyDetail.lobby,
                           ); // Default case if userStatus is unexpected
                       }
+                    } else if (lobbyDetail.lobby.userStatus == "VISITOR" && lobbyDetail.lobby.loginNotRequired) {
+                      Get.toNamed(AppRoutes.noAuthCheckoutLobbyView.replaceAll(':lobbyId', lobbyDetail.lobby.id));
                     } else {
                       LoginRequiredDialog.show(
                         context,
